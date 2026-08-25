@@ -1,4 +1,7 @@
 /* src/pages/Login/LoginPage.css */
+/* Mobile-first: os estilos abaixo definem primeiro o layout de celular.
+   As media queries usam min-width e vão ADICIONANDO complexidade conforme
+   a tela cresce (nunca desfazendo regras de telas maiores). */
 @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Karla:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap");
 
 .login-page {
@@ -19,21 +22,22 @@
   --font-mono: "IBM Plex Mono", monospace;
 
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  display: flex;
+  flex-direction: column;
   background: var(--bg-parchment);
   color: var(--ink);
   font-family: var(--font-body);
 }
 
-/* Painel esquerdo: identidade da ONG */
+/* Painel de identidade da ONG — no celular fica em cima, compacto */
 .login-page__brand {
   position: relative;
   overflow: hidden;
-  padding: 4rem 3.5rem;
+  padding: 2rem 1.5rem 2.5rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: 1.5rem;
   background: var(--primary-dark);
   color: var(--bg-parchment);
   transition: background 600ms ease;
@@ -49,7 +53,7 @@
 
 .login-page__brand-mark {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   opacity: 0.75;
@@ -57,29 +61,29 @@
 
 .login-page__brand-title {
   font-family: var(--font-display);
-  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  font-size: clamp(1.6rem, 6vw, 3.2rem);
   font-weight: 600;
   line-height: 1.15;
-  max-width: 18ch;
-  margin-top: 2rem;
+  max-width: 22ch;
 }
 
 .login-page__brand-copy {
-  font-size: 1rem;
+  font-size: 0.92rem;
   line-height: 1.6;
   max-width: 34ch;
   opacity: 0.9;
-  margin-top: 1rem;
+  margin-top: 0.75rem;
 }
 
-/* Vinha/galho que "cresce" conforme o papel selecionado — elemento de assinatura */
+/* Vinha/galho — elemento de assinatura. Fica discreto no celular para não
+   competir com o texto num espaço curto. */
 .login-page__vine {
   position: absolute;
-  right: -40px;
-  bottom: -40px;
-  width: 320px;
-  height: 320px;
-  opacity: 0.35;
+  right: -60px;
+  bottom: -60px;
+  width: 200px;
+  height: 200px;
+  opacity: 0.25;
   transition: transform 600ms ease;
 }
 
@@ -87,12 +91,13 @@
   transform: rotate(35deg) scale(0.9);
 }
 
-/* Painel direito: formulário */
+/* Painel do formulário */
 .login-page__panel {
+  flex: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 2.5rem;
+  padding: 2rem 1.25rem 3rem;
 }
 
 .login-page__card {
@@ -102,7 +107,7 @@
 
 .login-page__eyebrow {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -110,8 +115,8 @@
 
 .login-page__heading {
   font-family: var(--font-display);
-  font-size: 1.9rem;
-  margin: 0.35rem 0 1.75rem;
+  font-size: 1.6rem;
+  margin: 0.35rem 0 1.5rem;
 }
 
 /* Toggle de papel: duas "portas de entrada" */
@@ -119,17 +124,17 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.5rem;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.5rem;
 }
 
 .role-toggle__option {
   border: 1.5px solid #d9d2c2;
   background: transparent;
   border-radius: var(--radius);
-  padding: 0.85rem 0.75rem;
+  padding: 0.8rem 0.6rem;
   font-family: var(--font-body);
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--ink-soft);
   cursor: pointer;
   transition: border-color 200ms ease, background 200ms ease, color 200ms ease;
@@ -153,7 +158,7 @@
 }
 
 .login-form__field {
-  margin-bottom: 1.1rem;
+  margin-bottom: 1rem;
 }
 
 .login-form__label {
@@ -170,11 +175,12 @@
 .login-form__input {
   width: 100%;
   box-sizing: border-box;
-  padding: 0.75rem 0.9rem;
+  /* padding vertical maior no celular = alvo de toque confortável (>=44px) */
+  padding: 0.85rem 0.9rem;
   border: 1.5px solid #d9d2c2;
   border-radius: 10px;
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 1rem;
   background: #fff;
   color: var(--ink);
   transition: border-color 150ms ease;
@@ -201,7 +207,7 @@
   font-size: 0.7rem;
   color: var(--ink-soft);
   cursor: pointer;
-  padding: 0.2rem 0.4rem;
+  padding: 0.4rem;
 }
 
 .login-form__error {
@@ -219,7 +225,8 @@
 
 .login-form__submit {
   width: 100%;
-  padding: 0.85rem;
+  /* altura de toque generosa: alvo mínimo recomendado para mobile */
+  padding: 0.9rem;
   border: none;
   border-radius: 10px;
   background: var(--primary-dark);
@@ -256,17 +263,60 @@
   font-weight: 700;
 }
 
-@media (max-width: 860px) {
-  .login-page {
-    grid-template-columns: 1fr;
-  }
+/* ===== A partir daqui, telas maiores ganham camadas extras de layout ===== */
 
+/* Tablets: mais respiro nos paddings, ainda empilhado */
+@media (min-width: 601px) {
   .login-page__brand {
-    padding: 2.5rem 1.75rem 3.5rem;
+    padding: 3rem 2.5rem 3rem;
   }
 
   .login-page__panel {
-    padding: 2rem 1.5rem 3rem;
+    padding: 3rem 2rem;
+  }
+
+  .login-page__heading {
+    font-size: 1.8rem;
+  }
+}
+
+/* Desktop: layout em duas colunas lado a lado, tela cheia */
+@media (min-width: 861px) {
+  .login-page {
+    flex-direction: row;
+  }
+
+  .login-page__brand {
+    flex: 1.1;
+    padding: 4rem 3.5rem;
+  }
+
+  .login-page__panel {
+    flex: 1;
+    align-items: center;
+    padding: 2.5rem;
+  }
+
+  .login-page__brand-title {
+    font-size: clamp(2.2rem, 4vw, 3.2rem);
+    max-width: 18ch;
+    margin-top: 2rem;
+  }
+
+  .login-page__brand-copy {
+    font-size: 1rem;
+  }
+
+  .login-page__vine {
+    right: -40px;
+    bottom: -40px;
+    width: 320px;
+    height: 320px;
+    opacity: 0.35;
+  }
+
+  .login-page__heading {
+    font-size: 1.9rem;
   }
 }
 
