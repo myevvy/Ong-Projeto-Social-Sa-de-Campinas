@@ -93,6 +93,64 @@
   text-align: center;
 }
 
+.dashboard-colaborador__link {
+  display: inline-block;
+  color: var(--collaborator);
+  font-weight: 700;
+  font-size: 0.88rem;
+  margin-top: 0.85rem;
+}
+.dashboard-colaborador__botao {
+  border: 0;
+  background: var(--collaborator);
+  color: white;
+  border-radius: 8px;
+  padding: 0.65rem 0.9rem;
+  font: 700 0.8rem var(--font-body);
+  cursor: pointer;
+}
+.dashboard-colaborador__botao--secundario {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid #d9d2c2;
+}
+.evento-form {
+  background: var(--card-bg);
+  border: 1.5px solid #e3dbc8;
+  border-radius: var(--radius);
+  padding: 1rem;
+  display: grid;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+.evento-form label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.evento-form input {
+  border: 1px solid #d9d2c2;
+  border-radius: 6px;
+  padding: 0.65rem;
+  font: inherit;
+  color: var(--ink);
+}
+.evento-form__acoes,
+.acao-card__acoes {
+  display: flex;
+  gap: 0.5rem;
+}
+.acao-card__acoes button {
+  border: 0;
+  background: transparent;
+  color: var(--collaborator);
+  cursor: pointer;
+  padding: 0;
+  font: 700 0.75rem var(--font-body);
+}
+
 /* --- Estoque: uma coluna no celular --- */
 .stat-grid {
   display: grid;

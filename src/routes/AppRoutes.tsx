@@ -6,9 +6,14 @@ import DashboardColaborador from "../pages/DashboardColaborador/DashboardColabor
 import DashboardMedicamentos, {
   type MedicamentosProps,
 } from "../pages/DashboardMedicamentos/DashboardMedicamentos";
+import DashboardDoacoes from "../pages/DashboardDoacoes/DashboardDoacoes";
 import LoginPage from "../pages/Login/LoginPage";
 
-type Route = "/login" | "/dashboard/colaborador" | "/dashboard/medicamentos";
+type Route =
+  | "/login"
+  | "/dashboard/colaborador"
+  | "/dashboard/medicamentos"
+  | "/dashboard/doacoes";
 
 const DADOS_PREVIEW: DashboardColaboradorData = {
   colaborador: { nome: "Marina Oliveira" },
@@ -81,6 +86,9 @@ function getCurrentRoute(): Route {
   if (window.location.pathname === "/dashboard/medicamentos") {
     return "/dashboard/medicamentos";
   }
+  if (window.location.pathname === "/dashboard/doacoes") {
+    return "/dashboard/doacoes";
+  }
   return "/login";
 }
 
@@ -118,7 +126,8 @@ export default function AppRoutes() {
     if (
       window.location.pathname !== "/login" &&
       window.location.pathname !== "/dashboard/colaborador" &&
-      window.location.pathname !== "/dashboard/medicamentos"
+      window.location.pathname !== "/dashboard/medicamentos" &&
+      window.location.pathname !== "/dashboard/doacoes"
     ) {
       window.history.replaceState({}, "", "/login");
     }
@@ -157,8 +166,16 @@ export default function AppRoutes() {
     return (
       <DashboardColaborador
         dadosIniciais={modoPreview ? DADOS_PREVIEW : undefined}
+        usuario={usuario}
       />
     );
+  }
+
+  if (
+    route === "/dashboard/doacoes" &&
+    (usuario?.tipoUsuario === "colaborador" || modoPreview)
+  ) {
+    return <DashboardDoacoes />;
   }
 
   if (

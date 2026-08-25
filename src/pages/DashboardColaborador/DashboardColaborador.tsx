@@ -1,6 +1,8 @@
 // src/pages/Dashboard/DashboardColaborador.tsx
 import { useEffect, useRef, useState } from "react";
+import type { FormEvent } from "react";
 import { buscarDashboardColaborador } from "../../services/dashboardService";
+import type { UsuarioAutenticado } from "../../types/auth";
 import type { DashboardColaboradorData } from "../../types/dashboard";
 import "./DashboardColaborador.css";
 
@@ -26,10 +28,19 @@ function formatarData(dataIso: string): { dia: string; mes: string } {
 
 interface DashboardColaboradorProps {
   dadosIniciais?: DashboardColaboradorData;
+  usuario?: UsuarioAutenticado | null;
+}
+
+interface Evento {
+  id: string;
+  titulo: string;
+  data: string;
+  voluntariosInscritos: number;
 }
 
 export default function DashboardColaborador({
   dadosIniciais,
+  usuario,
 }: DashboardColaboradorProps) {
   const [dados, setDados] = useState<DashboardColaboradorData | null>(
     dadosIniciais ?? null,
@@ -37,6 +48,13 @@ export default function DashboardColaborador({
   const [carregando, setCarregando] = useState(!dadosIniciais);
   const [erro, setErro] = useState<string | null>(null);
   const trilhaRef = useRef<HTMLDivElement>(null);
+  const [eventos, setEventos] = useState<Evento[]>([]);
+  const [formularioAberto, setFormularioAberto] = useState(false);
+  const [eventoEmEdicao, setEventoEmEdicao] = useState<string | null>(null);
+  const [formularioEvento, setFormularioEvento] = useState({
+    titulo: "",
+    data: "",
+  });
 
   useEffect(() => {
     if (dadosIniciais) return;
@@ -80,6 +98,51 @@ export default function DashboardColaborador({
     window.dispatchEvent(new PopStateEvent("popstate"));
   }
 
+  function abrirDoacoes(evento: React.MouseEvent<HTMLAnchorElement>) {
+    evento.preventDefault();
+    window.history.pushState({}, "", "/dashboard/doacoes");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  }
+
+  function abrirFormularioEvento(evento?: Evento) {
+    setEventoEmEdicao(evento?.id ?? null);
+    setFormularioEvento({
+      titulo: evento?.titulo ?? "",
+      data: evento?.data ?? "",
+    });
+    setFormularioAberto(true);
+  }
+
+  function salvarEvento(evento: FormEvent<HTMLFormElement>) {
+    evento.preventDefault();
+    if (!formularioEvento.titulo.trim() || !formularioEvento.data) return;
+    const eventoAtualizado = {
+      titulo: formularioEvento.titulo.trim(),
+      data: formularioEvento.data,
+    };
+    if (eventoEmEdicao) {
+      setEventos((atuais) =>
+        atuais.map((item) =>
+          item.id === eventoEmEdicao ? { ...item, ...eventoAtualizado } : item,
+        ),
+      );
+    } else {
+      setEventos((atuais) =>
+        [
+          ...atuais,
+          {
+            ...eventoAtualizado,
+            id: `evento-${Date.now()}`,
+            voluntariosInscritos: 0,
+          },
+        ].sort((a, b) => a.data.localeCompare(b.data)),
+      );
+    }
+    setFormularioAberto(false);
+    setEventoEmEdicao(null);
+    setFormularioEvento({ titulo: "", data: "" });
+  }
+
   if (carregando) {
     return (
       <div className="dashboard-colaborador">
@@ -104,13 +167,14 @@ export default function DashboardColaborador({
   }
 
   const { colaborador, estoque, doacoes, proximasAcoes } = dados;
+  const nomeColaborador = usuario?.nome || colaborador.nome || "colaborador";
 
   return (
     <div className="dashboard-colaborador">
       <header className="dashboard-colaborador__header">
         <p className="dashboard-colaborador__eyebrow">Painel do colaborador</p>
         <h1 className="dashboard-colaborador__titulo">
-          {saudacaoPorHorario()}, {colaborador.nome.split(" ")[0]}
+          {saudacaoPorHorario()}, {nomeColaborador.split(" ")[0]}
         </h1>
       </header>
 
@@ -170,6 +234,13 @@ export default function DashboardColaborador({
             </span>
           </div>
         </div>
+        <a
+          className="dashboard-colaborador__link"
+          href="/dashboard/doacoes"
+          onClick={abrirDoacoes}
+        >
+          Ver gestão de doações
+        </a>
       </section>
 
       <section aria-labelledby="secao-acoes">
@@ -177,6 +248,13 @@ export default function DashboardColaborador({
           <h2 id="secao-acoes" className="dashboard-colaborador__secao-titulo">
             Próximas ações
           </h2>
+          <button
+            className="dashboard-colaborador__botao"
+            type="button"
+            onClick={() => abrirFormularioEvento()}
+          >
+            + Criar evento
+          </button>
           {proximasAcoes.length > 0 && (
             <div className="carrossel-controles">
               <button
@@ -197,13 +275,56 @@ export default function DashboardColaborador({
           )}
         </div>
 
-        {proximasAcoes.length === 0 ? (
+        {formularioAberto && (
+          <form className="evento-form" onSubmit={salvarEvento}>
+            <label>
+              Nome do evento
+              <input
+                required
+                value={formularioEvento.titulo}
+                onChange={(evento) =>
+                  setFormularioEvento({
+                    ...formularioEvento,
+                    titulo: evento.target.value,
+                  })
+                }
+              />
+            </label>
+            <label>
+              Data
+              <input
+                required
+                type="date"
+                value={formularioEvento.data}
+                onChange={(evento) =>
+                  setFormularioEvento({
+                    ...formularioEvento,
+                    data: evento.target.value,
+                  })
+                }
+              />
+            </label>
+            <div className="evento-form__acoes">
+              <button className="dashboard-colaborador__botao" type="submit">
+                Salvar
+              </button>
+              <button
+                className="dashboard-colaborador__botao dashboard-colaborador__botao--secundario"
+                type="button"
+                onClick={() => setFormularioAberto(false)}
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        )}
+        {eventos.length === 0 && proximasAcoes.length === 0 ? (
           <p className="dashboard-colaborador__vazio">
             Nenhuma ação agendada no momento.
           </p>
         ) : (
           <div className="carrossel-trilha" ref={trilhaRef}>
-            {proximasAcoes.map((acao) => {
+            {[...eventos, ...proximasAcoes].map((acao) => {
               const { dia, mes } = formatarData(acao.data);
               return (
                 <article className="acao-card" key={acao.id}>
@@ -219,6 +340,24 @@ export default function DashboardColaborador({
                         ? "voluntário inscrito"
                         : "voluntários inscritos"}
                     </span>
+                    <div className="acao-card__acoes">
+                      <button
+                        type="button"
+                        onClick={() => abrirFormularioEvento(acao)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEventos((atuais) =>
+                            atuais.filter((item) => item.id !== acao.id),
+                          )
+                        }
+                      >
+                        Deletar
+                      </button>
+                    </div>
                   </div>
                 </article>
               );
