@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
+import { verificarSessao } from "../services/authService";
 import type { UsuarioAutenticado } from "../types/auth";
 import type { DashboardColaboradorData } from "../types/dashboard";
 import DashboardColaborador from "../pages/DashboardColaborador/DashboardColaborador";
+import DashboardMedicamentos, {
+  type MedicamentosProps,
+} from "../pages/DashboardMedicamentos/DashboardMedicamentos";
 import LoginPage from "../pages/Login/LoginPage";
 
-type Route = "/login" | "/dashboard/colaborador";
+type Route = "/login" | "/dashboard/colaborador" | "/dashboard/medicamentos";
 
 const DADOS_PREVIEW: DashboardColaboradorData = {
   colaborador: { nome: "Marina Oliveira" },
@@ -31,22 +35,90 @@ const DADOS_PREVIEW: DashboardColaboradorData = {
   ],
 };
 
+const DADOS_MEDICAMENTOS_PREVIEW: MedicamentosProps[] = [
+  {
+    nome: "Dipirona",
+    quantidade: 20,
+    veiculo: "Comprimido",
+    viaAdm: "Oral",
+    dose: 500,
+    unidadeDose: "mg",
+    validade: "2027-01-20",
+  },
+  {
+    nome: "dipirona",
+    quantidade: 15,
+    veiculo: "Comprimido",
+    viaAdm: "Oral",
+    dose: 500,
+    unidadeDose: "mg",
+    validade: "2027-01-20",
+  },
+  {
+    nome: "Dipirona",
+    quantidade: 8,
+    veiculo: "Comprimido",
+    viaAdm: "Oral",
+    dose: 500,
+    unidadeDose: "mg",
+    validade: "2028-04-10",
+  },
+  {
+    nome: "Soro fisiológico",
+    quantidade: 35,
+    veiculo: "Líquido",
+    viaAdm: "Intravenosa",
+    dose: 0.9,
+    unidadeDose: "mg/ml",
+    validade: "2026-12-15",
+  },
+];
+
 function getCurrentRoute(): Route {
-  return window.location.pathname === "/dashboard/colaborador"
-    ? "/dashboard/colaborador"
-    : "/login";
+  if (window.location.pathname === "/dashboard/colaborador") {
+    return "/dashboard/colaborador";
+  }
+  if (window.location.pathname === "/dashboard/medicamentos") {
+    return "/dashboard/medicamentos";
+  }
+  return "/login";
 }
 
 export default function AppRoutes() {
-  const [route, setRoute] = useState<Route>(getCurrentRoute);
-  const [usuario, setUsuario] = useState<UsuarioAutenticado | null>(null);
   const modoPreview =
     new URLSearchParams(window.location.search).get("preview") === "true";
+  const [route, setRoute] = useState<Route>(getCurrentRoute);
+  const [usuario, setUsuario] = useState<UsuarioAutenticado | null>(null);
+  const [verificandoSessao, setVerificandoSessao] = useState(!modoPreview);
+
+  useEffect(() => {
+    if (modoPreview) {
+      return;
+    }
+
+    let ativo = true;
+
+    verificarSessao()
+      .then((usuarioAutenticado) => {
+        if (ativo) setUsuario(usuarioAutenticado);
+      })
+      .catch(() => {
+        if (ativo) setUsuario(null);
+      })
+      .finally(() => {
+        if (ativo) setVerificandoSessao(false);
+      });
+
+    return () => {
+      ativo = false;
+    };
+  }, [modoPreview]);
 
   useEffect(() => {
     if (
       window.location.pathname !== "/login" &&
-      window.location.pathname !== "/dashboard/colaborador"
+      window.location.pathname !== "/dashboard/colaborador" &&
+      window.location.pathname !== "/dashboard/medicamentos"
     ) {
       window.history.replaceState({}, "", "/login");
     }
@@ -70,6 +142,14 @@ export default function AppRoutes() {
     }
   }
 
+  if (verificandoSessao) {
+    return (
+      <main>
+        <p>Verificando sessão...</p>
+      </main>
+    );
+  }
+
   if (
     route === "/dashboard/colaborador" &&
     (usuario?.tipoUsuario === "colaborador" || modoPreview)
@@ -77,6 +157,19 @@ export default function AppRoutes() {
     return (
       <DashboardColaborador
         dadosIniciais={modoPreview ? DADOS_PREVIEW : undefined}
+      />
+    );
+  }
+
+  if (
+    route === "/dashboard/medicamentos" &&
+    (usuario?.tipoUsuario === "colaborador" || modoPreview)
+  ) {
+    return (
+      <DashboardMedicamentos
+        medicamentosIniciais={
+          modoPreview ? DADOS_MEDICAMENTOS_PREVIEW : undefined
+        }
       />
     );
   }

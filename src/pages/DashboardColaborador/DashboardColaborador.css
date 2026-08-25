@@ -23,6 +23,8 @@
   --font-mono: "IBM Plex Mono", monospace;
 
   min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
   background: var(--bg-parchment);
   color: var(--ink);
   font-family: var(--font-body);

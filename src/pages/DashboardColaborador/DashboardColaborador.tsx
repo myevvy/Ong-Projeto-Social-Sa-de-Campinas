@@ -72,6 +72,14 @@ export default function DashboardColaborador({
     });
   }
 
+  function abrirCadastroMedicamentos(
+    evento: React.MouseEvent<HTMLAnchorElement>,
+  ) {
+    evento.preventDefault();
+    window.history.pushState({}, "", "/dashboard/medicamentos");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  }
+
   if (carregando) {
     return (
       <div className="dashboard-colaborador">
@@ -132,6 +140,13 @@ export default function DashboardColaborador({
             <span className="stat-card__rotulo">Em estoque baixo</span>
           </div>
         </div>
+        <a
+          className="dashboard-colaborador__link"
+          href="/dashboard/medicamentos"
+          onClick={abrirCadastroMedicamentos}
+        >
+          Cadastrar medicamento
+        </a>
       </section>
 
       <section aria-labelledby="secao-doacoes">
