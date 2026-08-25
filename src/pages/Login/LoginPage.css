@@ -1,0 +1,278 @@
+/* src/pages/Login/LoginPage.css */
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Karla:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap");
+
+.login-page {
+  --bg-parchment: #f5f1e8;
+  --ink: #1f2a24;
+  --ink-soft: #4d564f;
+  --primary-dark: #1f3a34;
+  --gold: #d9a441;
+  --volunteer: #5f7d43;
+  --volunteer-soft: #e7edda;
+  --collaborator: #3f5f8a;
+  --collaborator-soft: #dfe6ee;
+  --error: #a83e3e;
+  --radius: 14px;
+
+  --font-display: "Fraunces", serif;
+  --font-body: "Karla", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  background: var(--bg-parchment);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+/* Painel esquerdo: identidade da ONG */
+.login-page__brand {
+  position: relative;
+  overflow: hidden;
+  padding: 4rem 3.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--primary-dark);
+  color: var(--bg-parchment);
+  transition: background 600ms ease;
+}
+
+.login-page__brand[data-role="voluntario"] {
+  background: linear-gradient(160deg, var(--primary-dark) 45%, var(--volunteer) 130%);
+}
+
+.login-page__brand[data-role="colaborador"] {
+  background: linear-gradient(160deg, var(--primary-dark) 45%, var(--collaborator) 130%);
+}
+
+.login-page__brand-mark {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.login-page__brand-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  font-weight: 600;
+  line-height: 1.15;
+  max-width: 18ch;
+  margin-top: 2rem;
+}
+
+.login-page__brand-copy {
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 34ch;
+  opacity: 0.9;
+  margin-top: 1rem;
+}
+
+/* Vinha/galho que "cresce" conforme o papel selecionado — elemento de assinatura */
+.login-page__vine {
+  position: absolute;
+  right: -40px;
+  bottom: -40px;
+  width: 320px;
+  height: 320px;
+  opacity: 0.35;
+  transition: transform 600ms ease;
+}
+
+.login-page__brand[data-role="colaborador"] .login-page__vine {
+  transform: rotate(35deg) scale(0.9);
+}
+
+/* Painel direito: formulário */
+.login-page__panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+}
+
+.login-page__card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-page__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.login-page__heading {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  margin: 0.35rem 0 1.75rem;
+}
+
+/* Toggle de papel: duas "portas de entrada" */
+.role-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.role-toggle__option {
+  border: 1.5px solid #d9d2c2;
+  background: transparent;
+  border-radius: var(--radius);
+  padding: 0.85rem 0.75rem;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: border-color 200ms ease, background 200ms ease, color 200ms ease;
+}
+
+.role-toggle__option[aria-pressed="true"][data-role="voluntario"] {
+  border-color: var(--volunteer);
+  background: var(--volunteer-soft);
+  color: var(--volunteer);
+}
+
+.role-toggle__option[aria-pressed="true"][data-role="colaborador"] {
+  border-color: var(--collaborator);
+  background: var(--collaborator-soft);
+  color: var(--collaborator);
+}
+
+.role-toggle__option:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.login-form__field {
+  margin-bottom: 1.1rem;
+}
+
+.login-form__label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.login-form__input-wrap {
+  position: relative;
+}
+
+.login-form__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.75rem 0.9rem;
+  border: 1.5px solid #d9d2c2;
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  background: #fff;
+  color: var(--ink);
+  transition: border-color 150ms ease;
+}
+
+.login-form__input:focus-visible {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(217, 164, 65, 0.25);
+}
+
+.login-form__input[aria-invalid="true"] {
+  border-color: var(--error);
+}
+
+.login-form__toggle-visibility {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+}
+
+.login-form__error {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  background: #f6e8e8;
+  border: 1px solid var(--error);
+  color: var(--error);
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  margin-bottom: 1.1rem;
+}
+
+.login-form__submit {
+  width: 100%;
+  padding: 0.85rem;
+  border: none;
+  border-radius: 10px;
+  background: var(--primary-dark);
+  color: var(--bg-parchment);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 150ms ease, transform 100ms ease;
+}
+
+.login-form__submit:hover:not(:disabled) {
+  background: #142722;
+}
+
+.login-form__submit:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.login-form__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-form__hint {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  margin-top: 1.25rem;
+}
+
+.login-form__hint a {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+@media (max-width: 860px) {
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+
+  .login-page__brand {
+    padding: 2.5rem 1.75rem 3.5rem;
+  }
+
+  .login-page__panel {
+    padding: 2rem 1.5rem 3rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-page__brand,
+  .login-page__vine {
+    transition: none;
+  }
+}
