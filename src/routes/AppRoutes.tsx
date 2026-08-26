@@ -8,8 +8,10 @@ import DashboardMedicamentos, {
 } from "../pages/DashboardMedicamentos/DashboardMedicamentos";
 import DashboardDoacoes from "../pages/DashboardDoacoes/DashboardDoacoes";
 import LoginPage from "../pages/Login/LoginPage";
+import Home from "../pages/Home/home";
 
 type Route =
+  | "/"
   | "/login"
   | "/dashboard/colaborador"
   | "/dashboard/medicamentos"
@@ -80,6 +82,9 @@ const DADOS_MEDICAMENTOS_PREVIEW: MedicamentosProps[] = [
 ];
 
 function getCurrentRoute(): Route {
+  if (window.location.pathname === "/") {
+    return "/";
+  }
   if (window.location.pathname === "/dashboard/colaborador") {
     return "/dashboard/colaborador";
   }
@@ -124,6 +129,7 @@ export default function AppRoutes() {
 
   useEffect(() => {
     if (
+      window.location.pathname !== "/" &&
       window.location.pathname !== "/login" &&
       window.location.pathname !== "/dashboard/colaborador" &&
       window.location.pathname !== "/dashboard/medicamentos" &&
@@ -157,6 +163,10 @@ export default function AppRoutes() {
         <p>Verificando sessão...</p>
       </main>
     );
+  }
+
+  if (route === "/") {
+    return <Home />;
   }
 
   if (
