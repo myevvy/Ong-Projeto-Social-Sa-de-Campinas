@@ -1,20 +1,21 @@
 import { Button } from '../../components/Button/Button'
+import { Header } from '../../components/Header/Header'
 
 export default function Home () {
     return (
       <div>
-
-         <header className="topo">
-         <img id="logo" />
-         <h1>Saúde Campinas</h1>
-         <div className="opcoes-topo">
-            <p>Sobre</p>
-            <p>Como ajudar</p>
-            <p>Eventos</p>
-            <p>Área do voluntário</p>
-            <p>Contato</p>
-         </div>
-        </header>
+    
+                <Header
+                    logoUrl="/favicon.svg"
+                    navLinks={[
+                        { label: "Sobre", href: "#sobre" },
+                        { label: "Como ajudar", href: "#como-ajudar" },
+                        { label: "Eventos", href: "#eventos" },
+                        { label: "Área do voluntário", href: "/login" },
+                        { label: "Contato", href: "#contato" },
+                    ]}
+                />
+         
         
         <section className="principal">
         <h4>PROJETO SOCIAL SAÚDE CAMPINAS</h4>
