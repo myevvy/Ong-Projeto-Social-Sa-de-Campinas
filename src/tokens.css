@@ -1,0 +1,43 @@
+/**
+ * Design tokens — Saúde Campinas
+ * Importe este arquivo uma vez na raiz do app (ex: no seu index.tsx ou layout.tsx).
+ * Todo componente da lib consome essas variáveis — não usar hex direto nos componentes.
+ */
+
+:root {
+  /* Cores */
+  --color-parchment: #f5f1e8;
+  --color-white: #ffffff;
+  --color-black: #211811; /* "preto quente" — cor primária da marca */
+  --color-gold: #d9a441;
+  --color-amber: #c97a2b;
+  --color-ink-soft: #4d564f;
+
+  --color-volunteer: #5f7d43;
+  --color-volunteer-soft: #e7edda;
+  --color-collaborator: #3f5f8a;
+  --color-collaborator-soft: #dfe6ee;
+  --color-error: #a83e3e;
+
+  --color-border-soft: rgba(33, 24, 17, 0.08);
+  --color-border-medium: rgba(33, 24, 17, 0.18);
+
+  /* Tipografia */
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-body: "Karla", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Raios */
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+
+  /* Espaçamento (escala usada nas seções) */
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 40px;
+  --space-xl: 64px;
+}
