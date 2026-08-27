@@ -19,9 +19,7 @@ const verificaToken = (req, res, next) => {
 
   try {
     const usuario = jwt.verify(token, process.env.ASSINATURA_TOKEN);
-
     req.usuario = usuario;
-
     next();
   } catch (error) {
     return res.status(401).json({
@@ -30,4 +28,18 @@ const verificaToken = (req, res, next) => {
   }
 };
 
-export default { verificaToken };
+const verificaAdm = (req, res, next) => {
+  if (req.usuario.tipo !== "adm") {
+    return res.status(403).json({ mensagem: "Acesso restrito a administradores." });
+  }
+  next();
+};
+
+const verificaFunc = (req, res, next) => {
+  if (req.usuario.tipo !== "adm") {
+    return res.status(403).json({ mensagem: "Acesso restrito a administradores." });
+  }
+  next();
+};
+
+export default { verificaToken, verificaAdm, verificaFunc };

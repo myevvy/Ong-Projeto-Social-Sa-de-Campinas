@@ -44,15 +44,15 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
     },
   };
 
-  function validarCampos(): string | null {
-    if (!EMAIL_REGEX.test(email.trim())) {
-      return "Informe um e-mail válido.";
-    }
-    if (senha.length < 6) {
-      return "A senha deve ter pelo menos 6 caracteres.";
-    }
-    return null;
-  }
+  // function validarCampos(): string | null {
+  //   if (!EMAIL_REGEX.test(email.trim())) {
+  //     return "Informe um e-mail válido.";
+  //   }
+  //   if (senha.length < 6) {
+  //     return "A senha deve ter pelo menos 6 caracteres.";
+  //   }
+  //   return null;
+  // }
 
   function mudarModo(novoModo: ModoAutenticacao) {
     setModo(novoModo);
@@ -106,11 +106,11 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
         setErro("Informe seu nome completo.");
         return;
       }
-      const erroSenha = validarCampos();
-      if (erroSenha || senha !== confirmarSenha) {
-        setErro(erroSenha ?? "As senhas não coincidem.");
-        return;
-      }
+      // const erroSenha = validarCampos();
+      // if (erroSenha || senha !== confirmarSenha) {
+      //   setErro(erroSenha ?? "As senhas não coincidem.");
+      //   return;
+      // }
       setModo("login");
       setSenha("");
       setConfirmarSenha("");
@@ -118,11 +118,11 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
       return;
     }
 
-    const erroValidacao = validarCampos();
-    if (erroValidacao) {
-      setErro(erroValidacao);
-      return;
-    }
+    // const erroValidacao = validarCampos();
+    // if (erroValidacao) {
+    //   setErro(erroValidacao);
+    //   return;
+    // }
 
     setCarregando(true);
     try {

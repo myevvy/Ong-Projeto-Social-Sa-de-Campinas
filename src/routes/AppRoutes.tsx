@@ -10,7 +10,7 @@ import DashboardDoacoes from "../pages/DashboardDoacoes/DashboardDoacoes";
 import LoginPage from "../pages/Login/LoginPage";
 
 type Route =
-  | "/login"
+   "/login"
   | "/dashboard/colaborador"
   | "/dashboard/medicamentos"
   | "/dashboard/doacoes";
