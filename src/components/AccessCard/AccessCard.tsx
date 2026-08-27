@@ -1,4 +1,4 @@
-import { Tag, TagVariant } from "../Tag/Tag";
+import { Tag, type TagVariant } from "../Tag/Tag";
 import { Button } from "../Button/Button";
 
 export interface AccessCardProps {
@@ -45,7 +45,10 @@ export function AccessCard({
             key={bullet}
             className="flex items-center gap-2 font-body text-[14.5px] text-ink-soft"
           >
-            <span className="h-0.5 w-3 shrink-0 bg-current opacity-60" aria-hidden="true" />
+            <span
+              className="h-0.5 w-3 shrink-0 bg-current opacity-60"
+              aria-hidden="true"
+            />
             {bullet}
           </li>
         ))}

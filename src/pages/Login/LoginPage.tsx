@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // src/pages/Login/LoginPage.tsx
 import { useState } from "react";
 import type { FormEvent } from "react";
@@ -451,3 +452,5 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
     </div>
   );
 }
+=======
+>>>>>>> bad2494a00c0fee2a65a9ff3621af250ab924d92

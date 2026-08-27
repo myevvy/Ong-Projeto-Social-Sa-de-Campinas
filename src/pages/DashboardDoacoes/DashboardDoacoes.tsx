@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
+import type { UsuarioAutenticado } from "../../types/auth";
 import "./DashboardDoacoes.css";
 
 type StatusDoacao = "aprovada" | "pendente" | "recusada";
@@ -77,7 +78,20 @@ const meses = [
 const moeda = (valor: number) =>
   valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-export default function DashboardDoacoes() {
+interface DashboardDoacoesProps {
+  usuario?: UsuarioAutenticado | null;
+}
+
+export default function DashboardDoacoes({ usuario }: DashboardDoacoesProps) {
+  const [formularioAberto, setFormularioAberto] = useState(false);
+  const [doacaoEmEdicao, setDoacaoEmEdicao] = useState<number | null>(null);
+  const [formulario, setFormulario] = useState({
+    nome: "",
+    email: "",
+    telefone: "",
+    valor: "",
+    data: "",
+  });
   const [doacoes, setDoacoes] = useState(DOACOES_INICIAIS);
   const [mesSelecionado, setMesSelecionado] = useState(7);
   const [aba, setAba] = useState<StatusDoacao>("aprovada");
@@ -99,6 +113,42 @@ export default function DashboardDoacoes() {
   const diasComDoacao = new Set(
     doacoesDoMes.map((doacao) => Number(doacao.data.slice(8, 10))),
   );
+
+  function salvarDoacao(evento: FormEvent<HTMLFormElement>) {
+    evento.preventDefault();
+    const registro = {
+      nome: formulario.nome.trim(),
+      email: formulario.email.trim(),
+      telefone: formulario.telefone.trim(),
+      valor: Number(formulario.valor),
+      data: formulario.data,
+      status: "pendente" as StatusDoacao,
+    };
+    if (doacaoEmEdicao) {
+      setDoacoes((atuais) =>
+        atuais.map((doacao) =>
+          doacao.id === doacaoEmEdicao ? { ...doacao, ...registro } : doacao,
+        ),
+      );
+    } else {
+      setDoacoes((atuais) => [...atuais, { ...registro, id: Date.now() }]);
+    }
+    setFormulario({ nome: "", email: "", telefone: "", valor: "", data: "" });
+    setDoacaoEmEdicao(null);
+    setFormularioAberto(false);
+  }
+
+  function editarDoacao(doacao: Doacao) {
+    setFormulario({
+      nome: doacao.nome,
+      email: doacao.email,
+      telefone: doacao.telefone,
+      valor: String(doacao.valor),
+      data: doacao.data,
+    });
+    setDoacaoEmEdicao(doacao.id);
+    setFormularioAberto(true);
+  }
 
   function atualizarStatus(id: number, status: StatusDoacao) {
     setDoacoes((atuais) =>
@@ -124,13 +174,88 @@ export default function DashboardDoacoes() {
           href="/dashboard/colaborador"
           onClick={(evento) => {
             evento.preventDefault();
-            window.history.pushState({}, "", "/dashboard/colaborador");
+            window.history.pushState(
+              {},
+              "",
+              usuario?.tipoUsuario === "admin"
+                ? "/dashboard/admin"
+                : "/dashboard/colaborador",
+            );
             window.dispatchEvent(new PopStateEvent("popstate"));
           }}
         >
           Voltar ao dashboard
         </a>
+        <button
+          className="doacoes-page__novo"
+          type="button"
+          onClick={() => setFormularioAberto((aberto) => !aberto)}
+        >
+          {formularioAberto ? "Fechar cadastro" : "+ Nova doação"}
+        </button>
       </header>
+
+      {formularioAberto && (
+        <form className="doacao-form" onSubmit={salvarDoacao}>
+          <h2>{doacaoEmEdicao ? "Editar doação" : "Registrar doação"}</h2>
+          <label>
+            Nome do doador
+            <input
+              required
+              value={formulario.nome}
+              onChange={(e) =>
+                setFormulario({ ...formulario, nome: e.target.value })
+              }
+            />
+          </label>
+          <label>
+            E-mail
+            <input
+              required
+              type="email"
+              value={formulario.email}
+              onChange={(e) =>
+                setFormulario({ ...formulario, email: e.target.value })
+              }
+            />
+          </label>
+          <label>
+            Telefone
+            <input
+              required
+              value={formulario.telefone}
+              onChange={(e) =>
+                setFormulario({ ...formulario, telefone: e.target.value })
+              }
+            />
+          </label>
+          <label>
+            Valor (R$)
+            <input
+              required
+              min="0"
+              step="0.01"
+              type="number"
+              value={formulario.valor}
+              onChange={(e) =>
+                setFormulario({ ...formulario, valor: e.target.value })
+              }
+            />
+          </label>
+          <label>
+            Data
+            <input
+              required
+              type="date"
+              value={formulario.data}
+              onChange={(e) =>
+                setFormulario({ ...formulario, data: e.target.value })
+              }
+            />
+          </label>
+          <button type="submit">Salvar registro</button>
+        </form>
+      )}
 
       <section className="doacoes-resumo" aria-label="Resumo mensal">
         <div>
@@ -265,6 +390,21 @@ export default function DashboardDoacoes() {
                       </button>
                     </div>
                   )}
+                  <div className="doacao-item__acoes">
+                    <button type="button" onClick={() => editarDoacao(doacao)}>
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setDoacoes((atuais) =>
+                          atuais.filter((item) => item.id !== doacao.id),
+                        )
+                      }
+                    >
+                      Excluir
+                    </button>
+                  </div>
                 </article>
               ))}
             </div>

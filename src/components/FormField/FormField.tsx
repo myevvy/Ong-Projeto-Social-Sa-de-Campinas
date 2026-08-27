@@ -1,4 +1,4 @@
-import { InputHTMLAttributes } from "react";
+import type { InputHTMLAttributes } from "react";
 
 export interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -10,10 +10,18 @@ export interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
  * Campo de formulário padrão (label + input). Usado no formulário de
  * inscrição em ações — reaproveitar para qualquer formulário novo do site.
  */
-export function FormField({ label, id, className = "", ...rest }: FormFieldProps) {
+export function FormField({
+  label,
+  id,
+  className = "",
+  ...rest
+}: FormFieldProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="font-body text-[13px] font-bold text-black">
+      <label
+        htmlFor={id}
+        className="font-body text-[13px] font-bold text-black"
+      >
         {label}
       </label>
       <input

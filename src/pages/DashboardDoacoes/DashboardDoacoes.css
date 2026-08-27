@@ -1,22 +1,22 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@500;600&family=Karla:wght@400;500;700&display=swap");
 
 .doacoes-page {
-  --navy: #173b43;
-  --ink: #203238;
-  --muted: #718083;
-  --line: #dce6e3;
-  --mint: #dff1e9;
-  --coral: #d96d50;
+  --navy: var(--color-black);
+  --ink: var(--color-black);
+  --muted: var(--color-ink-soft);
+  --line: var(--color-border-medium);
+  --mint: var(--color-volunteer-soft);
+  --coral: var(--color-amber);
   min-height: 100vh;
   box-sizing: border-box;
   padding: 2rem clamp(1.1rem, 5vw, 5rem) 4rem;
   color: var(--ink);
-  background: #f7faf8;
-  font-family: "DM Sans", sans-serif;
+  background: var(--color-parchment);
+  font-family: var(--font-body);
 }
 .doacoes-page h1,
 .doacoes-page h2 {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   color: var(--navy);
   margin: 0;
 }
@@ -57,6 +57,45 @@
   font-size: 0.86rem;
   white-space: nowrap;
 }
+.doacoes-page__novo,
+.doacao-form > button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.7rem 1rem;
+  background: var(--color-black);
+  color: var(--color-parchment);
+  cursor: pointer;
+  font: 700 0.9rem var(--font-body);
+}
+.doacao-form {
+  max-width: 1100px;
+  margin: 0 auto 2rem;
+  padding: 1.4rem;
+  display: grid;
+  gap: 1rem;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+.doacao-form h2 {
+  grid-column: 1 / -1;
+}
+.doacao-form label {
+  display: grid;
+  gap: 0.4rem;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.doacao-form input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font: inherit;
+}
 .doacoes-resumo,
 .doacoes-layout {
   max-width: 1100px;
@@ -85,7 +124,7 @@
 .doacoes-resumo strong {
   color: var(--navy);
   font:
-    700 1.8rem "Space Grotesk",
+    600 1.8rem var(--font-display),
     sans-serif;
 }
 @media (max-width: 900px) and (min-width: 721px) {
@@ -103,6 +142,7 @@
 .lista-panel {
   background: white;
   border: 1px solid var(--line);
+  border-radius: 18px;
   padding: 1.5rem;
 }
 .calendario-panel__topo,
@@ -174,7 +214,7 @@ select {
   color: var(--muted);
   cursor: pointer;
   font:
-    500 0.78rem "DM Sans",
+    500 0.78rem var(--font-body),
     sans-serif;
   padding: 0.5rem 0.6rem;
 }
@@ -250,5 +290,16 @@ select {
   }
   .doacoes-tabs {
     margin-top: 1rem;
+  }
+  .doacoes-page__novo {
+    margin-top: 1rem;
+  }
+}
+@media (min-width: 700px) {
+  .doacao-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .doacao-form > button {
+    justify-self: start;
   }
 }

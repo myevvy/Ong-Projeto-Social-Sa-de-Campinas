@@ -1,26 +1,24 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@500;600&family=Karla:wght@400;500;700&display=swap");
 
 .dashboard-medicamentos {
-  --med-bg: #f3f7f5;
+  --med-bg: var(--color-parchment);
   --med-surface: #ffffff;
-  --med-ink: #18332d;
+  --med-ink: var(--color-black);
   --med-muted: #62736d;
   --med-line: #d8e4df;
-  --med-primary: #176b5b;
-  --med-primary-dark: #0e4b40;
-  --med-accent: #f2b84b;
+  --med-primary: var(--color-collaborator);
+  --med-primary-dark: var(--color-black);
+  --med-accent: var(--color-gold);
   min-height: 100vh;
   box-sizing: border-box;
   padding: 1.25rem;
-  background:
-    radial-gradient(
-      circle at 100% 0,
-      rgba(242, 184, 75, 0.2),
-      transparent 28rem
-    ),
-    linear-gradient(145deg, var(--med-bg), #e8f1ed);
+  background: var(--med-bg);
   color: var(--med-ink);
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font-body);
+}
+.dashboard-medicamentos > * {
+  width: min(100%, 1180px);
+  margin-inline: auto;
 }
 
 .dashboard-medicamentos > a {
@@ -61,7 +59,7 @@
 .dashboard-medicamentos h2 {
   margin: 0;
   color: var(--med-ink);
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-display);
   letter-spacing: -0.03em;
 }
 
@@ -84,7 +82,7 @@
 .dashboard-medicamentos__primary-button,
 .medicamento-form__submit {
   border: 0;
-  border-radius: 0.65rem;
+  border-radius: 999px;
   background: var(--med-primary);
   color: #fff;
   cursor: pointer;
@@ -114,7 +112,7 @@
 .medicamentos-section {
   margin-top: 2rem;
   border: 1px solid var(--med-line);
-  border-radius: 1rem;
+  border-radius: 24px;
   background: rgba(255, 255, 255, 0.82);
   box-shadow: 0 1rem 2.5rem rgba(24, 51, 45, 0.08);
 }

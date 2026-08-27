@@ -1,19 +1,29 @@
 import { useEffect, useState } from "react";
-import { verificarSessao } from "../services/authService";
-import type { UsuarioAutenticado } from "../types/auth";
 import type { DashboardColaboradorData } from "../types/dashboard";
 import DashboardColaborador from "../pages/DashboardColaborador/DashboardColaborador";
 import DashboardMedicamentos, {
   type MedicamentosProps,
 } from "../pages/DashboardMedicamentos/DashboardMedicamentos";
 import DashboardDoacoes from "../pages/DashboardDoacoes/DashboardDoacoes";
-import LoginPage from "../pages/Login/LoginPage";
+import DashboardAdmin from "../pages/DashboardAdmin/DashboardAdmin";
+import DashboardVoluntario from "../pages/DashboardVoluntario/DashboardVoluntario";
+
+import Home from "../pages/Home/home";
+import Eventos from "../pages/Eventos/eventos";
 
 type Route =
+<<<<<<< HEAD
    "/login"
+=======
+  | "/"
+  | "/login"
+  | "/eventos"
+>>>>>>> bad2494a00c0fee2a65a9ff3621af250ab924d92
   | "/dashboard/colaborador"
   | "/dashboard/medicamentos"
-  | "/dashboard/doacoes";
+  | "/dashboard/doacoes"
+  | "/dashboard/admin"
+  | "/dashboard/voluntario";
 
 const DADOS_PREVIEW: DashboardColaboradorData = {
   colaborador: { nome: "Marina Oliveira" },
@@ -80,6 +90,12 @@ const DADOS_MEDICAMENTOS_PREVIEW: MedicamentosProps[] = [
 ];
 
 function getCurrentRoute(): Route {
+  if (window.location.pathname === "/") {
+    return "/";
+  }
+  if (window.location.pathname === "/eventos") {
+    return "/eventos";
+  }
   if (window.location.pathname === "/dashboard/colaborador") {
     return "/dashboard/colaborador";
   }
@@ -89,47 +105,30 @@ function getCurrentRoute(): Route {
   if (window.location.pathname === "/dashboard/doacoes") {
     return "/dashboard/doacoes";
   }
-  return "/login";
+  if (window.location.pathname === "/dashboard/admin") {
+    return "/dashboard/admin";
+  }
+  if (window.location.pathname === "/dashboard/voluntario") {
+    return "/dashboard/voluntario";
+  }
+  return "/";
 }
 
 export default function AppRoutes() {
-  const modoPreview =
-    new URLSearchParams(window.location.search).get("preview") === "true";
   const [route, setRoute] = useState<Route>(getCurrentRoute);
-  const [usuario, setUsuario] = useState<UsuarioAutenticado | null>(null);
-  const [verificandoSessao, setVerificandoSessao] = useState(!modoPreview);
-
-  useEffect(() => {
-    if (modoPreview) {
-      return;
-    }
-
-    let ativo = true;
-
-    verificarSessao()
-      .then((usuarioAutenticado) => {
-        if (ativo) setUsuario(usuarioAutenticado);
-      })
-      .catch(() => {
-        if (ativo) setUsuario(null);
-      })
-      .finally(() => {
-        if (ativo) setVerificandoSessao(false);
-      });
-
-    return () => {
-      ativo = false;
-    };
-  }, [modoPreview]);
 
   useEffect(() => {
     if (
+      window.location.pathname !== "/" &&
       window.location.pathname !== "/login" &&
+      window.location.pathname !== "/eventos" &&
       window.location.pathname !== "/dashboard/colaborador" &&
       window.location.pathname !== "/dashboard/medicamentos" &&
-      window.location.pathname !== "/dashboard/doacoes"
+      window.location.pathname !== "/dashboard/doacoes" &&
+      window.location.pathname !== "/dashboard/admin" &&
+      window.location.pathname !== "/dashboard/voluntario"
     ) {
-      window.history.replaceState({}, "", "/login");
+      window.history.replaceState({}, "", "/");
     }
   }, []);
 
@@ -142,63 +141,36 @@ export default function AppRoutes() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
-  function handleLoginSuccess(usuarioAutenticado: UsuarioAutenticado) {
-    setUsuario(usuarioAutenticado);
-
-    if (usuarioAutenticado.tipoUsuario === "colaborador") {
-      window.history.pushState({}, "", "/dashboard/colaborador");
-      setRoute("/dashboard/colaborador");
-    }
+  if (route === "/") {
+    return <Home />;
+  }
+   
+  if (route === "/eventos") {
+    return <Eventos />;
+  }
+  if (route === "/dashboard/colaborador") {
+    return <DashboardColaborador dadosIniciais={DADOS_PREVIEW} />;
   }
 
-  if (verificandoSessao) {
-    return (
-      <main>
-        <p>Verificando sessão...</p>
-      </main>
-    );
-  }
-
-  if (
-    route === "/dashboard/colaborador" &&
-    (usuario?.tipoUsuario === "colaborador" || modoPreview)
-  ) {
-    return (
-      <DashboardColaborador
-        dadosIniciais={modoPreview ? DADOS_PREVIEW : undefined}
-        usuario={usuario}
-      />
-    );
-  }
-
-  if (
-    route === "/dashboard/doacoes" &&
-    (usuario?.tipoUsuario === "colaborador" || modoPreview)
-  ) {
+  if (route === "/dashboard/doacoes") {
     return <DashboardDoacoes />;
   }
 
-  if (
-    route === "/dashboard/medicamentos" &&
-    (usuario?.tipoUsuario === "colaborador" || modoPreview)
-  ) {
+  if (route === "/dashboard/medicamentos") {
     return (
       <DashboardMedicamentos
-        medicamentosIniciais={
-          modoPreview ? DADOS_MEDICAMENTOS_PREVIEW : undefined
-        }
+        medicamentosIniciais={DADOS_MEDICAMENTOS_PREVIEW}
       />
     );
   }
 
-  if (usuario) {
-    return (
-      <main>
-        <h1>Olá, {usuario.nome}!</h1>
-        <p>Você está autenticado no sistema.</p>
-      </main>
-    );
+  if (route === "/dashboard/admin") {
+    return <DashboardAdmin />;
   }
 
-  return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+  if (route === "/dashboard/voluntario") {
+    return <DashboardVoluntario />;
+  }
+
+  return <Home />;
 }
