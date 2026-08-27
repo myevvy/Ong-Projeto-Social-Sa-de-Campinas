@@ -1,7 +1,8 @@
 // src/pages/Dashboard/DashboardColaborador.tsx
-import { useEffect, useRef, useState } from "react";
-import type { FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { buscarDashboardColaborador } from "../../services/dashboardService";
+import { EventCalendar } from "../../components/EventCalendar/EventCalendar";
+import { MessageBox } from "../../components/MessageBox/MessageBox";
 import type { UsuarioAutenticado } from "../../types/auth";
 import type { DashboardColaboradorData } from "../../types/dashboard";
 import "./DashboardColaborador.css";
@@ -31,13 +32,6 @@ interface DashboardColaboradorProps {
   usuario?: UsuarioAutenticado | null;
 }
 
-interface Evento {
-  id: string;
-  titulo: string;
-  data: string;
-  voluntariosInscritos: number;
-}
-
 export default function DashboardColaborador({
   dadosIniciais,
   usuario,
@@ -47,14 +41,8 @@ export default function DashboardColaborador({
   );
   const [carregando, setCarregando] = useState(!dadosIniciais);
   const [erro, setErro] = useState<string | null>(null);
-  const trilhaRef = useRef<HTMLDivElement>(null);
-  const [eventos, setEventos] = useState<Evento[]>([]);
-  const [formularioAberto, setFormularioAberto] = useState(false);
-  const [eventoEmEdicao, setEventoEmEdicao] = useState<string | null>(null);
-  const [formularioEvento, setFormularioEvento] = useState({
-    titulo: "",
-    data: "",
-  });
+  const [estoqueAtualizado, setEstoqueAtualizado] = useState(248);
+  const [salvandoEstoque, setSalvandoEstoque] = useState(false);
 
   useEffect(() => {
     if (dadosIniciais) return;
@@ -80,67 +68,16 @@ export default function DashboardColaborador({
     };
   }, [dadosIniciais]);
 
-  function rolarCarrossel(direcao: "esquerda" | "direita") {
-    const trilha = trilhaRef.current;
-    if (!trilha) return;
-    const distancia = trilha.clientWidth * 0.8;
-    trilha.scrollBy({
-      left: direcao === "direita" ? distancia : -distancia,
-      behavior: "smooth",
-    });
-  }
-
-  function abrirCadastroMedicamentos(
-    evento: React.MouseEvent<HTMLAnchorElement>,
-  ) {
-    evento.preventDefault();
-    window.history.pushState({}, "", "/dashboard/medicamentos");
-    window.dispatchEvent(new PopStateEvent("popstate"));
-  }
-
   function abrirDoacoes(evento: React.MouseEvent<HTMLAnchorElement>) {
     evento.preventDefault();
     window.history.pushState({}, "", "/dashboard/doacoes");
     window.dispatchEvent(new PopStateEvent("popstate"));
   }
 
-  function abrirFormularioEvento(evento?: Evento) {
-    setEventoEmEdicao(evento?.id ?? null);
-    setFormularioEvento({
-      titulo: evento?.titulo ?? "",
-      data: evento?.data ?? "",
-    });
-    setFormularioAberto(true);
-  }
-
-  function salvarEvento(evento: FormEvent<HTMLFormElement>) {
+  function atualizarEstoque(evento: React.FormEvent<HTMLFormElement>) {
     evento.preventDefault();
-    if (!formularioEvento.titulo.trim() || !formularioEvento.data) return;
-    const eventoAtualizado = {
-      titulo: formularioEvento.titulo.trim(),
-      data: formularioEvento.data,
-    };
-    if (eventoEmEdicao) {
-      setEventos((atuais) =>
-        atuais.map((item) =>
-          item.id === eventoEmEdicao ? { ...item, ...eventoAtualizado } : item,
-        ),
-      );
-    } else {
-      setEventos((atuais) =>
-        [
-          ...atuais,
-          {
-            ...eventoAtualizado,
-            id: `evento-${Date.now()}`,
-            voluntariosInscritos: 0,
-          },
-        ].sort((a, b) => a.data.localeCompare(b.data)),
-      );
-    }
-    setFormularioAberto(false);
-    setEventoEmEdicao(null);
-    setFormularioEvento({ titulo: "", data: "" });
+    setSalvandoEstoque(true);
+    window.setTimeout(() => setSalvandoEstoque(false), 400);
   }
 
   if (carregando) {
@@ -204,13 +141,21 @@ export default function DashboardColaborador({
             <span className="stat-card__rotulo">Em estoque baixo</span>
           </div>
         </div>
-        <a
-          className="dashboard-colaborador__link"
-          href="/dashboard/medicamentos"
-          onClick={abrirCadastroMedicamentos}
-        >
-          Cadastrar medicamento
-        </a>
+        <form className="estoque-atualizacao" onSubmit={atualizarEstoque}>
+          <label htmlFor="estoque-total">Atualizar total em estoque</label>
+          <input
+            id="estoque-total"
+            type="number"
+            min="0"
+            value={estoqueAtualizado}
+            onChange={(evento) =>
+              setEstoqueAtualizado(Number(evento.target.value))
+            }
+          />
+          <button className="dashboard-colaborador__botao" type="submit">
+            {salvandoEstoque ? "Salvando..." : "Salvar estoque"}
+          </button>
+        </form>
       </section>
 
       <section aria-labelledby="secao-doacoes">
@@ -248,83 +193,15 @@ export default function DashboardColaborador({
           <h2 id="secao-acoes" className="dashboard-colaborador__secao-titulo">
             Próximas ações
           </h2>
-          <button
-            className="dashboard-colaborador__botao"
-            type="button"
-            onClick={() => abrirFormularioEvento()}
-          >
-            + Criar evento
-          </button>
-          {proximasAcoes.length > 0 && (
-            <div className="carrossel-controles">
-              <button
-                type="button"
-                aria-label="Ação anterior"
-                onClick={() => rolarCarrossel("esquerda")}
-              >
-                ‹
-              </button>
-              <button
-                type="button"
-                aria-label="Próxima ação"
-                onClick={() => rolarCarrossel("direita")}
-              >
-                ›
-              </button>
-            </div>
-          )}
         </div>
 
-        {formularioAberto && (
-          <form className="evento-form" onSubmit={salvarEvento}>
-            <label>
-              Nome do evento
-              <input
-                required
-                value={formularioEvento.titulo}
-                onChange={(evento) =>
-                  setFormularioEvento({
-                    ...formularioEvento,
-                    titulo: evento.target.value,
-                  })
-                }
-              />
-            </label>
-            <label>
-              Data
-              <input
-                required
-                type="date"
-                value={formularioEvento.data}
-                onChange={(evento) =>
-                  setFormularioEvento({
-                    ...formularioEvento,
-                    data: evento.target.value,
-                  })
-                }
-              />
-            </label>
-            <div className="evento-form__acoes">
-              <button className="dashboard-colaborador__botao" type="submit">
-                Salvar
-              </button>
-              <button
-                className="dashboard-colaborador__botao dashboard-colaborador__botao--secundario"
-                type="button"
-                onClick={() => setFormularioAberto(false)}
-              >
-                Cancelar
-              </button>
-            </div>
-          </form>
-        )}
-        {eventos.length === 0 && proximasAcoes.length === 0 ? (
+        {proximasAcoes.length === 0 ? (
           <p className="dashboard-colaborador__vazio">
             Nenhuma ação agendada no momento.
           </p>
         ) : (
-          <div className="carrossel-trilha" ref={trilhaRef}>
-            {[...eventos, ...proximasAcoes].map((acao) => {
+          <div className="carrossel-trilha">
+            {proximasAcoes.map((acao) => {
               const { dia, mes } = formatarData(acao.data);
               return (
                 <article className="acao-card" key={acao.id}>
@@ -340,31 +217,44 @@ export default function DashboardColaborador({
                         ? "voluntário inscrito"
                         : "voluntários inscritos"}
                     </span>
-                    <div className="acao-card__acoes">
-                      <button
-                        type="button"
-                        onClick={() => abrirFormularioEvento(acao)}
-                      >
-                        Editar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setEventos((atuais) =>
-                            atuais.filter((item) => item.id !== acao.id),
-                          )
-                        }
-                      >
-                        Deletar
-                      </button>
-                    </div>
                   </div>
                 </article>
               );
             })}
           </div>
         )}
+        <EventCalendar
+          events={proximasAcoes.map((acao) => ({
+            id: acao.id,
+            title: acao.titulo,
+            date: acao.data,
+            meta: `${acao.voluntariosInscritos} voluntários inscritos`,
+          }))}
+        />
       </section>
+      <section aria-labelledby="secao-voluntarios">
+        <h2
+          id="secao-voluntarios"
+          className="dashboard-colaborador__secao-titulo"
+        >
+          Voluntários nas ações
+        </h2>
+        <div className="voluntarios-resumo">
+          <div>
+            <strong>9</strong>
+            <span>voluntários ativos</span>
+          </div>
+          <div>
+            <strong>3</strong>
+            <span>aguardando confirmação</span>
+          </div>
+          <div>
+            <strong>18</strong>
+            <span>inscrições nas próximas ações</span>
+          </div>
+        </div>
+      </section>
+      <MessageBox author="colaborador" />
     </div>
   );
 }

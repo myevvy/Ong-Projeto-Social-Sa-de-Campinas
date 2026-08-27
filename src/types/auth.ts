@@ -2,7 +2,7 @@
 // Tipos compartilhados entre o front (React) e o contrato esperado do back (Node + MySQL).
 // Combine estes tipos com sua colega antes dela implementar as rotas.
 
-export type TipoUsuario = "voluntario" | "colaborador";
+export type TipoUsuario = "voluntario" | "colaborador" | "admin";
 
 export interface LoginCredentials {
   email: string;
@@ -26,5 +26,9 @@ export interface LoginResponse {
 
 export interface ApiErrorPayload {
   mensagem: string;
-  codigo?: "CREDENCIAIS_INVALIDAS" | "USUARIO_NAO_ENCONTRADO" | "MUITAS_TENTATIVAS" | "ERRO_INTERNO";
+  codigo?:
+    | "CREDENCIAIS_INVALIDAS"
+    | "USUARIO_NAO_ENCONTRADO"
+    | "MUITAS_TENTATIVAS"
+    | "ERRO_INTERNO";
 }

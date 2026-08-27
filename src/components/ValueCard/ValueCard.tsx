@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export interface ValueCardProps {
   /** Ícone já colorido (SVG/component) — ex: de lucide-react */
