@@ -9,10 +9,12 @@ import DashboardAdmin from "../pages/DashboardAdmin/DashboardAdmin";
 import DashboardVoluntario from "../pages/DashboardVoluntario/DashboardVoluntario";
 
 import Home from "../pages/Home/home";
+import Eventos from "../pages/Eventos/eventos";
 
 type Route =
   | "/"
   | "/login"
+  | "/eventos"
   | "/dashboard/colaborador"
   | "/dashboard/medicamentos"
   | "/dashboard/doacoes"
@@ -87,6 +89,9 @@ function getCurrentRoute(): Route {
   if (window.location.pathname === "/") {
     return "/";
   }
+  if (window.location.pathname === "/eventos") {
+    return "/eventos";
+  }
   if (window.location.pathname === "/dashboard/colaborador") {
     return "/dashboard/colaborador";
   }
@@ -112,6 +117,7 @@ export default function AppRoutes() {
     if (
       window.location.pathname !== "/" &&
       window.location.pathname !== "/login" &&
+      window.location.pathname !== "/eventos" &&
       window.location.pathname !== "/dashboard/colaborador" &&
       window.location.pathname !== "/dashboard/medicamentos" &&
       window.location.pathname !== "/dashboard/doacoes" &&
@@ -134,7 +140,10 @@ export default function AppRoutes() {
   if (route === "/") {
     return <Home />;
   }
-
+   
+  if (route === "/eventos") {
+    return <Eventos />;
+  }
   if (route === "/dashboard/colaborador") {
     return <DashboardColaborador dadosIniciais={DADOS_PREVIEW} />;
   }
