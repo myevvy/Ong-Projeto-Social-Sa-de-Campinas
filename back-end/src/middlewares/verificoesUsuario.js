@@ -42,4 +42,11 @@ const verificaFunc = (req, res, next) => {
   next();
 };
 
-export default { verificaToken, verificaAdm, verificaFunc };
+const verificaAdmFunc = (req, res, next) => {
+  if (req.usuario.tipo !== "adm" && req.usuario.tipo !== "func") {
+    return res.status(403).json({ mensagem: "Acesso restrito a administradores e funcionários." });
+  }
+  next();
+};
+
+export default { verificaToken, verificaAdm, verificaFunc, verificaAdmFunc };
