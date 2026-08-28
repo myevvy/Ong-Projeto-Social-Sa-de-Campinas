@@ -10,6 +10,7 @@ import DashboardVoluntario from "../pages/DashboardVoluntario/DashboardVoluntari
 
 import Home from "../pages/Home/home";
 import Eventos from "../pages/Eventos/eventos";
+import Sobre from "../pages/Sobre/sobre";
 
 type Route =
 <<<<<<< HEAD
@@ -18,7 +19,11 @@ type Route =
   | "/"
   | "/login"
   | "/eventos"
+<<<<<<< HEAD
 >>>>>>> bad2494a00c0fee2a65a9ff3621af250ab924d92
+=======
+  | "/sobre"
+>>>>>>> 243349fa0ecf6a0c470b6b76a51c056c34ebd974
   | "/dashboard/colaborador"
   | "/dashboard/medicamentos"
   | "/dashboard/doacoes"
@@ -96,6 +101,9 @@ function getCurrentRoute(): Route {
   if (window.location.pathname === "/eventos") {
     return "/eventos";
   }
+  if (window.location.pathname === "/sobre") {
+    return "/sobre";
+  }
   if (window.location.pathname === "/dashboard/colaborador") {
     return "/dashboard/colaborador";
   }
@@ -122,6 +130,7 @@ export default function AppRoutes() {
       window.location.pathname !== "/" &&
       window.location.pathname !== "/login" &&
       window.location.pathname !== "/eventos" &&
+      window.location.pathname !== "/sobre" &&
       window.location.pathname !== "/dashboard/colaborador" &&
       window.location.pathname !== "/dashboard/medicamentos" &&
       window.location.pathname !== "/dashboard/doacoes" &&
@@ -147,6 +156,9 @@ export default function AppRoutes() {
    
   if (route === "/eventos") {
     return <Eventos />;
+  }
+  if (route === "/sobre") {
+    return <Sobre />;
   }
   if (route === "/dashboard/colaborador") {
     return <DashboardColaborador dadosIniciais={DADOS_PREVIEW} />;
