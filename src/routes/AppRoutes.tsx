@@ -8,7 +8,7 @@ import DashboardDoacoes from "../pages/DashboardDoacoes/DashboardDoacoes";
 import DashboardAdmin from "../pages/DashboardAdmin/DashboardAdmin";
 import DashboardVoluntario from "../pages/DashboardVoluntario/DashboardVoluntario";
 
-import Home from "../pages/Home/home";
+import Home from "../pages/Home/Home";
 import Eventos from "../pages/Eventos/eventos";
 import Sobre from "../pages/Sobre/sobre";
 

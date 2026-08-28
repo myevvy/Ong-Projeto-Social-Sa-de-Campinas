@@ -1,0 +1,116 @@
+.principal {
+    background-color: sandybrown;
+}
+
+#botao-quero-ser {
+    text-color: white;
+    background-color:black;
+}
+
+#botao-doar {
+    text-color: black;
+    background-color: white;
+}
+
+.h5-info {
+    text-color: orange;
+}
+
+.textinho-info {
+    text-color: black;
+}
+
+#principios {
+    text-color: black;
+    background-color: white;
+}
+
+#infos-ong1 {
+    background-color: white;
+    border-radius: 10px;
+}
+
+#infos-ong2 {
+    background-color: white;
+    border-radius: 10px;
+}
+
+#infos-ong3 {
+    background-color: white;
+    border-radius: 10px;
+}
+
+.fotos {
+    radius: 10px;
+}
+
+.dicas-doacao {
+    background-color: white;
+    border-radius: 10px;
+}
+
+#botao-quero-ajudar {
+    text-color: white;
+    background-color: rgb(201, 126, 57);
+}
+
+#titulos-eventos {
+    text-color: orange;
+}
+
+    #ajuda {
+        text-color: black;
+    }
+
+.datas {
+    text-color: orange;
+}
+
+.quero-participar {
+    text-color: white;
+    background-color: black;
+    border-radius: 7px;
+}
+
+#voluntarios {
+    text-color: black;
+   background-color: rgb(173, 238, 185)
+}
+
+.botao-entrar {
+    text-color: white;
+    radius: 10px;
+    background-color: rgb(50, 46, 9);
+}
+
+#botao-voluntarios {
+    text-color: white;
+    background-color: rgb(15, 89, 44);
+}
+
+#adm {
+    background-color:rgb(172, 232, 242)
+}
+
+#botao-equipe {
+    text-color: white;
+    background-color: rgb(39, 52, 134);
+}
+
+.perguntinhas {
+    text-color: white;
+    background-color: rgb(57, 37, 27);
+
+}
+
+#contato {
+    background-color: rgb(57, 37, 27);
+}
+
+.nome-redes {
+    text-color: orange;
+}
+
+.id-redes {
+    text-color: white;
+}
