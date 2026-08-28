@@ -27,7 +27,7 @@ export function Header({ logoUrl, navLinks, onLoginClick, onCtaClick }: HeaderPr
         <img
           src={logoUrl}
           alt="Saúde Campinas"
-          className="h-10 w-10 rounded-pill object-cover"
+          className="h-15 w-15 rounded-pill object-cover"
         />
         <span className="font-body text-base font-bold text-black">Saúde Campinas</span>
       </a>
