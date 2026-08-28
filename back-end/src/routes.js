@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import express from "express";
 const routes = express.Router();
 import usuarioC from "./controllers/usuarioController.js";
@@ -22,30 +21,10 @@ routes.post("/cadFuncionario", middleware.verificaToken ,middleware.verificaAdm 
 
 routes.post("/cadEvento", middleware.verificaToken ,middleware.verificaAdmFunc ,eventoC.postEventoC);
 
-// routes.get("/evento", middleware.verificaToken ,eventoC.postEventoC);
+routes.get("/eventos", middleware.verificaToken ,eventoC.getEventoC);
 
 
 // routes.post("/cadRemedio", middleware.verificaToken ,middleware.verificaAdm ,usuarioC.cadastro);
 
 
 export default routes;
-=======
-import express from "express";
-const routes = express.Router();
-import usuarioC from "./controllers/usuarioController.js";
-import middleware from './middlewares/verificoesUsuario.js'
-
-routes.post("/cadastro", usuarioC.cadastro);
-routes.post("/login",middleware.verificaToken ,usuarioC.login);
-routes.get("/pagAdm", middleware.verificaToken ,middleware.verificaAdm, (req,res)=>{
-    res.json({mensagem: "Acesso Permitido!", usuario: req.usuario});
-}); //no front verificar se a resposta enviada pelo token é o certo
-routes.get("/pagFunc", middleware.verificaToken ,middleware.verificaFunc, (req,res)=>{
-    res.json({mensagem: "Acesso Permitido!", usuario: req.usuario});
-}); //no front verificar se a resposta enviada pelo token é o certo
-routes.post("/cadFuncionario", middleware.verificaToken ,middleware.verificaAdm ,usuarioC.cadastro);
-routes.post("/cadRemedio", middleware.verificaToken ,middleware.verificaAdm ,usuarioC.cadastro);
-routes.post("/cadEvento", middleware.verificaToken ,middleware.verificaAdm, middleware.verificaFunc ,usuarioC.cadastro);
-
-export default routes;
->>>>>>> 243349fa0ecf6a0c470b6b76a51c056c34ebd974

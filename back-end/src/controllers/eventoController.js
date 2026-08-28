@@ -1,8 +1,9 @@
 import eventoModel from "../models/eventosModel.js";
 
-// const getEventoC = (req,res)=>{
-
-// }
+const getEventoC = async (req,res)=>{
+  const resposta = await eventoModel.getEventoM();
+  res.json(resposta);
+}
 
 const postEventoC = async (req, res) => {
   const existeEvento = await eventoModel.buscarPorNome(req.body.nome);
@@ -13,4 +14,4 @@ const postEventoC = async (req, res) => {
   return res.json({idEvento: resposta});
 };
 
-export default { postEventoC };
+export default { postEventoC, getEventoC };

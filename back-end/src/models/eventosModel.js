@@ -1,8 +1,10 @@
 import connection from "./connection.js";
 
-// const eventoExpirado = (evento)=>{
-//   const [eventoExpirado] = connection.execute("SELECT * FROM ")
-// }
+const getEventoM = async ()=>{
+  connection.execute("UPDATE evento SET status = false WHERE data_evento < CURDATE();");
+  const [eventoAtivo] = await connection.execute("SELECT * FROM evento WHERE status = true");
+  return eventoAtivo;
+}
 
 const buscarPorNome = async (nome)=>{
     const [evento] = await connection.execute("SELECT * FROM evento WHERE nome_evento = ? AND status= ?", [nome, true]);
@@ -23,4 +25,4 @@ const postEventoM = async (evento) => {
   return resposta.insertId;
 };
 
-export default { postEventoM, buscarPorNome };
+export default { postEventoM, buscarPorNome, getEventoM };
