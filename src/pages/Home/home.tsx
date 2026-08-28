@@ -11,7 +11,7 @@ export default function Home () {
                     navLinks={[
                         { label: "Sobre", href: "#sobre" },
                         { label: "Como ajudar", href: "#como-ajudar" },
-                        { label: "Eventos", href: "#eventos" },
+                        { label: "Eventos", href: "/eventos" },
                         { label: "Área do voluntário", href: "/login" },
                         { label: "Contato", href: "#contato" },
                     ]}

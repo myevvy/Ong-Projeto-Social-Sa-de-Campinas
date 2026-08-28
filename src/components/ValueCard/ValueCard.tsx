@@ -15,7 +15,7 @@ export function ValueCard({ icon, title, description }: ValueCardProps) {
   return (
     <article className="flex flex-col items-center gap-2 rounded-md border border-black/10 bg-white p-6 text-center">
       <span className="mb-1 text-[34px] leading-none text-gold">{icon}</span>
-      <h3 className="m-0 font-display text-[17px] font-semibold text-black">
+      <h3 className="m-0 font-display text-[19px] font-normal text-black">
         {title}
       </h3>
       <p className="m-0 font-body text-[13.5px] text-ink-soft">{description}</p>
