@@ -18,8 +18,8 @@ type Route =
   | "/"
   | "/login"
   | "/eventos"
-
   | "/sobre"
+  | "/doacao"
 
   | "/dashboard/colaborador"
   | "/dashboard/medicamentos"

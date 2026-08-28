@@ -9,8 +9,8 @@ export default function Home () {
                 <Header
                     logoUrl="/favicon.svg"
                     navLinks={[
-                        { label: "Sobre", href: "#sobre" },
-                        { label: "Como ajudar", href: "#como-ajudar" },
+                        { label: "Sobre", href: "/sobre" },
+                        { label: "Como ajudar", href: "/doacao" },
                         { label: "Eventos", href: "/eventos" },
                         { label: "Área do voluntário", href: "/login" },
                         { label: "Contato", href: "#contato" },
