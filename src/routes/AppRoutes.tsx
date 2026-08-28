@@ -13,17 +13,14 @@ import Eventos from "../pages/Eventos/eventos";
 import Sobre from "../pages/Sobre/sobre";
 
 type Route =
-<<<<<<< HEAD
+
    "/login"
-=======
   | "/"
   | "/login"
   | "/eventos"
-<<<<<<< HEAD
->>>>>>> bad2494a00c0fee2a65a9ff3621af250ab924d92
-=======
+
   | "/sobre"
->>>>>>> 243349fa0ecf6a0c470b6b76a51c056c34ebd974
+
   | "/dashboard/colaborador"
   | "/dashboard/medicamentos"
   | "/dashboard/doacoes"
