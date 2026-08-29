@@ -2,6 +2,7 @@ import { Button } from '../../components/Button/Button'
 import { Header } from '../../components/Header/Header'
 import { Footer } from '../../components/Footer/Footer'
 
+
 export default function Home () {
     return (
       <div>
@@ -82,7 +83,9 @@ export default function Home () {
                       <p>Estudantes de medicina e de outras áreas da saúde encontram aqui
                         um espaço para aprender cuidando.
                      </p>
-                      <Button>Quero ajudar</Button>
+                      <a href="/dashboard/colaborador">
+  <Button>Quero ajudar</Button>
+</a>
                   </div>
                 <section id="calendario">
                     <h3>Próximos eventos</h3>

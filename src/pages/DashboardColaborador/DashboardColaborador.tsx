@@ -3,219 +3,217 @@ import { useEffect, useState } from "react";
 import { buscarDashboardColaborador } from "../../services/dashboardService";
 import { EventCalendar } from "../../components/EventCalendar/EventCalendar";
 import { MessageBox } from "../../components/MessageBox/MessageBox";
+import { Kicker, DatePill, Button, FormField } from "../../components";
 import type { UsuarioAutenticado } from "../../types/auth";
 import type { DashboardColaboradorData } from "../../types/dashboard";
-import "./DashboardColaborador.css";
 
 function saudacaoPorHorario(): string {
-  const hora = new Date().getHours();
-  if (hora < 12) return "Bom dia";
-  if (hora < 18) return "Boa tarde";
-  return "Boa noite";
+const hora = new Date().getHours();
+if (hora < 12) return "Bom dia";
+if (hora < 18) return "Boa tarde";
+return "Boa noite";
 }
 
 function formatarMoeda(valor: number): string {
-  return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
 function formatarData(dataIso: string): { dia: string; mes: string } {
-  const data = new Date(`${dataIso}T00:00:00`);
-  const dia = data.toLocaleDateString("pt-BR", { day: "2-digit" });
-  const mes = data
-    .toLocaleDateString("pt-BR", { month: "short" })
-    .replace(".", "");
-  return { dia, mes };
+const data = new Date(`${dataIso}T00:00:00`);
+const dia = data.toLocaleDateString("pt-BR", { day: "2-digit" });
+const mes = data
+.toLocaleDateString("pt-BR", { month: "short" })
+.replace(".", "");
+return { dia, mes };
+}
+
+type StatTone = "neutro" | "atencao" | "critico" | "baixo";
+
+const TONE_CARD_CLASSES: Record<StatTone, string> = {
+neutro: "bg-white border border-black/10",
+atencao: "bg-amber/10 border border-amber/25",
+critico: "bg-error/10 border border-error/25",
+baixo: "bg-gold/10 border border-gold/25",
+};
+
+const TONE_VALUE_CLASSES: Record<StatTone, string> = {
+neutro: "text-black",
+atencao: "text-amber",
+critico: "text-error",
+baixo: "text-[#b5872f]",
+};
+
+function StatCard({
+tone,
+value,
+label,
+}: {
+tone: StatTone;
+value: number | string;
+label: string;
+}) {
+return (
+<div className={`flex flex-col gap-1 rounded-md p-4 ${TONE_CARD_CLASSES[tone]}`}>
+<span className={`font-display text-xl font-semibold ${TONE_VALUE_CLASSES[tone]}`}>
+{value}
+</span>
+<span className="font-body text-[12px] leading-tight text-ink-soft">{label}</span>
+</div>
+);
+}
+
+// Wrapper padrão de card de seção — evita repetir bg/border/padding em cada bloco
+function SectionCard({
+id,
+title,
+children,
+}: {
+id: string;
+title: string;
+children: React.ReactNode;
+}) {
+return (
+<section aria-labelledby={id} className="rounded-lg border border-black/10 bg-white p-6">
+<h2 id={id} className="m-0 mb-4 font-display text-lg font-semibold text-black">
+{title}
+</h2>
+{children}
+</section>
+);
 }
 
 interface DashboardColaboradorProps {
-  dadosIniciais?: DashboardColaboradorData;
-  usuario?: UsuarioAutenticado | null;
+dadosIniciais?: DashboardColaboradorData;
+usuario?: UsuarioAutenticado | null;
 }
 
 export default function DashboardColaborador({
-  dadosIniciais,
-  usuario,
+dadosIniciais,
+usuario,
 }: DashboardColaboradorProps) {
-  const [dados, setDados] = useState<DashboardColaboradorData | null>(
-    dadosIniciais ?? null,
-  );
-  const [carregando, setCarregando] = useState(!dadosIniciais);
-  const [erro, setErro] = useState<string | null>(null);
-  const [estoqueAtualizado, setEstoqueAtualizado] = useState(248);
-  const [salvandoEstoque, setSalvandoEstoque] = useState(false);
+const [dados, setDados] = useState<DashboardColaboradorData | null>(
+dadosIniciais ?? null,
+);
+const [carregando, setCarregando] = useState(!dadosIniciais);
+const [erro, setErro] = useState<string | null>(null);
+const [estoqueAtualizado, setEstoqueAtualizado] = useState(248);
+const [salvandoEstoque, setSalvandoEstoque] = useState(false);
 
-  useEffect(() => {
-    if (dadosIniciais) return;
+useEffect(() => {
+if (dadosIniciais) return;
+let ativo = true;
+buscarDashboardColaborador()
+.then((resposta) => {
+if (ativo) setDados(resposta);
+})
+.catch((err) => {
+if (ativo)
+setErro(err instanceof Error ? err.message : "Erro ao carregar o painel.");
+})
+.finally(() => {
+if (ativo) setCarregando(false);
+});
+return () => {
+ativo = false;
+};
+}, [dadosIniciais]);
 
-    let ativo = true;
+function abrirDoacoes(evento: React.MouseEvent<HTMLAnchorElement>) {
+evento.preventDefault();
+window.history.pushState({}, "", "/dashboard/doacoes");
+window.dispatchEvent(new PopStateEvent("popstate"));
+}
 
-    buscarDashboardColaborador()
-      .then((resposta) => {
-        if (ativo) setDados(resposta);
-      })
-      .catch((err) => {
-        if (ativo)
-          setErro(
-            err instanceof Error ? err.message : "Erro ao carregar o painel.",
-          );
-      })
-      .finally(() => {
-        if (ativo) setCarregando(false);
-      });
+function atualizarEstoque(evento: React.FormEvent<HTMLFormElement>) {
+evento.preventDefault();
+setSalvandoEstoque(true);
+window.setTimeout(() => setSalvandoEstoque(false), 400);
+}
 
-    return () => {
-      ativo = false;
-    };
-  }, [dadosIniciais]);
+if (carregando) {
+return (
+<div className="flex min-h-[40vh] items-center justify-center px-6">
+<p role="status" className="font-body text-sm text-ink-soft">
+Carregando painel...
+</p>
+</div>
+);
+}
 
-  function abrirDoacoes(evento: React.MouseEvent<HTMLAnchorElement>) {
-    evento.preventDefault();
-    window.history.pushState({}, "", "/dashboard/doacoes");
-    window.dispatchEvent(new PopStateEvent("popstate"));
-  }
+if (erro || !dados) {
+return (
+<div className="flex min-h-[40vh] items-center justify-center px-6">
+<p role="alert" className="font-body text-sm text-error">
+{erro ?? "Não foi possível carregar o painel."}
+</p>
+</div>
+);
+}
 
-  function atualizarEstoque(evento: React.FormEvent<HTMLFormElement>) {
-    evento.preventDefault();
-    setSalvandoEstoque(true);
-    window.setTimeout(() => setSalvandoEstoque(false), 400);
-  }
+const { colaborador, estoque, doacoes, proximasAcoes } = dados;
+const nomeColaborador = usuario?.nome || colaborador.nome || "colaborador";
 
-  if (carregando) {
-    return (
-      <div className="dashboard-colaborador">
-        <p className="dashboard-colaborador__estado" role="status">
-          Carregando painel...
-        </p>
-      </div>
-    );
-  }
+return (
+// max-w limita a largura útil — é isso que resolve o "muito largo".
+// Sem isso, em monitor grande cada seção estica até a borda da tela.
+<div className="mx-auto flex max-w-[1120px] flex-col gap-6 px-6 py-8 md:px-10">
+<header className="flex flex-col gap-1.5">
+<Kicker>Painel do colaborador</Kicker>
+<h1 className="m-0 font-display text-[26px] font-semibold text-black md:text-[32px]">
+{saudacaoPorHorario()}, {nomeColaborador.split(" ")[0]}
+</h1>
+</header>
 
-  if (erro || !dados) {
-    return (
-      <div className="dashboard-colaborador">
-        <p
-          className="dashboard-colaborador__estado dashboard-colaborador__estado--erro"
-          role="alert"
-        >
-          {erro ?? "Não foi possível carregar o painel."}
-        </p>
-      </div>
-    );
-  }
 
-  const { colaborador, estoque, doacoes, proximasAcoes } = dados;
-  const nomeColaborador = usuario?.nome || colaborador.nome || "colaborador";
-
-  return (
-    <div className="dashboard-colaborador">
-      <header className="dashboard-colaborador__header">
-        <p className="dashboard-colaborador__eyebrow">Painel do colaborador</p>
-        <h1 className="dashboard-colaborador__titulo">
-          {saudacaoPorHorario()}, {nomeColaborador.split(" ")[0]}
-        </h1>
-      </header>
-
-      <section aria-labelledby="secao-estoque">
-        <h2 id="secao-estoque" className="dashboard-colaborador__secao-titulo">
-          Estoque de medicamentos
-        </h2>
-        <div className="stat-grid">
-          <div className="stat-card" data-tom="neutro">
-            <span className="stat-card__valor">
-              {estoque.totalMedicamentos}
-            </span>
-            <span className="stat-card__rotulo">Medicamentos cadastrados</span>
-          </div>
-          <div className="stat-card" data-tom="atencao">
-            <span className="stat-card__valor">
-              {estoque.proximosVencimento}
-            </span>
-            <span className="stat-card__rotulo">Próximos do vencimento</span>
-          </div>
-          <div className="stat-card" data-tom="critico">
-            <span className="stat-card__valor">{estoque.vencidos}</span>
-            <span className="stat-card__rotulo">Vencidos</span>
-          </div>
-          <div className="stat-card" data-tom="baixo">
-            <span className="stat-card__valor">{estoque.estoqueBaixo}</span>
-            <span className="stat-card__rotulo">Em estoque baixo</span>
-          </div>
+  {/* Grid 2 colunas no desktop: conteúdo principal (2/3) + lateral (1/3).
+      É o que dá a "cara de dashboard organizado" em vez de tudo empilhado. */}
+  <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <div className="flex flex-col gap-6 lg:col-span-2">
+      <SectionCard id="secao-estoque" title="Estoque de medicamentos">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatCard tone="neutro" value={estoque.totalMedicamentos} label="Cadastrados" />
+          <StatCard tone="atencao" value={estoque.proximosVencimento} label="Perto de vencer" />
+          <StatCard tone="critico" value={estoque.vencidos} label="Vencidos" />
+          <StatCard tone="baixo" value={estoque.estoqueBaixo} label="Estoque baixo" />
         </div>
-        <form className="estoque-atualizacao" onSubmit={atualizarEstoque}>
-          <label htmlFor="estoque-total">Atualizar total em estoque</label>
-          <input
+        <form
+          onSubmit={atualizarEstoque}
+          className="mt-5 flex flex-wrap items-end gap-3 border-t border-black/10 pt-5"
+        >
+          <FormField
             id="estoque-total"
+            label="Atualizar total em estoque"
             type="number"
-            min="0"
+            min={0}
             value={estoqueAtualizado}
-            onChange={(evento) =>
-              setEstoqueAtualizado(Number(evento.target.value))
-            }
+            onChange={(evento) => setEstoqueAtualizado(Number(evento.target.value))}
           />
-          <button className="dashboard-colaborador__botao" type="submit">
+          <Button type="submit" variant="dark">
             {salvandoEstoque ? "Salvando..." : "Salvar estoque"}
-          </button>
+          </Button>
         </form>
-      </section>
+      </SectionCard>
 
-      <section aria-labelledby="secao-doacoes">
-        <h2 id="secao-doacoes" className="dashboard-colaborador__secao-titulo">
-          Doações do mês
-        </h2>
-        <div className="doacoes-card">
-          <div>
-            <span className="doacoes-card__valor">
-              {formatarMoeda(doacoes.valorTotalMes)}
-            </span>
-            <span className="doacoes-card__rotulo">arrecadados este mês</span>
-          </div>
-          <div className="doacoes-card__divisor" aria-hidden="true" />
-          <div>
-            <span className="doacoes-card__valor">{doacoes.quantidadeMes}</span>
-            <span className="doacoes-card__rotulo">
-              {doacoes.quantidadeMes === 1
-                ? "doação recebida"
-                : "doações recebidas"}
-            </span>
-          </div>
-        </div>
-        <a
-          className="dashboard-colaborador__link"
-          href="/dashboard/doacoes"
-          onClick={abrirDoacoes}
-        >
-          Ver gestão de doações
-        </a>
-      </section>
-
-      <section aria-labelledby="secao-acoes">
-        <div className="dashboard-colaborador__secao-cabecalho">
-          <h2 id="secao-acoes" className="dashboard-colaborador__secao-titulo">
-            Próximas ações
-          </h2>
-        </div>
-
+      <SectionCard id="secao-acoes" title="Próximas ações">
         {proximasAcoes.length === 0 ? (
-          <p className="dashboard-colaborador__vazio">
-            Nenhuma ação agendada no momento.
-          </p>
+          <p className="font-body text-sm text-ink-soft">Nenhuma ação agendada.</p>
         ) : (
-          <div className="carrossel-trilha">
+          <div className="flex flex-col gap-2.5">
             {proximasAcoes.map((acao) => {
               const { dia, mes } = formatarData(acao.data);
               return (
-                <article className="acao-card" key={acao.id}>
-                  <div className="acao-card__data">
-                    <span className="acao-card__dia">{dia}</span>
-                    <span className="acao-card__mes">{mes}</span>
-                  </div>
-                  <div className="acao-card__corpo">
-                    <h3 className="acao-card__titulo">{acao.titulo}</h3>
-                    <span className="acao-card__voluntarios">
+                <article
+                  key={acao.id}
+                  className="flex items-center gap-4 rounded-md border border-black/10 p-3.5"
+                >
+                  <DatePill label={`${dia} ${mes.toUpperCase()}`} />
+                  <div className="flex flex-col gap-0.5">
+                    <h3 className="m-0 font-display text-[15px] font-semibold text-black">
+                      {acao.titulo}
+                    </h3>
+                    <span className="font-body text-xs text-ink-soft">
                       {acao.voluntariosInscritos}{" "}
-                      {acao.voluntariosInscritos === 1
-                        ? "voluntário inscrito"
-                        : "voluntários inscritos"}
+                      {acao.voluntariosInscritos === 1 ? "voluntário" : "voluntários"} inscritos
                     </span>
                   </div>
                 </article>
@@ -223,38 +221,70 @@ export default function DashboardColaborador({
             })}
           </div>
         )}
-        <EventCalendar
-          events={proximasAcoes.map((acao) => ({
-            id: acao.id,
-            title: acao.titulo,
-            date: acao.data,
-            meta: `${acao.voluntariosInscritos} voluntários inscritos`,
-          }))}
-        />
-      </section>
-      <section aria-labelledby="secao-voluntarios">
-        <h2
-          id="secao-voluntarios"
-          className="dashboard-colaborador__secao-titulo"
-        >
-          Voluntários nas ações
-        </h2>
-        <div className="voluntarios-resumo">
+        <div className="mt-5">
+          <EventCalendar
+            events={proximasAcoes.map((acao) => ({
+              id: acao.id,
+              title: acao.titulo,
+              date: acao.data,
+              meta: `${acao.voluntariosInscritos} voluntários inscritos`,
+            }))}
+          />
+        </div>
+      </SectionCard>
+    </div>
+
+    {/* Coluna lateral: cards mais curtos e independentes — o que antes
+        eram 2 seções full-width viram blocos compactos lado a lado
+        com o conteúdo principal, aproveitando a largura da tela. */}
+    <div className="flex flex-col gap-6">
+      <SectionCard id="secao-doacoes" title="Doações do mês">
+        <div className="flex flex-col gap-4 rounded-md bg-black p-5">
           <div>
-            <strong>9</strong>
-            <span>voluntários ativos</span>
+            <span className="block font-display text-xl font-semibold text-parchment">
+              {formatarMoeda(doacoes.valorTotalMes)}
+            </span>
+            <span className="font-body text-xs text-[#c8c8c3]">arrecadados este mês</span>
           </div>
           <div>
-            <strong>3</strong>
-            <span>aguardando confirmação</span>
-          </div>
-          <div>
-            <strong>18</strong>
-            <span>inscrições nas próximas ações</span>
+            <span className="block font-display text-xl font-semibold text-parchment">
+              {doacoes.quantidadeMes}
+            </span>
+            <span className="font-body text-xs text-[#c8c8c3]">
+              {doacoes.quantidadeMes === 1 ? "doação recebida" : "doações recebidas"}
+            </span>
           </div>
         </div>
-      </section>
-      <MessageBox author="colaborador" />
+        <a
+          href="/dashboard/doacoes"
+          onClick={abrirDoacoes}
+          className="mt-3 inline-block font-body text-sm font-bold text-black underline underline-offset-2"
+        >
+          Ver gestão de doações →
+        </a>
+      </SectionCard>
+
+      <SectionCard id="secao-voluntarios" title="Voluntários">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-baseline justify-between">
+            <span className="font-body text-sm text-ink-soft">Ativos</span>
+            <strong className="font-display text-lg font-semibold text-black">9</strong>
+          </div>
+          <div className="flex items-baseline justify-between">
+            <span className="font-body text-sm text-ink-soft">Aguardando confirmação</span>
+            <strong className="font-display text-lg font-semibold text-black">3</strong>
+          </div>
+          <div className="flex items-baseline justify-between">
+            <span className="font-body text-sm text-ink-soft">Inscrições nas próximas <br /> ações</span>
+            <strong className="font-display text-lg font-semibold text-black">18</strong>
+          </div>
+        </div>
+      </SectionCard>
     </div>
-  );
+  </div>
+
+  <MessageBox author="colaborador" />
+</div>
+
+);
 }
