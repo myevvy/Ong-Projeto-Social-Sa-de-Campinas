@@ -9,18 +9,16 @@ import DashboardAdmin from "../pages/DashboardAdmin/DashboardAdmin";
 import DashboardVoluntario from "../pages/DashboardVoluntario/DashboardVoluntario";
 
 import Home from "../pages/Home/Home";
+import LoginPage from "../pages/Login/LoginPage";
 import Eventos from "../pages/Eventos/eventos";
 import Sobre from "../pages/Sobre/sobre";
 
 type Route =
-
-   "/login"
+  | "/login"
   | "/"
   | "/login"
   | "/eventos"
-
   | "/sobre"
-
   | "/dashboard/colaborador"
   | "/dashboard/medicamentos"
   | "/dashboard/doacoes"
@@ -101,6 +99,9 @@ function getCurrentRoute(): Route {
   if (window.location.pathname === "/sobre") {
     return "/sobre";
   }
+  if (window.location.pathname === "/login") {
+    return "/login";
+  }
   if (window.location.pathname === "/dashboard/colaborador") {
     return "/dashboard/colaborador";
   }
@@ -150,7 +151,11 @@ export default function AppRoutes() {
   if (route === "/") {
     return <Home />;
   }
-   
+
+  if (route === "/login") {
+    return <LoginPage />;
+  }
+
   if (route === "/eventos") {
     return <Eventos />;
   }
