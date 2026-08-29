@@ -1,69 +1,131 @@
 .principal {
-    background-color: sandybrown;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   text-align: center;
+   padding: 48px 24px 40px;
+   max-width: 560px;
+   margin: 0 auto;
+}
+
+#nome-projeto {
+     display: flex;
+     justify-items: center;
+     text-color: #D9A441;
+     margin: 0 0 20px;
+     text-transform: uppercase;
 }
 
 #botao-quero-ser {
-    text-color: white;
-    background-color:black;
+     display: flex;
+     justify-content: center;
+     text-color: white;
+     background-color:black;
+     margin: 0 0 20px;
+     line-height: 1.25;
+     max-width: 15ch;
 }
 
 #botao-doar {
-    text-color: black;
-    background-color: white;
+     display: block;
+     width: 100%;
+     max-width: 320px;
+     padding: 15px 24px;
+     border-radius: 999px;
+     transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+
 }
 
 .h5-info {
-    text-color: orange;
+     text-color: #D9A441;
+      margin: 0 0 4px;
 }
 
 .textinho-info {
-    text-color: black;
+     text-color: black;
+      margin: 0;
+     font-size: 13px;
+
 }
 
 #principios {
     text-color: black;
-    background-color: white;
+     background-color: white;
+}
+#principios img {
+     display: block;
+      width: 100%;
+     aspect-ratio: 4 / 3;
+     object-fit: cover;
+     border-radius: 20px;
+     margin: 0 0 28px;
 }
 
 #infos-ong1 {
-    background-color: white;
-    border-radius: 10px;
+     background-color: white;
+     border-radius: 10px;
+       margin-bottom: 24px;
 }
 
 #infos-ong2 {
-    background-color: white;
-    border-radius: 10px;
+     background-color: white;
+     border-radius: 10px;
+       margin-bottom: 24px;
 }
 
 #infos-ong3 {
-    background-color: white;
-    border-radius: 10px;
+     background-color: white;
+     border-radius: 10px;
+       margin-bottom: 24px;
+}
+
+.cartoezinhos {
+     display: block;
+     padding: 0 20px 48px;
+     max-width: 560px;
+     width: 40px;
+     height: 40px;
+     margin: 0 auto 16px;
+}
+
+#cartao1 {
+      margin-top: 8px;
+      background-color: white;
+      border-radius: 10px;
+}
+
+#cartao2 {
+      margin-top: 8px;
+      background-color: white;
+      border-radius: 10px;
+ }
+
+#cartao3 {
+      margin-top: 8px;
+      background-color: white;
+      border-radius: 10px;
 }
 
 .fotos {
-    radius: 10px;
+     radius: 10px;
 }
 
 .dicas-doacao {
-    background-color: white;
-    border-radius: 10px;
+     background-color: white;
+     border-radius: 10px;
 }
 
 #botao-quero-ajudar {
-    text-color: white;
-    background-color: rgb(201, 126, 57);
+     text-color: white;
+     background-color: rgb(201, 126, 57);
 }
 
 #titulos-eventos {
-    text-color: orange;
+    text-color: #D9A441;
 }
 
-    #ajuda {
-        text-color: black;
-    }
-
 .datas {
-    text-color: orange;
+    text-color: #D9A441;
 }
 
 .quero-participar {
@@ -72,9 +134,18 @@
     border-radius: 7px;
 }
 
+#botao-participar {
+    text-color: white;
+    background-color: black;
+    border-radius: 7px;
+}
+
+#area-voluntaio {
+    background-color :#5F7D43;
+    text-color: white;
+}
 #voluntarios {
-    text-color: black;
-   background-color: rgb(173, 238, 185)
+     background-color: #E7EDDA
 }
 
 .botao-entrar {
@@ -88,18 +159,17 @@
     background-color: rgb(15, 89, 44);
 }
 
-#adm {
-    background-color:rgb(172, 232, 242)
-}
-
-#botao-equipe {
+#painel-equipe {
     text-color: white;
-    background-color: rgb(39, 52, 134);
+    background-color: #3F5F8A;
+}
+#adm {
+    background-color:#DFE6EE
 }
 
 .perguntinhas {
     text-color: white;
-    background-color: rgb(57, 37, 27);
+    background-color: #211811;
 
 }
 
@@ -108,7 +178,7 @@
 }
 
 .nome-redes {
-    text-color: orange;
+    text-color: #D9A441;
 }
 
 .id-redes {
