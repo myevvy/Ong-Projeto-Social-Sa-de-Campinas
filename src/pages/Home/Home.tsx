@@ -8,11 +8,11 @@ export default function Home() {
       <Header
         logoUrl="/favicon.svg"
         navLinks={[
-          { label: 'Sobre', href: '#sobre' },
-          { label: 'Como ajudar', href: '#como-ajudar' },
+          { label: 'Sobre', href: '/sobre' },
+          { label: 'Como ajudar', href: '/como-ajudar' },
           { label: 'Eventos', href: '/eventos' },
           { label: 'Área do voluntário', href: '/login' },
-          { label: 'Contato', href: '#contato' },
+          { label: 'Contato', href: '/contato' },
         ]}
       />
 
@@ -182,11 +182,11 @@ export default function Home() {
 
       <Footer
         navLinks={[
-          { label: 'Sobre', href: '#sobre' },
-          { label: 'Como ajudar', href: '#como-ajudar' },
-          { label: 'Eventos', href: '#eventos' },
+          { label: 'Sobre', href: '/sobre' },
+          { label: 'Como ajudar', href: '/como-ajudar' },
+          { label: 'Eventos', href: '/eventos' },
           { label: 'Área do voluntário', href: '/login' },
-          { label: 'Contato', href: '#contato' },
+          { label: 'Contato', href: '/contato' },
         ]}
         email="contato@saudecampinas.org"
         whatsappLabel="(19) 99999-9999"
