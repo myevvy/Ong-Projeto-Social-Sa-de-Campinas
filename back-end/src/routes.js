@@ -7,7 +7,7 @@ import middleware from './middlewares/verificoesUsuario.js'
 
 routes.post("/cadastro", usuarioC.cadastro);
 
-routes.post("/login",middleware.verificaToken ,usuarioC.login);
+routes.post("/login" ,usuarioC.login);
 
 routes.get("/pagAdm", middleware.verificaToken ,middleware.verificaAdm, (req,res)=>{
     res.json({mensagem: "Acesso Permitido!", usuario: req.usuario});
@@ -17,14 +17,18 @@ routes.get("/pagFunc", middleware.verificaToken ,middleware.verificaFunc, (req,r
     res.json({mensagem: "Acesso Permitido!", usuario: req.usuario});
 }); //no front verificar se a resposta enviada pelo token é o certo
 
-routes.post("/cadFuncionario", middleware.verificaToken ,middleware.verificaAdm ,usuarioC.cadastro);
+routes.get("/funcionarios", middleware.verificaToken ,middleware.verificaAdm ,usuarioC.getFuncionarios);
+routes.post("/funcionarios", middleware.verificaToken ,middleware.verificaAdm ,usuarioC.cadastro);
+routes.put("/funcionarios/:id", middleware.verificaToken ,middleware.verificaAdm ,usuarioC.putUsuarioC);
+routes.delete("/funcionarios/:id", middleware.verificaToken ,middleware.verificaAdm ,usuarioC.deleteUsuarioC);
 
-routes.post("/cadEvento", middleware.verificaToken ,middleware.verificaAdmFunc ,eventoC.postEventoC);
 
-routes.get("/eventos", middleware.verificaToken ,eventoC.getEventoC);
+routes.get("/eventos", eventoC.getEventoC);
+routes.post("/eventos", middleware.verificaToken ,middleware.verificaAdmFunc ,eventoC.postEventoC);
+routes.put("/eventos/:id", middleware.verificaToken ,middleware.verificaAdmFunc ,eventoC.putEventoC);
+routes.delete("/eventos/:id", middleware.verificaToken ,middleware.verificaAdmFunc ,eventoC.deleteUsuarioC);
 
 
 // routes.post("/cadRemedio", middleware.verificaToken ,middleware.verificaAdm ,usuarioC.cadastro);
-
 
 export default routes;
