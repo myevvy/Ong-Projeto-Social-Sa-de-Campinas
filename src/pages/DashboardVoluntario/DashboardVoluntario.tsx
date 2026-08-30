@@ -1,6 +1,13 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { EventCalendar } from "../../components/EventCalendar/EventCalendar";
 import { MessageBox } from "../../components/MessageBox/MessageBox";
+import { MuralBoard } from "../../components/MuralBoard/MuralBoard";
+import {
+  obterEventos,
+  obterInscricoesVoluntario,
+  alternarInscricaoVoluntario,
+  type EventoGlobal,
+} from "../../services/eventService";
 import "./DashboardVoluntario.css";
 
 interface PerfilVoluntario {
@@ -8,28 +15,13 @@ interface PerfilVoluntario {
   sobre: string;
   habilidades: string;
 }
-const EVENTOS = [
-  {
-    id: 1,
-    titulo: "Triagem e organização do estoque",
-    data: "2026-09-14",
-    local: "Centro de Campinas",
-    vagas: 6,
-  },
-  {
-    id: 2,
-    titulo: "Entrega de medicamentos",
-    data: "2026-09-21",
-    local: "Jardim Florence",
-    vagas: 3,
-  },
-];
 
 export default function DashboardVoluntario({
-  nome = "Beatriz",
+  nome = "Voluntário",
 }: {
   nome?: string;
 }) {
+  const [eventos, setEventos] = useState<EventoGlobal[]>([]);
   const [perfil, setPerfil] = useState<PerfilVoluntario>({
     nascimento: "",
     sobre: "",
@@ -37,20 +29,49 @@ export default function DashboardVoluntario({
   });
   const [editando, setEditando] = useState(false);
   const [inscritos, setInscritos] = useState<number[]>([]);
-  const [mural, setMural] = useState("");
-  const [postagens, setPostagens] = useState([
-    "A entrega de hoje foi muito bonita. Obrigada a todo mundo que participou!",
-  ]);
+  const [emailUsuario, setEmailUsuario] = useState("");
+
+  useEffect(() => {
+    let emailUser = "";
+    try {
+      const rawUser = localStorage.getItem("usuario");
+      if (rawUser) {
+        const u = JSON.parse(rawUser);
+        if (u.email) emailUser = u.email;
+      }
+    } catch {}
+    setEmailUsuario(emailUser || "voluntario@saudecampinas.org");
+
+    setEventos(obterEventos());
+    setInscritos(obterInscricoesVoluntario(nome));
+
+    function recarregar() {
+      setEventos(obterEventos());
+      setInscritos(obterInscricoesVoluntario(nome));
+    }
+    window.addEventListener("ong_eventos_atualizados", recarregar);
+    return () => {
+      window.removeEventListener("ong_eventos_atualizados", recarregar);
+    };
+  }, [nome]);
+
+  function handleInscricao(eventoId: number) {
+    let emailUser = emailUsuario;
+    let telUser = "(19) 99124-3012";
+    let sobreUser = perfil.sobre || "";
+
+    const res = alternarInscricaoVoluntario(eventoId, {
+      nome,
+      email: emailUser || `${nome.toLowerCase().replace(/\s+/g, "")}@gmail.com`,
+      telefone: telUser,
+      sobre: sobreUser || "Voluntário cadastrado no projeto Saúde Campinas.",
+    });
+    setInscritos(res.inscritos);
+  }
 
   function salvarPerfil(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     setEditando(false);
-  }
-  function publicar(evento: FormEvent<HTMLFormElement>) {
-    evento.preventDefault();
-    if (!mural.trim()) return;
-    setPostagens((atuais) => [mural.trim(), ...atuais]);
-    setMural("");
   }
 
   return (
@@ -60,33 +81,47 @@ export default function DashboardVoluntario({
           <p className="volunteer-page__kicker">Área do voluntário</p>
           <h1>Olá, {nome.split(" ")[0]}.</h1>
           <p>
-            Encontre sua próxima ação, compartilhe no mural e mantenha seu
-            perfil atualizado.
+            Encontre sua próxima ação, compartilhe no mural e envie recados para a equipe.
           </p>
         </div>
-        <button type="button" onClick={() => window.location.assign("/login")}>
+        <button
+          type="button"
+          onClick={() => {
+            localStorage.removeItem("usuario");
+            localStorage.removeItem("token");
+            window.location.assign("/login");
+          }}
+        >
           Sair
         </button>
       </header>
+
       <section className="volunteer-page__events">
         <div className="volunteer-heading">
           <div>
             <p className="volunteer-page__kicker">Agenda</p>
             <h2>Eventos disponíveis</h2>
           </div>
-          <span>{EVENTOS.length} ações</span>
+          <span>
+            {eventos.length} {eventos.length === 1 ? "ação" : "ações"}
+          </span>
         </div>
         <div className="volunteer-events-layout">
           <EventCalendar
-            events={EVENTOS.map((evento) => ({
+            events={eventos.map((evento) => ({
               id: evento.id,
               title: evento.titulo,
               date: evento.data,
-              meta: `${evento.local} · ${evento.vagas} vagas`,
+              meta: `${evento.local || "Campinas"} · ${evento.vagas || 6} vagas`,
             }))}
           />
           <div className="volunteer-events">
-            {EVENTOS.map((evento) => (
+            {eventos.length === 0 && (
+              <p className="font-body text-sm text-ink-soft">
+                Nenhum evento disponível no momento.
+              </p>
+            )}
+            {eventos.map((evento) => (
               <article className="volunteer-event" key={evento.id}>
                 <div className="volunteer-event__date">
                   <strong>
@@ -101,20 +136,15 @@ export default function DashboardVoluntario({
                 <div className="volunteer-event__content">
                   <h3>{evento.titulo}</h3>
                   <p>
-                    {evento.local} · {evento.vagas} vagas
+                    {evento.local || "Campinas"} · {evento.vagas || 6} vagas
                   </p>
                   <button
                     type="button"
-                    onClick={() =>
-                      setInscritos((atuais) =>
-                        atuais.includes(evento.id)
-                          ? atuais.filter((id) => id !== evento.id)
-                          : [...atuais, evento.id],
-                      )
-                    }
+                    className={inscritos.includes(evento.id) ? "inscrito" : ""}
+                    onClick={() => handleInscricao(evento.id)}
                   >
                     {inscritos.includes(evento.id)
-                      ? "Inscrito"
+                      ? "✓ Inscrito"
                       : "Quero participar"}
                   </button>
                 </div>
@@ -123,30 +153,21 @@ export default function DashboardVoluntario({
           </div>
         </div>
       </section>
+
+      {/* Seção com Central de Mensagens e Mural Comunitário */}
       <section className="volunteer-page__communication-grid">
-        <MessageBox author="voluntario" />
-        <article className="volunteer-panel">
-          <div className="volunteer-heading">
-            <div>
-              <p className="volunteer-page__kicker">Comunidade</p>
-              <h2>Mural</h2>
-            </div>
-          </div>
-          <form className="volunteer-post-form" onSubmit={publicar}>
-            <textarea
-              aria-label="Nova publicação"
-              placeholder="Compartilhe uma atualização com a equipe"
-              value={mural}
-              onChange={(evento) => setMural(evento.target.value)}
-            />
-            <button type="submit">Publicar</button>
-          </form>
-          <div className="volunteer-posts">
-            {postagens.map((postagem, indice) => (
-              <p key={`${postagem}-${indice}`}>{postagem}</p>
-            ))}
-          </div>
-        </article>
+        <MessageBox
+          author="voluntario"
+          usuarioNome={nome}
+          usuarioEmail={emailUsuario}
+        />
+
+        <MuralBoard
+          tipoUsuario="voluntario"
+          usuarioNome={nome}
+          usuarioEmail={emailUsuario}
+        />
+
         <article className="volunteer-panel">
           <div className="volunteer-heading">
             <div>

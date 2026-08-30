@@ -1,0 +1,246 @@
+/* src/components/MuralBoard/MuralBoard.css */
+
+.mural-board {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.mural-board__heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding-bottom: 12px;
+}
+
+.mural-board__kicker {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #c97e39;
+  margin: 0 0 2px;
+}
+
+.mural-board__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #211811;
+  font-family: inherit;
+}
+
+.mural-board__count {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666666;
+  background-color: #f5f4ef;
+  padding: 4px 10px;
+  border-radius: 12px;
+  border: 1px solid #e2ded5;
+  white-space: nowrap;
+}
+
+.mural-board__author-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #555555;
+  background-color: #f9f8f4;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ece7dd;
+}
+
+.mural-board__form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mural-board__textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #d5cfc4;
+  background-color: #ffffff;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #211811;
+  resize: vertical;
+  min-height: 70px;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.mural-board__textarea:focus {
+  outline: none;
+  border-color: #211811;
+  box-shadow: 0 0 0 2px rgba(33, 24, 17, 0.1);
+}
+
+.mural-board__form-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.mural-board__submit-btn {
+  background-color: #211811;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.mural-board__submit-btn:hover:not(:disabled) {
+  background-color: #3b2d22;
+}
+
+.mural-board__submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mural-board__posts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.mural-board__empty {
+  text-align: center;
+  padding: 24px 12px;
+  color: #777777;
+  font-size: 13px;
+  font-style: italic;
+  background-color: #faf9f6;
+  border-radius: 8px;
+  border: 1px dashed #e0dbce;
+}
+
+.mural-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background-color: #fbfaf6;
+  border: 1px solid #e7e2d7;
+  border-radius: 10px;
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
+}
+
+.mural-card:hover {
+  border-color: #d6cfbf;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+}
+
+.mural-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mural-card__author {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #211811;
+}
+
+.mural-card__badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 2px 6px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.mural-card__badge--admin {
+  background-color: #fef08a;
+  color: #713f12;
+  border: 1px solid #fde047;
+}
+
+.mural-card__badge--colaborador {
+  background-color: #dcfce7;
+  color: #14532d;
+  border: 1px solid #bbf7d0;
+}
+
+.mural-card__badge--voluntario {
+  background-color: #dbeafe;
+  color: #1e3a8a;
+  border: 1px solid #bfdbfe;
+}
+
+.mural-card__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mural-card__time {
+  font-size: 11px;
+  color: #777777;
+  font-family: inherit;
+}
+
+.mural-card__delete-btn {
+  background: none;
+  border: none;
+  color: #b91c1c;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  opacity: 0.75;
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.mural-card__delete-btn:hover {
+  opacity: 1;
+  background-color: #fee2e2;
+}
+
+.mural-card__text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #333333;
+  word-break: break-word;
+  white-space: pre-wrap;
+}

@@ -14,13 +14,10 @@ import Eventos from "../pages/Eventos/eventos";
 import Sobre from "../pages/Sobre/sobre";
 
 type Route =
-  | "/login"
   | "/"
   | "/login"
   | "/eventos"
   | "/sobre"
-
-
   | "/dashboard/colaborador"
   | "/dashboard/medicamentos"
   | "/dashboard/doacoes"
@@ -150,6 +147,16 @@ export default function AppRoutes() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
+  let usuarioLogado = null;
+  try {
+    const rawUser = localStorage.getItem("usuario");
+    if (rawUser) {
+      usuarioLogado = JSON.parse(rawUser);
+    }
+  } catch {
+    usuarioLogado = null;
+  }
+
   if (route === "/") {
     return <Home />;
   }
@@ -165,11 +172,41 @@ export default function AppRoutes() {
     return <Sobre />;
   }
   if (route === "/dashboard/colaborador") {
-    return <DashboardColaborador dadosIniciais={DADOS_PREVIEW} />;
+    return (
+      <DashboardColaborador
+        dadosIniciais={DADOS_PREVIEW}
+        usuario={
+          usuarioLogado
+            ? {
+                id: usuarioLogado.id || 1,
+                nome: usuarioLogado.nome || "Colaborador",
+                email: usuarioLogado.email || "",
+                tipoUsuario: "colaborador",
+              }
+            : null
+        }
+      />
+    );
   }
 
   if (route === "/dashboard/doacoes") {
-    return <DashboardDoacoes />;
+    return (
+      <DashboardDoacoes
+        usuario={
+          usuarioLogado
+            ? {
+                id: usuarioLogado.id || 1,
+                nome: usuarioLogado.nome || "Usuário",
+                email: usuarioLogado.email || "",
+                tipoUsuario:
+                  usuarioLogado.tipo === "adm" || usuarioLogado.tipo === "admin"
+                    ? "admin"
+                    : "colaborador",
+              }
+            : null
+        }
+      />
+    );
   }
 
   if (route === "/dashboard/medicamentos") {
@@ -185,7 +222,7 @@ export default function AppRoutes() {
   }
 
   if (route === "/dashboard/voluntario") {
-    return <DashboardVoluntario />;
+    return <DashboardVoluntario nome={usuarioLogado?.nome || "Voluntário"} />;
   }
 
   return <Home />;

@@ -1,117 +1,24 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { EventCalendar } from "../../components/EventCalendar/EventCalendar";
+import { MessageBox } from "../../components/MessageBox/MessageBox";
+import { MuralBoard } from "../../components/MuralBoard/MuralBoard";
+import {
+  obterSolicitacoes,
+  atualizarStatusSolicitacao,
+  atualizarTipoSolicitacao,
+  type SolicitacaoAcesso,
+  type StatusAcesso,
+} from "../../services/authService";
+import {
+  obterEventos,
+  adicionarEvento,
+  atualizarEvento,
+  removerEvento,
+  removerVoluntarioDeEvento,
+  type EventoGlobal,
+  type VoluntarioInscrito,
+} from "../../services/eventService";
 import "./DashboardAdmin.css";
-
-interface Evento {
-  id: number;
-  titulo: string;
-  data: string;
-  comentarios: string;
-}
-
-type StatusAcesso = "pendente" | "aceito" | "recusado";
-
-interface SolicitacaoAcesso {
-  id: number;
-  nome: string;
-  email: string;
-  telefone: string;
-  status: StatusAcesso;
-  dataSolicitacao: string;
-}
-
-const VOLUNTARIOS_INICIAIS: SolicitacaoAcesso[] = [
-  {
-    id: 1,
-    nome: "Beatriz Santos",
-    email: "beatriz.santos@email.com",
-    telefone: "(19) 99124-3012",
-    status: "pendente",
-    dataSolicitacao: "2026-08-25",
-  },
-  {
-    id: 2,
-    nome: "Lucas Almeida",
-    email: "lucas.almeida@email.com",
-    telefone: "(19) 99812-6640",
-    status: "pendente",
-    dataSolicitacao: "2026-08-24",
-  },
-  {
-    id: 3,
-    nome: "Joana Ribeiro",
-    email: "joana.ribeiro@email.com",
-    telefone: "(19) 99200-1818",
-    status: "pendente",
-    dataSolicitacao: "2026-08-22",
-  },
-  {
-    id: 4,
-    nome: "Marcos Oliveira",
-    email: "marcos.oliveira@email.com",
-    telefone: "(19) 99771-4588",
-    status: "aceito",
-    dataSolicitacao: "2026-08-18",
-  },
-  {
-    id: 5,
-    nome: "Carla Mendes",
-    email: "carla.mendes@email.com",
-    telefone: "(19) 99110-7432",
-    status: "recusado",
-    dataSolicitacao: "2026-08-12",
-  },
-];
-
-const COLABORADORES_INICIAIS: SolicitacaoAcesso[] = [
-  {
-    id: 6,
-    nome: "Paulo Mendes",
-    email: "paulo.mendes@saudecampinas.org",
-    telefone: "(19) 99145-2201",
-    status: "pendente",
-    dataSolicitacao: "2026-08-26",
-  },
-  {
-    id: 7,
-    nome: "Renata Castro",
-    email: "renata.castro@saudecampinas.org",
-    telefone: "(19) 99631-9087",
-    status: "pendente",
-    dataSolicitacao: "2026-08-23",
-  },
-  {
-    id: 8,
-    nome: "André Martins",
-    email: "andre.martins@saudecampinas.org",
-    telefone: "(19) 99318-5502",
-    status: "aceito",
-    dataSolicitacao: "2026-08-15",
-  },
-  {
-    id: 9,
-    nome: "Fernanda Lima",
-    email: "fernanda.lima@saudecampinas.org",
-    telefone: "(19) 99820-4410",
-    status: "recusado",
-    dataSolicitacao: "2026-08-10",
-  },
-];
-
-const EVENTOS_INICIAIS: Evento[] = [
-  {
-    id: 1,
-    titulo: "Triagem e organização do estoque",
-    data: "2026-09-14",
-    comentarios: "Levar etiquetas e conferir os lotes recebidos.",
-  },
-  {
-    id: 2,
-    titulo: "Entrega de medicamentos",
-    data: "2026-09-21",
-    comentarios: "Confirmar transporte com a equipe até sexta-feira.",
-  },
-];
 
 function navegarPara(caminho: string) {
   window.history.pushState({}, "", caminho);
@@ -119,40 +26,107 @@ function navegarPara(caminho: string) {
 }
 
 export default function DashboardAdmin() {
-  const [eventos, setEventos] = useState(EVENTOS_INICIAIS);
+  const [eventos, setEventos] = useState<EventoGlobal[]>([]);
+  const [eventoInscritosAberto, setEventoInscritosAberto] = useState<
+    number | null
+  >(null);
+  const [solicitacoes, setSolicitacoes] = useState<SolicitacaoAcesso[]>([]);
   const [novoEvento, setNovoEvento] = useState({
     titulo: "",
     data: "",
     comentarios: "",
+    local: "Centro de Campinas",
+    category: "Mutirão",
+    vagas: 6,
   });
   const [eventoEmEdicao, setEventoEmEdicao] = useState<number | null>(null);
   const [formularioAberto, setFormularioAberto] = useState(false);
 
+  useEffect(() => {
+    setSolicitacoes(obterSolicitacoes());
+    setEventos(obterEventos());
+
+    function atualizarEventosAoVivo() {
+      setEventos(obterEventos());
+    }
+    window.addEventListener("ong_eventos_atualizados", atualizarEventosAoVivo);
+    return () => {
+      window.removeEventListener(
+        "ong_eventos_atualizados",
+        atualizarEventosAoVivo,
+      );
+    };
+  }, []);
+
+  const totalVoluntarios = solicitacoes.filter(
+    (s) => s.tipo === "voluntario" && s.status === "aceito",
+  ).length;
+  const pendentesVoluntarios = solicitacoes.filter(
+    (s) => s.tipo === "voluntario" && s.status === "pendente",
+  ).length;
+
+  const totalColaboradores = solicitacoes.filter(
+    (s) => s.tipo === "colaborador" && s.status === "aceito",
+  ).length;
+  const pendentesColaboradores = solicitacoes.filter(
+    (s) => s.tipo === "colaborador" && s.status === "pendente",
+  ).length;
+
   function criarEvento(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     if (!novoEvento.titulo.trim() || !novoEvento.data) return;
+
     if (eventoEmEdicao) {
-      setEventos((atuais) =>
-        atuais.map((item) =>
-          item.id === eventoEmEdicao
-            ? { ...item, ...novoEvento, titulo: novoEvento.titulo.trim() }
-            : item,
-        ),
-      );
+      const atualizados = atualizarEvento(eventoEmEdicao, {
+        titulo: novoEvento.titulo.trim(),
+        data: novoEvento.data,
+        comentarios: novoEvento.comentarios.trim(),
+        local: novoEvento.local.trim(),
+        category: novoEvento.category,
+        vagas: Number(novoEvento.vagas) || 6,
+      });
+      setEventos(atualizados);
     } else {
-      setEventos((atuais) => [
-        ...atuais,
-        {
-          id: Date.now(),
-          titulo: novoEvento.titulo.trim(),
-          data: novoEvento.data,
-          comentarios: novoEvento.comentarios.trim(),
-        },
-      ]);
+      const atualizados = adicionarEvento({
+        titulo: novoEvento.titulo.trim(),
+        data: novoEvento.data,
+        comentarios: novoEvento.comentarios.trim(),
+        local: novoEvento.local.trim(),
+        category: novoEvento.category,
+        vagas: Number(novoEvento.vagas) || 6,
+      });
+      setEventos(atualizados);
     }
-    setNovoEvento({ titulo: "", data: "", comentarios: "" });
+    setNovoEvento({
+      titulo: "",
+      data: "",
+      comentarios: "",
+      local: "Centro de Campinas",
+      category: "Mutirão",
+      vagas: 6,
+    });
     setEventoEmEdicao(null);
     setFormularioAberto(false);
+  }
+
+  function excluirEvento(id: number) {
+    const atualizados = removerEvento(id);
+    setEventos(atualizados);
+  }
+
+  function handleRemoverVoluntario(eventoId: number, nomeOuEmail: string) {
+    const atualizados = removerVoluntarioDeEvento(eventoId, nomeOuEmail);
+    setEventos(atualizados);
+  }
+
+  function handleAtualizarStatus(id: number, status: StatusAcesso) {
+    const atualizadas = atualizarStatusSolicitacao(id, status);
+    setSolicitacoes(atualizadas);
+  }
+
+  function handleAtualizarTipo(id: number, tipo: "voluntario" | "colaborador") {
+    const atualizadas = atualizarTipoSolicitacao(id, tipo);
+    setSolicitacoes(atualizadas);
   }
 
   return (
@@ -171,7 +145,11 @@ export default function DashboardAdmin() {
         <button
           className="admin-page__logout"
           type="button"
-          onClick={() => navegarPara("/login")}
+          onClick={() => {
+            localStorage.removeItem("usuario");
+            localStorage.removeItem("token");
+            navegarPara("/login");
+          }}
         >
           Sair
         </button>
@@ -192,14 +170,14 @@ export default function DashboardAdmin() {
           <small>27 registros manuais</small>
         </article>
         <article>
-          <span>Novos voluntários</span>
-          <strong>12</strong>
-          <small>4 aguardando análise</small>
+          <span>Voluntários</span>
+          <strong>{totalVoluntarios || 1}</strong>
+          <small>{pendentesVoluntarios} aguardando análise</small>
         </article>
         <article>
           <span>Colaboradores</span>
-          <strong>8</strong>
-          <small>2 solicitações pendentes</small>
+          <strong>{totalColaboradores || 1}</strong>
+          <small>{pendentesColaboradores} solicitações pendentes</small>
         </article>
       </section>
 
@@ -253,9 +231,10 @@ export default function DashboardAdmin() {
         {formularioAberto && (
           <form className="admin-event-form" onSubmit={criarEvento}>
             <label>
-              Nome do evento
+              Nome do evento *
               <input
                 required
+                placeholder="Ex.: Mutirão de atendimento de rua"
                 value={novoEvento.titulo}
                 onChange={(e) =>
                   setNovoEvento({ ...novoEvento, titulo: e.target.value })
@@ -263,7 +242,7 @@ export default function DashboardAdmin() {
               />
             </label>
             <label>
-              Data
+              Data *
               <input
                 required
                 type="date"
@@ -274,17 +253,54 @@ export default function DashboardAdmin() {
               />
             </label>
             <label>
-              Comentários do evento
+              Local da ação
+              <input
+                placeholder="Ex.: Vila Industrial, Campinas"
+                value={novoEvento.local}
+                onChange={(e) =>
+                  setNovoEvento({ ...novoEvento, local: e.target.value })
+                }
+              />
+            </label>
+            <label>
+              Categoria
+              <select
+                value={novoEvento.category}
+                onChange={(e) =>
+                  setNovoEvento({ ...novoEvento, category: e.target.value })
+                }
+              >
+                <option value="Mutirão">Mutirão</option>
+                <option value="Campanha">Campanha</option>
+                <option value="Capacitação">Capacitação</option>
+              </select>
+            </label>
+            <label>
+              Vagas para voluntários
+              <input
+                type="number"
+                min="1"
+                value={novoEvento.vagas}
+                onChange={(e) =>
+                  setNovoEvento({
+                    ...novoEvento,
+                    vagas: Number(e.target.value),
+                  })
+                }
+              />
+            </label>
+            <label>
+              Comentários / Descrição
               <textarea
                 value={novoEvento.comentarios}
                 onChange={(e) =>
                   setNovoEvento({ ...novoEvento, comentarios: e.target.value })
                 }
-                placeholder="Orientações para a equipe"
+                placeholder="Orientações para a equipe e descrição do evento"
               />
             </label>
             <button className="admin-page__button" type="submit">
-              Salvar evento
+              {eventoEmEdicao ? "Atualizar evento" : "Salvar evento"}
             </button>
           </form>
         )}
@@ -294,8 +310,8 @@ export default function DashboardAdmin() {
               id: evento.id,
               title: evento.titulo,
               date: evento.data,
-              details: evento.comentarios,
-              meta: "Evento administrativo",
+              details: evento.comentarios || evento.description || "",
+              meta: `${evento.category || "Evento"} · ${evento.local || "Campinas"}`,
             }))}
           />
           <div className="admin-events-list">
@@ -312,9 +328,203 @@ export default function DashboardAdmin() {
                   <span>
                     {new Date(`${evento.data}T00:00:00`).toLocaleDateString(
                       "pt-BR",
-                    )}
+                    )}{" "}
+                    · {evento.category || "Mutirão"} ·{" "}
+                    {evento.local || "Campinas"}
                   </span>
-                  <p>{evento.comentarios || "Sem comentários registrados."}</p>
+                  <p>
+                    {evento.comentarios ||
+                      evento.description ||
+                      "Sem comentários registrados."}
+                  </p>
+
+                  <div style={{ marginTop: "10px" }}>
+                    <button
+                      type="button"
+                      style={{
+                        padding: "5px 12px",
+                        borderRadius: "20px",
+                        border: "1px solid #1a745a",
+                        background:
+                          eventoInscritosAberto === evento.id
+                            ? "#1a745a"
+                            : "#e6f4ea",
+                        color:
+                          eventoInscritosAberto === evento.id
+                            ? "#ffffff"
+                            : "#137333",
+                        fontWeight: 700,
+                        fontSize: "12px",
+                        cursor: "pointer",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                      onClick={() =>
+                        setEventoInscritosAberto((atual) =>
+                          atual === evento.id ? null : evento.id,
+                        )
+                      }
+                    >
+                      👥 {evento.inscritosDetalhes?.length || 0} de{" "}
+                      {evento.vagas || 6} voluntários inscritos
+                      <span>
+                        {eventoInscritosAberto === evento.id
+                          ? "▲ Fechar lista"
+                          : "▼ Ver detalhes"}
+                      </span>
+                    </button>
+                  </div>
+
+                  {eventoInscritosAberto === evento.id && (
+                    <div
+                      style={{
+                        marginTop: "12px",
+                        padding: "14px",
+                        borderRadius: "10px",
+                        background: "#faf8f4",
+                        border: "1px solid #e0dacf",
+                        display: "grid",
+                        gap: "10px",
+                      }}
+                    >
+                      <h4
+                        style={{
+                          margin: 0,
+                          fontSize: "13px",
+                          color: "#211811",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em",
+                        }}
+                      >
+                        Lista de Voluntários Confirmados (
+                        {evento.inscritosDetalhes?.length || 0})
+                      </h4>
+
+                      {!evento.inscritosDetalhes ||
+                      evento.inscritosDetalhes.length === 0 ? (
+                        <p
+                          style={{ margin: 0, fontSize: "12px", color: "#666" }}
+                        >
+                          Nenhum voluntário inscrito nesta ação até o momento.
+                        </p>
+                      ) : (
+                        evento.inscritosDetalhes.map((voluntario, idx) => (
+                          <div
+                            key={idx}
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "flex-start",
+                              padding: "10px 12px",
+                              background: "#ffffff",
+                              borderRadius: "8px",
+                              border: "1px solid #ece7de",
+                              flexWrap: "wrap",
+                              gap: "8px",
+                            }}
+                          >
+                            <div style={{ display: "grid", gap: "3px" }}>
+                              <strong
+                                style={{ fontSize: "14px", color: "#000000" }}
+                              >
+                                👤 {voluntario.nome}
+                              </strong>
+                              <span style={{ fontSize: "12px", color: "#555" }}>
+                                ✉️{" "}
+                                <a
+                                  href={`mailto:${voluntario.email}`}
+                                  style={{
+                                    color: "#1a745a",
+                                    textDecoration: "underline",
+                                  }}
+                                >
+                                  {voluntario.email}
+                                </a>
+                              </span>
+                              {voluntario.telefone && (
+                                <span
+                                  style={{ fontSize: "12px", color: "#555" }}
+                                >
+                                  📞{" "}
+                                  <a
+                                    href={`tel:${voluntario.telefone}`}
+                                    style={{
+                                      color: "#211811",
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    {voluntario.telefone}
+                                  </a>
+                                  {" · "}
+                                  <a
+                                    href={`https://wa.me/55${voluntario.telefone.replace(/\D/g, "")}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    style={{
+                                      color: "#1a745a",
+                                      fontWeight: 700,
+                                      textDecoration: "underline",
+                                    }}
+                                  >
+                                    WhatsApp
+                                  </a>
+                                </span>
+                              )}
+                              {voluntario.sobre && (
+                                <p
+                                  style={{
+                                    margin: "4px 0 0",
+                                    fontSize: "12px",
+                                    fontStyle: "italic",
+                                    color: "#666",
+                                  }}
+                                >
+                                  "{voluntario.sobre}"
+                                </p>
+                              )}
+                              {voluntario.dataInscricao && (
+                                <small
+                                  style={{
+                                    fontSize: "10px",
+                                    color: "#888",
+                                    marginTop: "3px",
+                                  }}
+                                >
+                                  Inscrito(a) em:{" "}
+                                  {new Date(
+                                    `${voluntario.dataInscricao}T00:00:00`,
+                                  ).toLocaleDateString("pt-BR")}
+                                </small>
+                              )}
+                            </div>
+
+                            <button
+                              type="button"
+                              style={{
+                                padding: "4px 8px",
+                                borderRadius: "6px",
+                                border: "1px solid #f8b4b4",
+                                background: "#fde8e8",
+                                color: "#b91c1c",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                cursor: "pointer",
+                              }}
+                              onClick={() =>
+                                handleRemoverVoluntario(
+                                  evento.id,
+                                  voluntario.email || voluntario.nome,
+                                )
+                              }
+                            >
+                              Remover da ação
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="admin-event__actions">
                   <button
@@ -323,7 +533,11 @@ export default function DashboardAdmin() {
                       setNovoEvento({
                         titulo: evento.titulo,
                         data: evento.data,
-                        comentarios: evento.comentarios,
+                        comentarios:
+                          evento.comentarios || evento.description || "",
+                        local: evento.local || "Centro de Campinas",
+                        category: evento.category || "Mutirão",
+                        vagas: evento.vagas || 6,
                       });
                       setEventoEmEdicao(evento.id);
                       setFormularioAberto(true);
@@ -333,11 +547,7 @@ export default function DashboardAdmin() {
                   </button>
                   <button
                     type="button"
-                    onClick={() =>
-                      setEventos((atuais) =>
-                        atuais.filter((item) => item.id !== evento.id),
-                      )
-                    }
+                    onClick={() => excluirEvento(evento.id)}
                   >
                     Excluir
                   </button>
@@ -348,106 +558,219 @@ export default function DashboardAdmin() {
         </div>
       </section>
 
-      <section className="admin-page__grid" aria-label="Solicitações de acesso">
-        <ApprovalPanel
-          title="Novos voluntários"
-          description="Gerencie quem quer atuar diretamente nas ações da ONG."
-          initialItems={VOLUNTARIOS_INICIAIS}
+      {/* Seção única de Gestão e Aprovação de Usuários (Voluntários e Colaboradores) */}
+      <section
+        className="admin-panel approval-panel"
+        aria-label="Gestão de cadastros e acessos"
+      >
+        <div className="admin-panel__heading">
+          <div>
+            <p className="admin-page__kicker">Central de Cadastros</p>
+            <h2>Aprovação e Gestão de Acessos</h2>
+          </div>
+          <span className="admin-badge">
+            {solicitacoes.filter((s) => s.status === "pendente").length}{" "}
+            pendentes
+          </span>
+        </div>
+        <p className="approval-description">
+          Avalie e aprove solicitações de cadastro. Você pode decidir se o
+          usuário atuará como Voluntário ou Colaborador e definir sua permissão
+          de acesso.
+        </p>
+
+        <ApprovalPanelContent
+          items={solicitacoes}
+          onAtualizarStatus={handleAtualizarStatus}
+          onAtualizarTipo={handleAtualizarTipo}
         />
-        <ApprovalPanel
-          title="Novos colaboradores"
-          description="Gerencie acessos de quem apoia a operação e a gestão."
-          initialItems={COLABORADORES_INICIAIS}
+      </section>
+
+      {/* Seção de Comunicação Interna e Mural da Equipe */}
+      <section
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+          gap: "24px",
+          marginTop: "16px",
+        }}
+        aria-label="Comunicação e Mural"
+      >
+        <MessageBox
+          author="admin"
+          usuarioNome="Coordenação Geral"
+          usuarioEmail="admin@saudecampinas.org"
+        />
+        <MuralBoard
+          tipoUsuario="admin"
+          usuarioNome="Coordenação Geral"
+          usuarioEmail="admin@saudecampinas.org"
         />
       </section>
     </main>
   );
 }
 
-function ApprovalPanel({
-  title,
-  description,
-  initialItems,
+function ApprovalPanelContent({
+  items,
+  onAtualizarStatus,
+  onAtualizarTipo,
 }: {
-  title: string;
-  description: string;
-  initialItems: SolicitacaoAcesso[];
+  items: SolicitacaoAcesso[];
+  onAtualizarStatus: (id: number, status: StatusAcesso) => void;
+  onAtualizarTipo: (id: number, tipo: "voluntario" | "colaborador") => void;
 }) {
-  const [registros, setRegistros] = useState(initialItems);
-  const [filtro, setFiltro] = useState<StatusAcesso>("pendente");
+  const [filtroStatus, setFiltroStatus] = useState<StatusAcesso | "todos">(
+    "pendente",
+  );
+  const [filtroTipo, setFiltroTipo] = useState<
+    "todos" | "voluntario" | "colaborador"
+  >("todos");
   const [busca, setBusca] = useState("");
-  const contagens = {
-    pendente: registros.filter((registro) => registro.status === "pendente")
-      .length,
-    aceito: registros.filter((registro) => registro.status === "aceito").length,
-    recusado: registros.filter((registro) => registro.status === "recusado")
-      .length,
-  };
-  const exibidos = registros.filter((registro) => {
-    const texto =
-      `${registro.nome} ${registro.email} ${registro.telefone}`.toLocaleLowerCase();
-    return (
-      registro.status === filtro && texto.includes(busca.toLocaleLowerCase())
-    );
-  });
+  const [mensagemFeedback, setMensagemFeedback] = useState<string | null>(null);
 
-  function atualizarStatus(id: number, status: StatusAcesso) {
-    setRegistros((atuais) =>
-      atuais.map((registro) =>
-        registro.id === id ? { ...registro, status } : registro,
-      ),
+  function executarAtualizarStatus(
+    id: number,
+    status: StatusAcesso,
+    nome: string,
+  ) {
+    onAtualizarStatus(id, status);
+    const textoStatus =
+      status === "aceito"
+        ? "aprovado(a)"
+        : status === "recusado"
+          ? "recusado(a)"
+          : "reaberto(a) para análise";
+    setMensagemFeedback(
+      `Status de ${nome} alterado para "${textoStatus}" com sucesso.`,
     );
+    window.setTimeout(() => setMensagemFeedback(null), 4000);
   }
 
+  function executarAtualizarTipo(
+    id: number,
+    tipo: "voluntario" | "colaborador",
+    nome: string,
+  ) {
+    onAtualizarTipo(id, tipo);
+    setMensagemFeedback(
+      `Perfil de ${nome} alterado para "${tipo === "voluntario" ? "Voluntário" : "Colaborador"}".`,
+    );
+    window.setTimeout(() => setMensagemFeedback(null), 4000);
+  }
+
+  const contagens = {
+    todos: items.length,
+    pendente: items.filter((r) => r.status === "pendente").length,
+    aceito: items.filter((r) => r.status === "aceito").length,
+    recusado: items.filter((r) => r.status === "recusado").length,
+  };
+
+  const exibidos = items.filter((registro) => {
+    const matchStatus =
+      filtroStatus === "todos" || registro.status === filtroStatus;
+    const matchTipo = filtroTipo === "todos" || registro.tipo === filtroTipo;
+    const texto =
+      `${registro.nome} ${registro.email} ${registro.telefone} ${registro.sobre || ""}`.toLowerCase();
+    const matchBusca = texto.includes(busca.toLowerCase());
+    return matchStatus && matchTipo && matchBusca;
+  });
+
   return (
-    <article className="admin-panel approval-panel">
-      <div className="admin-panel__heading">
-        <div>
-          <p className="admin-page__kicker">Acessos</p>
-          <h2>{title}</h2>
+    <>
+      {mensagemFeedback && (
+        <div
+          role="status"
+          style={{
+            marginTop: "14px",
+            padding: "10px 16px",
+            borderRadius: "10px",
+            backgroundColor: "#e6f4ea",
+            color: "#137333",
+            fontWeight: 600,
+            fontSize: "13px",
+            border: "1px solid #ceead6",
+          }}
+        >
+          ✓ {mensagemFeedback}
         </div>
-        <span className="admin-badge">{contagens.pendente} pendentes</span>
+      )}
+      <div className="approval-filters">
+        <div className="approval-summary" aria-label="Filtro por status">
+          <button
+            className={filtroStatus === "pendente" ? "ativo" : ""}
+            type="button"
+            onClick={() => setFiltroStatus("pendente")}
+          >
+            <strong>{contagens.pendente}</strong>
+            <span>Pendentes</span>
+          </button>
+          <button
+            className={filtroStatus === "aceito" ? "ativo" : ""}
+            type="button"
+            onClick={() => setFiltroStatus("aceito")}
+          >
+            <strong>{contagens.aceito}</strong>
+            <span>Aceitos</span>
+          </button>
+          <button
+            className={filtroStatus === "recusado" ? "ativo" : ""}
+            type="button"
+            onClick={() => setFiltroStatus("recusado")}
+          >
+            <strong>{contagens.recusado}</strong>
+            <span>Recusados</span>
+          </button>
+          <button
+            className={filtroStatus === "todos" ? "ativo" : ""}
+            type="button"
+            onClick={() => setFiltroStatus("todos")}
+          >
+            <strong>{contagens.todos}</strong>
+            <span>Todos</span>
+          </button>
+        </div>
+
+        <div className="approval-type-tabs">
+          <span>Filtrar perfil:</span>
+          <button
+            type="button"
+            className={filtroTipo === "todos" ? "ativo" : ""}
+            onClick={() => setFiltroTipo("todos")}
+          >
+            Todos os perfis
+          </button>
+          <button
+            type="button"
+            className={filtroTipo === "voluntario" ? "ativo" : ""}
+            onClick={() => setFiltroTipo("voluntario")}
+          >
+            Voluntários
+          </button>
+          <button
+            type="button"
+            className={filtroTipo === "colaborador" ? "ativo" : ""}
+            onClick={() => setFiltroTipo("colaborador")}
+          >
+            Colaboradores
+          </button>
+        </div>
       </div>
-      <p className="approval-description">{description}</p>
-      <div className="approval-summary" aria-label={`Resumo de ${title}`}>
-        <button
-          className={filtro === "pendente" ? "ativo" : ""}
-          type="button"
-          onClick={() => setFiltro("pendente")}
-        >
-          <strong>{contagens.pendente}</strong>
-          <span>Pendentes</span>
-        </button>
-        <button
-          className={filtro === "aceito" ? "ativo" : ""}
-          type="button"
-          onClick={() => setFiltro("aceito")}
-        >
-          <strong>{contagens.aceito}</strong>
-          <span>Aceitos</span>
-        </button>
-        <button
-          className={filtro === "recusado" ? "ativo" : ""}
-          type="button"
-          onClick={() => setFiltro("recusado")}
-        >
-          <strong>{contagens.recusado}</strong>
-          <span>Recusados</span>
-        </button>
-      </div>
+
       <label className="approval-search">
         Buscar pessoa
         <input
           type="search"
-          placeholder="Nome, e-mail ou telefone"
+          placeholder="Nome, e-mail, telefone ou interesse"
           value={busca}
           onChange={(evento) => setBusca(evento.target.value)}
         />
       </label>
+
       <div className="approval-list">
         {exibidos.length === 0 && (
           <p className="approval-empty">
-            Nenhum registro encontrado nesta categoria.
+            Nenhuma solicitação encontrada para os filtros selecionados.
           </p>
         )}
         {exibidos.map((registro) => (
@@ -456,6 +779,9 @@ function ApprovalPanel({
               <strong>{registro.nome}</strong>
               <span>{registro.email}</span>
               <span>{registro.telefone}</span>
+              {registro.sobre && (
+                <p className="approval-sobre">"{registro.sobre}"</p>
+              )}
               <small>
                 Solicitado em{" "}
                 {new Date(
@@ -463,40 +789,147 @@ function ApprovalPanel({
                 ).toLocaleDateString("pt-BR")}
               </small>
             </div>
+
             <div className="approval-item__right">
+              {/* Botões para o administrador decidir se a pessoa é Voluntário ou Colaborador */}
+              <div
+                className="approval-role-selector"
+                title="Definir perfil da pessoa"
+              >
+                <span className="approval-role-label">Perfil:</span>
+                <button
+                  type="button"
+                  className={`approval-role-btn ${registro.tipo === "voluntario" ? "ativo" : ""}`}
+                  onClick={() =>
+                    executarAtualizarTipo(
+                      registro.id,
+                      "voluntario",
+                      registro.nome,
+                    )
+                  }
+                >
+                  Voluntário
+                </button>
+                <button
+                  type="button"
+                  className={`approval-role-btn ${registro.tipo === "colaborador" ? "ativo" : ""}`}
+                  onClick={() =>
+                    executarAtualizarTipo(
+                      registro.id,
+                      "colaborador",
+                      registro.nome,
+                    )
+                  }
+                >
+                  Colaborador
+                </button>
+              </div>
+
               <span
                 className={`approval-status approval-status--${registro.status}`}
               >
                 {registro.status}
               </span>
-              {registro.status === "pendente" && (
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => atualizarStatus(registro.id, "aceito")}
-                  >
-                    Aceitar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => atualizarStatus(registro.id, "recusado")}
-                  >
-                    Recusar
-                  </button>
-                </div>
-              )}
-              {registro.status !== "pendente" && (
-                <button
-                  type="button"
-                  onClick={() => atualizarStatus(registro.id, "pendente")}
-                >
-                  Reabrir análise
-                </button>
-              )}
+
+              {/* Botões de Ação: Aceitar / Recusar / Reabrir */}
+              <div className="approval-actions">
+                {registro.status === "pendente" && (
+                  <>
+                    <button
+                      type="button"
+                      className="btn-accept"
+                      onClick={() =>
+                        executarAtualizarStatus(
+                          registro.id,
+                          "aceito",
+                          registro.nome,
+                        )
+                      }
+                    >
+                      ✓ Aceitar
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-reject"
+                      onClick={() =>
+                        executarAtualizarStatus(
+                          registro.id,
+                          "recusado",
+                          registro.nome,
+                        )
+                      }
+                    >
+                      ✕ Recusar
+                    </button>
+                  </>
+                )}
+
+                {registro.status === "aceito" && (
+                  <>
+                    <button
+                      type="button"
+                      className="btn-reject"
+                      onClick={() =>
+                        executarAtualizarStatus(
+                          registro.id,
+                          "recusado",
+                          registro.nome,
+                        )
+                      }
+                    >
+                      Mudar p/ Recusar
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-reopen"
+                      onClick={() =>
+                        executarAtualizarStatus(
+                          registro.id,
+                          "pendente",
+                          registro.nome,
+                        )
+                      }
+                    >
+                      Reabrir análise
+                    </button>
+                  </>
+                )}
+
+                {registro.status === "recusado" && (
+                  <>
+                    <button
+                      type="button"
+                      className="btn-accept"
+                      onClick={() =>
+                        executarAtualizarStatus(
+                          registro.id,
+                          "aceito",
+                          registro.nome,
+                        )
+                      }
+                    >
+                      Aprovar acesso
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-reopen"
+                      onClick={() =>
+                        executarAtualizarStatus(
+                          registro.id,
+                          "pendente",
+                          registro.nome,
+                        )
+                      }
+                    >
+                      Reabrir análise
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         ))}
       </div>
-    </article>
+    </>
   );
 }

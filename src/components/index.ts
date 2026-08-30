@@ -35,3 +35,4 @@ export { EventCalendar } from "./EventCalendar/EventCalendar";
 export type { CalendarEvent } from "./EventCalendar/EventCalendar";
 
 export { MessageBox } from "./MessageBox/MessageBox";
+export { MuralBoard } from "./MuralBoard/MuralBoard";

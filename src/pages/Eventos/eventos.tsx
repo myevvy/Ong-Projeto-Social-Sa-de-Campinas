@@ -1,114 +1,18 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import "./eventos.css";
 import { Header } from "../../components/Header/Header";
 import { Footer } from "../../components/Footer/Footer";
 import { Kicker } from "../../components/Kicker/Kicker";
 import { Button } from "../../components/Button/Button";
 import { EventCard } from "../../components/EventCard/EventCard";
+import {
+  obterEventos,
+  type EventoGlobal,
+  type CategoriaEvento,
+} from "../../services/eventService";
 import heroPlaceholder from "../../assets/hero.png";
 
-type Categoria = "Mutirão" | "Campanha" | "Capacitação";
-
-interface Evento {
-  id: number;
-  date: string; // ISO, ex: "2026-09-14"
-  category: Categoria;
-  place: string;
-  title: string;
-  description: string;
-  photoUrl: string;
-  photoAlt: string;
-}
-
-const EVENTOS: Evento[] = [
-  {
-    id: 1,
-    date: "2026-09-14",
-    category: "Mutirão",
-    place: "Vila Industrial",
-    title: "Atendimento de rua",
-    description:
-      "Atendimento de saúde itinerante para pessoas em situação de rua, com kits de higiene e escuta acolhedora.",
-    photoUrl: heroPlaceholder,
-    photoAlt: "Voluntária atendendo uma pessoa em situação de rua",
-  },
-  {
-    id: 2,
-    date: "2026-09-21",
-    category: "Campanha",
-    place: "Ponto de coleta",
-    title: "Coleta de medicamentos",
-    description:
-      "Recolhemos remédios e amostras grátis parados no armário para reforçar o estoque das próximas ações.",
-    photoUrl: heroPlaceholder,
-    photoAlt: "Voluntários organizando doações de medicamentos",
-  },
-  {
-    id: 3,
-    date: "2026-09-28",
-    category: "Mutirão",
-    place: "Centro",
-    title: "Atendimento de rua",
-    description:
-      "Segunda rodada do mês, com apoio de novos voluntários da capacitação de setembro.",
-    photoUrl: heroPlaceholder,
-    photoAlt: "Atendimento de rua no centro da cidade",
-  },
-  {
-    id: 4,
-    date: "2026-10-05",
-    category: "Capacitação",
-    place: "Sede parceira",
-    title: "Roda de novos voluntários",
-    description:
-      "Encontro para quem está começando: rotina das ações, uso do estoque colaborativo e primeiros passos.",
-    photoUrl: heroPlaceholder,
-    photoAlt: "Roda de conversa com novos voluntários",
-  },
-  {
-    id: 5,
-    date: "2026-10-12",
-    category: "Mutirão",
-    place: "Vila Industrial",
-    title: "Atendimento de rua",
-    description: "Atendimento mensal fixo na região, com parceria da UBS local.",
-    photoUrl: heroPlaceholder,
-    photoAlt: "Atendimento de saúde itinerante",
-  },
-  {
-    id: 6,
-    date: "2026-10-19",
-    category: "Campanha",
-    place: "Toda a cidade",
-    title: "Arrecadação de agasalhos",
-    description:
-      "Início da campanha de inverno, aceitando doações de roupas e cobertores.",
-    photoUrl: heroPlaceholder,
-    photoAlt: "Caixas de doação de roupas de frio",
-  },
-  {
-    id: 7,
-    date: "2026-11-09",
-    category: "Mutirão",
-    place: "Vila Industrial",
-    title: "Atendimento de rua",
-    description:
-      "Atendimento mensal fixo na região, com kits de higiene e orientação de saúde.",
-    photoUrl: heroPlaceholder,
-    photoAlt: "Atendimento de rua com kits de higiene",
-  },
-  {
-    id: 8,
-    date: "2026-11-16",
-    category: "Capacitação",
-    place: "Sede parceira",
-    title: "Primeiros socorros na rua",
-    description:
-      "Oficina prática voltada para voluntários que atuam no atendimento itinerante.",
-    photoUrl: heroPlaceholder,
-    photoAlt: "Oficina de primeiros socorros",
-  },
-];
+type Categoria = "Mutirão" | "Campanha" | "Capacitação" | string;
 
 const FILTROS: Array<"Todos" | Categoria> = [
   "Todos",
@@ -133,29 +37,44 @@ const MESES = [
 ];
 
 function formatDay(iso: string) {
+  if (!iso || !iso.includes("-")) return "15";
   return iso.split("-")[2];
 }
 
 function formatMesAno(iso: string) {
+  if (!iso || !iso.includes("-")) return "2026";
   const [ano, mes] = iso.split("-");
-  return `${MESES[Number(mes) - 1]} ${ano}`;
+  return `${MESES[Number(mes) - 1] || "MÊS"} ${ano}`;
 }
 
 function Eventos() {
   const [filtro, setFiltro] = useState<"Todos" | Categoria>("Todos");
+  const [eventos, setEventos] = useState<EventoGlobal[]>([]);
+
+  useEffect(() => {
+    setEventos(obterEventos());
+
+    function recarregarEventos() {
+      setEventos(obterEventos());
+    }
+    window.addEventListener("ong_eventos_atualizados", recarregarEventos);
+    return () => {
+      window.removeEventListener("ong_eventos_atualizados", recarregarEventos);
+    };
+  }, []);
 
   const eventosFiltrados = useMemo(
     () =>
       filtro === "Todos"
-        ? EVENTOS
-        : EVENTOS.filter((evento) => evento.category === filtro),
-    [filtro],
+        ? eventos
+        : eventos.filter((evento) => (evento.category || "Mutirão") === filtro),
+    [filtro, eventos],
   );
 
   const grupos = useMemo(() => {
-    const mapa = new Map<string, Evento[]>();
+    const mapa = new Map<string, EventoGlobal[]>();
     for (const evento of eventosFiltrados) {
-      const chave = formatMesAno(evento.date);
+      const chave = formatMesAno(evento.data);
       if (!mapa.has(chave)) mapa.set(chave, []);
       mapa.get(chave)!.push(evento);
     }
@@ -209,13 +128,17 @@ function Eventos() {
               {eventosDoMes.map((evento) => (
                 <EventCard
                   key={evento.id}
-                  date={formatDay(evento.date)}
-                  category={evento.category}
-                  place={evento.place}
-                  title={evento.title}
-                  description={evento.description}
-                  photoUrl={evento.photoUrl}
-                  photoAlt={evento.photoAlt}
+                  date={formatDay(evento.data)}
+                  category={evento.category || "Mutirão"}
+                  place={evento.local || "Campinas"}
+                  title={evento.titulo}
+                  description={
+                    evento.description ||
+                    evento.comentarios ||
+                    "Ação do Projeto Saúde Campinas."
+                  }
+                  photoUrl={evento.photoUrl || heroPlaceholder}
+                  photoAlt={evento.photoAlt || evento.titulo}
                 />
               ))}
             </div>
