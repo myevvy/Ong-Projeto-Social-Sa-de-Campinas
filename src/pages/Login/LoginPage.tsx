@@ -2,8 +2,59 @@ import { useState } from "react";
 import "./LoginPage.css";
 
 type ViewMode = "login" | "cadastro" | "recuperar";
+type TipoPerfil = "voluntario" | "func";
+
+interface JwtPayload {
+  id?: number | string;
+  tipo?: string;
+  iat?: number;
+  exp?: number;
+}
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+
+// Função para decodificar o token JWT e extrair informações do usuário e perfil
+function decodificarToken(token: string): JwtPayload | null {
+  try {
+    const partes = token.split(".");
+    if (partes.length < 2) return null;
+    const base64Url = partes[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(""),
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
+
+// Determina para qual rota redirecionar conforme o tipo de usuário cadastrado no banco
+function obterRotaRedirecionamento(tipo?: string): string {
+  if (!tipo) return "/";
+  const tipoNormalizado = tipo.toLowerCase().trim();
+  if (
+    tipoNormalizado === "adm" ||
+    tipoNormalizado === "admin" ||
+    tipoNormalizado === "administrador"
+  ) {
+    return "/dashboard/admin";
+  }
+  if (
+    tipoNormalizado === "func" ||
+    tipoNormalizado === "colaborador" ||
+    tipoNormalizado === "funcionario"
+  ) {
+    return "/dashboard/colaborador";
+  }
+  if (tipoNormalizado === "voluntario") {
+    return "/dashboard/voluntario";
+  }
+  return "/";
+}
 
 export default function LoginPage() {
   const [modo, setModo] = useState<ViewMode>("login");
@@ -22,6 +73,7 @@ export default function LoginPage() {
     telefone: "",
     end: "",
     cep: "",
+    tipo: "voluntario" as TipoPerfil,
     aniversario: "",
     sobre: "",
   });
@@ -49,11 +101,19 @@ export default function LoginPage() {
     setMensagem(null);
 
     try {
+      const tokenArmazenado = localStorage.getItem("token");
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (tokenArmazenado) {
+        headers["Authorization"] = `Bearer ${tokenArmazenado}`;
+      }
+
       const resposta = await fetch(`${API_URL}/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
-          email: login.email,
+          email: login.email.trim(),
           senha: login.senha,
         }),
       });
@@ -62,19 +122,51 @@ export default function LoginPage() {
 
       if (!resposta.ok) {
         throw new Error(
-          dados.mensagem || dados.message || "Não foi possível entrar.",
+          dados.mensagem ||
+            dados.message ||
+            "Não foi possível entrar. Verifique suas credenciais.",
         );
       }
 
-      localStorage.setItem("token", dados.token || "");
-      setMensagem({
-        tipo: "sucesso",
-        texto: "Login realizado com sucesso. Redirecionando...",
-      });
-      window.setTimeout(() => window.location.assign("/"), 700);
+      if (dados.token) {
+        localStorage.setItem("token", dados.token);
+
+        // Decodifica os dados salvos no token para identificar o tipo do usuário (admin/func/voluntario)
+        const payload = decodificarToken(dados.token);
+        const tipoUsuario = payload?.tipo || "voluntario";
+        localStorage.setItem(
+          "usuario",
+          JSON.stringify({
+            id: payload?.id,
+            tipo: tipoUsuario,
+            email: login.email.trim(),
+          }),
+        );
+
+        const destino = obterRotaRedirecionamento(tipoUsuario);
+
+        setMensagem({
+          tipo: "sucesso",
+          texto: "Login realizado com sucesso! Redirecionando...",
+        });
+
+        window.setTimeout(() => {
+          window.location.assign(destino);
+        }, 700);
+      } else {
+        setMensagem({
+          tipo: "sucesso",
+          texto: "Login realizado com sucesso. Redirecionando...",
+        });
+        window.setTimeout(() => {
+          window.location.assign("/");
+        }, 700);
+      }
     } catch (erro) {
       const mensagemErro =
-        erro instanceof Error ? erro.message : "Não foi possível entrar.";
+        erro instanceof Error
+          ? erro.message
+          : "Não foi possível conectar ao servidor. Verifique se o backend está em execução.";
       setMensagem({ tipo: "erro", texto: mensagemErro });
     } finally {
       setCarregando(false);
@@ -85,10 +177,10 @@ export default function LoginPage() {
     event.preventDefault();
 
     if (
-      !cadastro.nome ||
-      !cadastro.email ||
+      !cadastro.nome.trim() ||
+      !cadastro.email.trim() ||
       !cadastro.senha ||
-      !cadastro.telefone
+      !cadastro.telefone.trim()
     ) {
       setMensagem({
         tipo: "erro",
@@ -98,7 +190,7 @@ export default function LoginPage() {
       return;
     }
 
-    if (!validarEmail(cadastro.email)) {
+    if (!validarEmail(cadastro.email.trim())) {
       setMensagem({ tipo: "erro", texto: "Digite um e-mail válido." });
       return;
     }
@@ -124,15 +216,15 @@ export default function LoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          nome: cadastro.nome,
-          email: cadastro.email,
+          nome: cadastro.nome.trim(),
+          email: cadastro.email.trim().toLowerCase(),
           senha: cadastro.senha,
-          end: cadastro.end || "",
-          cep: cadastro.cep || "",
-          tel: cadastro.telefone,
-          tipo: "func",
+          end: cadastro.end.trim() || "",
+          cep: cadastro.cep.trim() || "",
+          tel: cadastro.telefone.trim(),
+          tipo: cadastro.tipo,
           aniversario: cadastro.aniversario || null,
-          sobre: cadastro.sobre || "",
+          sobre: cadastro.sobre.trim() || "",
         }),
       });
 
@@ -149,10 +241,10 @@ export default function LoginPage() {
       setMensagem({
         tipo: "sucesso",
         texto:
-          "Cadastro realizado com sucesso. Agora você pode entrar com suas credenciais.",
+          "Cadastro realizado com sucesso! Agora você pode entrar com suas credenciais.",
       });
       setModo("login");
-      setLogin({ email: cadastro.email, senha: cadastro.senha });
+      setLogin({ email: cadastro.email.trim(), senha: cadastro.senha });
       setCadastro({
         nome: "",
         email: "",
@@ -161,6 +253,7 @@ export default function LoginPage() {
         telefone: "",
         end: "",
         cep: "",
+        tipo: "voluntario",
         aniversario: "",
         sobre: "",
       });
@@ -178,7 +271,7 @@ export default function LoginPage() {
   const enviarRecuperacao = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!recuperar.email) {
+    if (!recuperar.email.trim()) {
       setMensagem({
         tipo: "erro",
         texto: "Informe o e-mail para receber ajuda de acesso.",
@@ -186,7 +279,7 @@ export default function LoginPage() {
       return;
     }
 
-    if (!validarEmail(recuperar.email)) {
+    if (!validarEmail(recuperar.email.trim())) {
       setMensagem({ tipo: "erro", texto: "Digite um e-mail válido." });
       return;
     }
@@ -195,7 +288,7 @@ export default function LoginPage() {
     setMensagem({
       tipo: "info",
       texto:
-        "Se esse e-mail estiver cadastrado, a equipe vai enviar um passo a passo de recuperação em breve.",
+        "Se esse e-mail estiver cadastrado, a equipe enviará orientações de recuperação.",
     });
     setCarregando(false);
     setRecuperar({ email: "" });
@@ -210,7 +303,7 @@ export default function LoginPage() {
             Projeto Social Saúde Campinas
           </span>
           <h1>Área de acesso</h1>
-          <p>Acesso único para voluntários, colaboradores e equipe da ONG.</p>
+          <p>Acesso para voluntários, colaboradores e equipe da ONG.</p>
         </div>
 
         <div
@@ -227,7 +320,10 @@ export default function LoginPage() {
               key={item.id}
               type="button"
               className={modo === item.id ? "is-active" : ""}
-              onClick={() => setModo(item.id as ViewMode)}
+              onClick={() => {
+                setModo(item.id as ViewMode);
+                setMensagem(null);
+              }}
               role="tab"
               aria-selected={modo === item.id}
             >
@@ -250,11 +346,13 @@ export default function LoginPage() {
               E-mail
               <input
                 type="email"
+                autoComplete="email"
                 value={login.email}
                 onChange={(event) =>
                   setLogin({ ...login, email: event.target.value })
                 }
                 placeholder="seu@email.com"
+                required
               />
             </label>
 
@@ -262,11 +360,13 @@ export default function LoginPage() {
               Senha
               <input
                 type="password"
+                autoComplete="current-password"
                 value={login.senha}
                 onChange={(event) =>
                   setLogin({ ...login, senha: event.target.value })
                 }
                 placeholder="••••••••"
+                required
               />
             </label>
 
@@ -283,60 +383,101 @@ export default function LoginPage() {
         {modo === "cadastro" && (
           <form className="login-form" onSubmit={enviarCadastro}>
             <label>
-              Nome completo
+              Nome completo *
               <input
                 type="text"
+                autoComplete="name"
                 value={cadastro.nome}
                 onChange={(event) =>
                   setCadastro({ ...cadastro, nome: event.target.value })
                 }
-                placeholder="Seu nome"
+                placeholder="Seu nome completo"
+                required
               />
             </label>
 
             <div className="login-form__row">
               <label>
-                E-mail
+                E-mail *
                 <input
                   type="email"
+                  autoComplete="email"
                   value={cadastro.email}
                   onChange={(event) =>
                     setCadastro({ ...cadastro, email: event.target.value })
                   }
                   placeholder="seu@email.com"
+                  required
                 />
               </label>
 
               <label>
-                Telefone
+                Telefone *
                 <input
                   type="tel"
+                  autoComplete="tel"
                   value={cadastro.telefone}
                   onChange={(event) =>
                     setCadastro({ ...cadastro, telefone: event.target.value })
                   }
                   placeholder="(19) 99999-9999"
+                  required
                 />
               </label>
             </div>
 
             <div className="login-form__row">
               <label>
-                Senha
+                Tipo de perfil *
+                <select
+                  value={cadastro.tipo}
+                  onChange={(event) =>
+                    setCadastro({
+                      ...cadastro,
+                      tipo: event.target.value as TipoPerfil,
+                    })
+                  }
+                >
+                  <option value="voluntario">Voluntário(a)</option>
+                  <option value="func">Colaborador(a) / Funcionário(a)</option>
+                </select>
+              </label>
+
+              <label>
+                Data de nascimento
+                <input
+                  type="date"
+                  value={cadastro.aniversario}
+                  onChange={(event) =>
+                    setCadastro({
+                      ...cadastro,
+                      aniversario: event.target.value,
+                    })
+                  }
+                />
+              </label>
+            </div>
+
+            <div className="login-form__row">
+              <label>
+                Senha *
                 <input
                   type="password"
+                  autoComplete="new-password"
                   value={cadastro.senha}
                   onChange={(event) =>
                     setCadastro({ ...cadastro, senha: event.target.value })
                   }
-                  placeholder="Crie uma senha"
+                  placeholder="Mínimo 6 caracteres"
+                  required
                 />
               </label>
 
               <label>
-                Confirmar senha
+                Confirmar senha *
                 <input
                   type="password"
+                  autoComplete="new-password"
                   value={cadastro.confirmarSenha}
                   onChange={(event) =>
                     setCadastro({
@@ -345,6 +486,7 @@ export default function LoginPage() {
                     })
                   }
                   placeholder="Repita a senha"
+                  required
                 />
               </label>
             </div>
@@ -354,6 +496,7 @@ export default function LoginPage() {
                 Endereço
                 <input
                   type="text"
+                  autoComplete="street-address"
                   value={cadastro.end}
                   onChange={(event) =>
                     setCadastro({ ...cadastro, end: event.target.value })
@@ -366,6 +509,7 @@ export default function LoginPage() {
                 CEP
                 <input
                   type="text"
+                  autoComplete="postal-code"
                   value={cadastro.cep}
                   onChange={(event) =>
                     setCadastro({ ...cadastro, cep: event.target.value })
@@ -374,17 +518,6 @@ export default function LoginPage() {
                 />
               </label>
             </div>
-
-            <label>
-              Data de nascimento
-              <input
-                type="date"
-                value={cadastro.aniversario}
-                onChange={(event) =>
-                  setCadastro({ ...cadastro, aniversario: event.target.value })
-                }
-              />
-            </label>
 
             <label>
               Sobre você
@@ -414,11 +547,13 @@ export default function LoginPage() {
               E-mail cadastrado
               <input
                 type="email"
+                autoComplete="email"
                 value={recuperar.email}
                 onChange={(event) =>
                   setRecuperar({ email: event.target.value })
                 }
                 placeholder="seu@email.com"
+                required
               />
             </label>
 
