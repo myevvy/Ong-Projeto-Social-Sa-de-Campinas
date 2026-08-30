@@ -1,7 +1,12 @@
 import userModel from "../models/usersModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import verificaIdade from '../utils/verificarIdade.js'
+import verificaIdade from "../utils/verificarIdade.js";
+
+const getFuncionarios = async (_req, res) => {
+  const resposta = await userModel.getFuncM();
+  return res.json(resposta);
+};
 
 const cadastro = async (req, res) => {
   const { email, senha, tipo } = req.body;
@@ -10,11 +15,13 @@ const cadastro = async (req, res) => {
     return res.status(400).json({ mensagem: "Usuário já cadastrado!" });
   }
 
-  if(tipo === "func"){
+  if (tipo === "func") {
     const idade = verificaIdade(req.body.aniversario);
 
-    if(idade < 18){
-      return res.status(403).json({mensagem: "Você deve ser maior de idade para voluntariar!"});
+    if (idade < 18) {
+      return res
+        .status(403)
+        .json({ mensagem: "Você deve ser maior de idade para voluntariar!" });
     }
   }
 
@@ -63,4 +70,44 @@ const login = async (req, res) => {
   }
 };
 
-export default { cadastro, login };
+const putUsuarioC = async (req, res) => {
+  const idFuncionario = req.params.id;
+  
+  try {
+    const resposta = await userModel.putFuncM(req.body, idFuncionario);
+    if (resposta === 0)
+      return res.status(404).json({ mensagem: "Funcionário não encontrado" });
+
+    return res.status(200).json({ mensagem: "Funcionário alterado com sucesso!" });
+  } catch (error) {
+    return res.status(500).json({ mensagem: "Erro ao alterar o usuário." });
+  }
+};
+
+const deleteUsuarioC = async (req, res) => {
+  try {
+    const resposta = await userModel.deleteFuncM(req.params.id);
+
+    if (resposta !== 0) {
+      return res.status(200).json({
+        mensagem: "Funcionário desativado com sucesso!",
+      });
+    }
+
+    return res.status(404).json({
+      mensagem: "Funcionário não encontrado.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      mensagem: "Erro ao desativar funcionário.",
+    });
+  }
+};
+
+export default {
+  cadastro,
+  login,
+  getFuncionarios,
+  putUsuarioC,
+  deleteUsuarioC,
+};

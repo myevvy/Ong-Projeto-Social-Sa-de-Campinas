@@ -25,4 +25,28 @@ const postEventoM = async (evento) => {
   return resposta.insertId;
 };
 
-export default { postEventoM, buscarPorNome, getEventoM };
+const putEventoM = async (eventoNovo, idEvento) => {
+  const { nome, data, localizacao, desc, status } = eventoNovo;
+  const query = `UPDATE evento SET nome_evento = ?, data_evento = ?, localizacao = ?, desc_evento = ?, status = ? WHERE ID_evento = ?`;
+
+  const resposta = await connection.execute(query, [
+    nome,
+    data,
+    localizacao,
+    desc,
+    status,
+    idEvento
+  ]);
+
+  return resposta.affectedRows;
+};
+
+const deleteEventoM = async (idEvento) => {
+  const [resposta] = await connection.execute(
+    "UPDATE evento SET status = false WHERE ID_evento = ?",
+    [idEvento]
+  );
+  return resposta.affectedRows;
+};
+
+export default { postEventoM, buscarPorNome, getEventoM, putEventoM, deleteEventoM };
