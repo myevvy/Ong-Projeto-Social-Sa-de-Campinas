@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import type { UsuarioAutenticado } from "../../types/auth";
 import { Kicker, Button, FormField } from "../../components";
-import { Trash2, Pencil, Check, X, Mail, Phone } from "lucide-react";
+import { Trash2, Pencil, Check, X, Mail, Phone, Plus} from "lucide-react";
 
 type StatusDoacao = "aprovada" | "pendente" | "recusada";
 
@@ -197,14 +197,21 @@ export default function DashboardDoacoes({ usuario }: DashboardDoacoesProps) {
           </p>
             
         </div>
-<Button
-          variant={formularioAberto ? "outline" : "primary"}
+<button
+          type="button"
           onClick={() => setFormularioAberto((aberto) => !aberto)}
-          className="mt-15 px-3 py-1.5 font-body text-xs font-bold bg-black text-white"
-        >
-          {formularioAberto ? "Fechar cadastro" : "+ Nova doação"}
-        </Button>
-      
+          className="inline-flex items-center gap-1.5 rounded-pill border bg-black px-4 py-2.5 font-body text-[13px] font-bold text-white transition-colors hover:bg-black/80"
+          >
+            {formularioAberto ? (
+              <>
+                <X size={15} /> Fechar
+              </>
+            ) : (
+              <>
+                <Plus size={15} /> Criar evento
+              </>
+            )}
+          </button>
       </header>
 
       {formularioAberto && (

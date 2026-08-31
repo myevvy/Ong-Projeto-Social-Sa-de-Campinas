@@ -3,7 +3,6 @@ import {
   verificarStatusUsuario,
   adicionarSolicitacao,
 } from "../../services/authService";
-import "./LoginPage.css";
 
 type ViewMode = "login" | "cadastro" | "recuperar";
 type TipoPerfil = "voluntario" | "func";
@@ -59,6 +58,10 @@ function obterRotaRedirecionamento(tipo?: string): string {
   }
   return "/";
 }
+
+const INPUT_CLASS =
+  "w-full rounded-xl border border-black/15 bg-white px-3 py-2.5 font-body text-sm text-black placeholder:text-ink-soft/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold";
+const LABEL_CLASS = "flex flex-col gap-1.5 font-body text-sm font-bold text-black";
 
 export default function LoginPage() {
   const [modo, setModo] = useState<ViewMode>("login");
@@ -356,37 +359,56 @@ export default function LoginPage() {
     setModo("login");
   };
 
+  const mensagemClasses = {
+    sucesso: "bg-volunteer-soft text-volunteer",
+    erro: "bg-error/10 text-error",
+    info: "bg-gold/10 text-[#8a5620]",
+  } as const;
+
   return (
-    <main className="login-page">
-      <div className="login-card" aria-live="polite">
-        <div className="login-card__brand">
-          <span className="login-card__eyebrow">
+    <main className="flex min-h-screen items-center justify-center bg-parchment px-4 py-10 sm:px-6">
+   <div
+  aria-live="polite"
+  className={`w-full rounded-2xl border border-black/10 bg-white p-6 sm:p-8 lg:p-12 ${
+    modo === "cadastro" ? "max-w-[750px] lg:max-w-[880px]" : "max-w-[440px] lg:max-w-[520px]"
+  }`}
+>
+        <div className="mb-6 flex flex-col gap-1.5 text-center">
+          <span className="font-mono text-[11px] font-semibold uppercase tracking-wide text-gold">
             Projeto Social Saúde Campinas
           </span>
-          <h1>Área de acesso</h1>
-          <p>Acesso para voluntários, colaboradores e equipe da ONG.</p>
+          <h1 className="m-0 font-display text-2xl font-semibold text-black sm:text-[28px]">
+            Área de acesso
+          </h1>
+          <p className="m-0 font-body text-sm text-ink-soft">
+            Acesso para voluntários, colaboradores e equipe da ONG.
+          </p>
         </div>
 
         <div
-          className="login-card__tabs"
           role="tablist"
           aria-label="Opções de acesso"
+          className="mb-6 flex gap-1 rounded-pill bg-black/5 p-1"
         >
           {[
             { id: "login", label: "Login" },
             { id: "cadastro", label: "Cadastro" },
-            { id: "recuperar", label: "Recuperar senha" },
+            { id: "recuperar", label: "Recuperar" },
           ].map((item) => (
             <button
               key={item.id}
               type="button"
-              className={modo === item.id ? "is-active" : ""}
+              role="tab"
+              aria-selected={modo === item.id}
               onClick={() => {
                 setModo(item.id as ViewMode);
                 setMensagem(null);
               }}
-              role="tab"
-              aria-selected={modo === item.id}
+              className={`min-h-9 flex-1 rounded-pill px-2 font-body text-[13px] font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${
+                modo === item.id
+                  ? "bg-black text-white"
+                  : "text-ink-soft hover:bg-black/5 hover:text-black"
+              }`}
             >
               {item.label}
             </button>
@@ -395,15 +417,16 @@ export default function LoginPage() {
 
         {mensagem && (
           <div
-            className={`login-card__message login-card__message--${mensagem.tipo}`}
+            role={mensagem.tipo === "erro" ? "alert" : "status"}
+            className={`mb-5 rounded-xl px-4 py-3 font-body text-sm ${mensagemClasses[mensagem.tipo]}`}
           >
             {mensagem.texto}
           </div>
         )}
 
         {modo === "login" && (
-          <form className="login-form" onSubmit={enviarLogin}>
-            <label>
+          <form className="flex flex-col gap-4" onSubmit={enviarLogin}>
+            <label className={LABEL_CLASS}>
               E-mail
               <input
                 type="email"
@@ -414,10 +437,11 @@ export default function LoginPage() {
                 }
                 placeholder="seu@email.com"
                 required
+                className={INPUT_CLASS}
               />
             </label>
 
-            <label>
+            <label className={LABEL_CLASS}>
               Senha
               <input
                 type="password"
@@ -428,13 +452,14 @@ export default function LoginPage() {
                 }
                 placeholder="••••••••"
                 required
+                className={INPUT_CLASS}
               />
             </label>
 
             <button
               type="submit"
-              className="login-form__button"
               disabled={carregando}
+              className="mt-2 flex min-h-11 w-full items-center justify-center rounded-pill bg-black font-body text-sm font-bold text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 disabled:opacity-50"
             >
               {carregando ? "Entrando..." : "Entrar"}
             </button>
@@ -442,8 +467,8 @@ export default function LoginPage() {
         )}
 
         {modo === "cadastro" && (
-          <form className="login-form" onSubmit={enviarCadastro}>
-            <label>
+          <form className="flex flex-col gap-4" onSubmit={enviarCadastro}>
+            <label className={LABEL_CLASS}>
               Nome completo *
               <input
                 type="text"
@@ -454,11 +479,12 @@ export default function LoginPage() {
                 }
                 placeholder="Seu nome completo"
                 required
+                className={INPUT_CLASS}
               />
             </label>
 
-            <div className="login-form__row">
-              <label>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <label className={LABEL_CLASS}>
                 E-mail *
                 <input
                   type="email"
@@ -469,10 +495,11 @@ export default function LoginPage() {
                   }
                   placeholder="seu@email.com"
                   required
+                  className={INPUT_CLASS}
                 />
               </label>
 
-              <label>
+              <label className={LABEL_CLASS}>
                 Telefone *
                 <input
                   type="tel"
@@ -483,12 +510,13 @@ export default function LoginPage() {
                   }
                   placeholder="(19) 99999-9999"
                   required
+                  className={INPUT_CLASS}
                 />
               </label>
             </div>
 
-            <div className="login-form__row">
-              <label>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <label className={LABEL_CLASS}>
                 Tipo de perfil *
                 <select
                   value={cadastro.tipo}
@@ -498,13 +526,14 @@ export default function LoginPage() {
                       tipo: event.target.value as TipoPerfil,
                     })
                   }
+                  className={INPUT_CLASS}
                 >
                   <option value="voluntario">Voluntário(a)</option>
                   <option value="func">Colaborador(a) / Funcionário(a)</option>
                 </select>
               </label>
 
-              <label>
+              <label className={LABEL_CLASS}>
                 Data de nascimento
                 <input
                   type="date"
@@ -515,12 +544,13 @@ export default function LoginPage() {
                       aniversario: event.target.value,
                     })
                   }
+                  className={INPUT_CLASS}
                 />
               </label>
             </div>
 
-            <div className="login-form__row">
-              <label>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <label className={LABEL_CLASS}>
                 Senha *
                 <input
                   type="password"
@@ -531,10 +561,11 @@ export default function LoginPage() {
                   }
                   placeholder="Mínimo 6 caracteres"
                   required
+                  className={INPUT_CLASS}
                 />
               </label>
 
-              <label>
+              <label className={LABEL_CLASS}>
                 Confirmar senha *
                 <input
                   type="password"
@@ -548,12 +579,13 @@ export default function LoginPage() {
                   }
                   placeholder="Repita a senha"
                   required
+                  className={INPUT_CLASS}
                 />
               </label>
             </div>
 
-            <div className="login-form__row">
-              <label>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <label className={LABEL_CLASS}>
                 Endereço
                 <input
                   type="text"
@@ -563,10 +595,11 @@ export default function LoginPage() {
                     setCadastro({ ...cadastro, end: event.target.value })
                   }
                   placeholder="Rua, número e bairro"
+                  className={INPUT_CLASS}
                 />
               </label>
 
-              <label>
+              <label className={LABEL_CLASS}>
                 CEP
                 <input
                   type="text"
@@ -576,11 +609,12 @@ export default function LoginPage() {
                     setCadastro({ ...cadastro, cep: event.target.value })
                   }
                   placeholder="13000-000"
+                  className={INPUT_CLASS}
                 />
               </label>
             </div>
 
-            <label>
+            <label className={LABEL_CLASS}>
               Sobre você
               <textarea
                 value={cadastro.sobre}
@@ -589,13 +623,14 @@ export default function LoginPage() {
                 }
                 placeholder="Conte um pouco sobre sua disponibilidade ou interesse na ONG"
                 rows={4}
+                className={INPUT_CLASS}
               />
             </label>
 
             <button
               type="submit"
-              className="login-form__button"
               disabled={carregando}
+              className="mt-2 flex min-h-11 w-full items-center justify-center rounded-pill bg-amber font-body text-sm font-bold text-black transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 disabled:opacity-50"
             >
               {carregando ? "Cadastrando..." : "Cadastrar"}
             </button>
@@ -603,8 +638,8 @@ export default function LoginPage() {
         )}
 
         {modo === "recuperar" && (
-          <form className="login-form" onSubmit={enviarRecuperacao}>
-            <label>
+          <form className="flex flex-col gap-4" onSubmit={enviarRecuperacao}>
+            <label className={LABEL_CLASS}>
               E-mail cadastrado
               <input
                 type="email"
@@ -615,13 +650,14 @@ export default function LoginPage() {
                 }
                 placeholder="seu@email.com"
                 required
+                className={INPUT_CLASS}
               />
             </label>
 
             <button
               type="submit"
-              className="login-form__button"
               disabled={carregando}
+              className="mt-2 flex min-h-11 w-full items-center justify-center rounded-pill bg-black font-body text-sm font-bold text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 disabled:opacity-50"
             >
               {carregando ? "Enviando..." : "Solicitar ajuda"}
             </button>

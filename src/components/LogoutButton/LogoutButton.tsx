@@ -1,4 +1,3 @@
-// components/LogoutButton/LogoutButton.tsx
 import { LogOut } from "lucide-react";
 
 interface LogoutButtonProps {
@@ -13,7 +12,8 @@ export function LogoutButton({
   function handleLogout() {
     localStorage.removeItem("usuario");
     localStorage.removeItem("token");
-    navegarPara(destino);
+    window.history.pushState({}, "", destino);
+    window.dispatchEvent(new PopStateEvent("popstate"));
   }
 
   return (

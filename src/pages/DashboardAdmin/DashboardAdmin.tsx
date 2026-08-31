@@ -303,7 +303,7 @@ export default function DashboardAdmin() {
           <button
             type="button"
             onClick={() => setFormularioAberto((aberto) => !aberto)}
-            className="inline-flex items-center gap-1.5 rounded-pill border bg-black px-4 py-2.5 font-body text-[13px] font-bold text-white transition-colors hover:bg-gold/10"
+            className="inline-flex items-center gap-1.5 rounded-pill border bg-black px-4 py-2.5 font-body text-[13px] font-bold text-white transition-colors hover:bg-black/80"
           >
             {formularioAberto ? (
               <>
@@ -406,7 +406,7 @@ export default function DashboardAdmin() {
 
             <button
               type="submit"
-              className="inline-flex w-fit justify-self-center items-center rounded-pill bg-black px-5 py-3 font-body text-[13px] font-bold text-parchment transition-opacity hover:opacity-90 md:col-span-2"
+              className="inline-flex w-fit justify-self-center items-center rounded-pill bg-black px-5 py-3 font-body text-[14px] font-bold text-parchment transition-opacity hover:opacity-90 md:col-span-2"
             >
               {eventoEmEdicao ? "Atualizar evento" : "Salvar evento"}
             </button>
