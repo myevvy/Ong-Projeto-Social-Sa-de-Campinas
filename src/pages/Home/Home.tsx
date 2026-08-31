@@ -16,8 +16,7 @@ export default function Home() {
         ]}
       />
 
-      <section class="flex flex-col items-center text-center pt-12 px-6 pb-10 max-w-[560px] mx-auto">
->
+      <section className="flex flex-col items-center text-center pt-12 px-6 pb-10 max-w-[560px] mx-auto">
         <h4>PROJETO SOCIAL SAÚDE CAMPINAS</h4>
         <h1>Cuidado que pousa onde é preciso.</h1>
         <p>
