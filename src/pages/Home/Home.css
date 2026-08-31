@@ -8,15 +8,7 @@
      text-transform: uppercase;
 }
 
-#botao-quero-ser {
-     display: flex;
-     justify-content: center;
-     text-color: white;
-     background-color:black;
-     margin: 0 0 20px;
-     line-height: 1.25;
-     max-width: 15ch;
-}
+
 
 #botao-doar {
      display: block;

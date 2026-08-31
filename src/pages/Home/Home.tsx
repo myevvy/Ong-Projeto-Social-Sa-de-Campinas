@@ -24,7 +24,7 @@ export default function Home() {
           situação de rua e vulnerabilidade em Campinas - conduzido por estudantes
           de medicina e da área da saúde, há 6 anos.
         </p>
-        <button id="botao-quero-ser" type="button">Quero ser voluntário</button>
+        <button id="flex justify-center text-white bg-black mb-5 leading-tight max-w-[15ch]" type="button">Quero ser voluntário</button>
         <button id="botao-doar" type="button">Doar medicamentos</button>
 <a href="/dashboard/admin">
   <button>Ir para Admin</button>
