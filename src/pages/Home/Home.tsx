@@ -12,7 +12,7 @@ export default function Home() {
           { label: 'Como ajudar', href: '/como-ajudar' },
           { label: 'Eventos', href: '/eventos' },
           { label: 'Área do voluntário', href: '/login' },
-          { label: 'Contato', href: '/contato' },
+          { label: 'Contato', href: 'DashboardAdmin/DashboardAdmin.tsx' },
         ]}
       />
 
@@ -26,7 +26,9 @@ export default function Home() {
         </p>
         <button id="botao-quero-ser" type="button">Quero ser voluntário</button>
         <button id="botao-doar" type="button">Doar medicamentos</button>
-
+<a href="/dashboard/admin">
+  <button>Ir para Admin</button>
+</a>
         <section>
           <div id="infos-ong1">
             <h5 className="h5-info">6 anos</h5>

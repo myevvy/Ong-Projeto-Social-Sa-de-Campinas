@@ -1,5 +1,6 @@
 // src/components/MessageBox/MessageBox.tsx
 import { useEffect, useState, useRef, type FormEvent, type KeyboardEvent } from "react";
+import { Send, Lock, Megaphone, MessageSquareText, User } from "lucide-react";
 import {
   obterDestinatariosPermitidos,
   obterMensagensChat,
@@ -9,7 +10,6 @@ import {
   type MensagemChat,
   type PapelUsuario,
 } from "../../services/messageService";
-import "./MessageBox.css";
 
 interface MessageBoxProps {
   author: PapelUsuario;
@@ -60,7 +60,7 @@ export function MessageBox({
     destinatarios.find((d) => d.id === destinatarioSelecionadoId) ||
     destinatarios[0] || {
       id: "geral",
-      nome: "📢 Canal Geral (Avisos de Todos)",
+      nome: "Canal Geral (Avisos de Todos)",
       email: "geral@saudecampinas.org",
       tipo: "grupo",
       descricao: "Comunidade da ONG (Administração, Colaboradores e Voluntários)",
@@ -110,82 +110,100 @@ export function MessageBox({
   }
 
   function getBadgeConfig(tipo: string) {
-    if (tipo === "admin") return { label: "Admin", className: "message-box__badge--admin" };
-    if (tipo === "colaborador") return { label: "Colaborador", className: "message-box__badge--colaborador" };
-    if (tipo === "voluntario") return { label: "Voluntário", className: "message-box__badge--voluntario" };
-    return { label: "Geral", className: "" };
+    if (tipo === "admin")
+      return { label: "Admin", className: "bg-black text-parchment" };
+    if (tipo === "colaborador")
+      return { label: "Colaborador", className: "bg-amber/15 text-amber" };
+    if (tipo === "voluntario")
+      return { label: "Voluntário", className: "bg-volunteer-soft text-volunteer" };
+    return { label: "Geral", className: "bg-black/10 text-black/60" };
   }
 
   return (
-    <section className="message-box" aria-labelledby={`mensagens-titulo-${author}`}>
-      <header className="message-box__heading">
+    <section
+      aria-labelledby={`mensagens-titulo-${author}`}
+      className="flex flex-col gap-4 rounded-xl border border-black/10 bg-white p-6"
+    >
+      <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <span className="message-box__kicker">Comunicação Interna</span>
-          <h2 id={`mensagens-titulo-${author}`} className="message-box__title">
+          <span className="m-0 block font-body text-xs font-bold uppercase tracking-wide text-black/50">
+            Comunicação Interna
+          </span>
+          <h2
+            id={`mensagens-titulo-${author}`}
+            className="m-0 font-display text-[1.1rem] font-semibold text-black"
+          >
             Mensagens & Avisos
           </h2>
         </div>
-        <span className="message-box__count">
-          {mensagensFiltradas.length} {mensagensFiltradas.length === 1 ? "mensagem" : "mensagens"}
+        <span className="rounded-pill border border-black/15 px-3 py-1 font-body text-xs font-bold text-ink-soft">
+          {mensagensFiltradas.length}{" "}
+          {mensagensFiltradas.length === 1 ? "mensagem" : "mensagens"}
         </span>
       </header>
 
       {/* Seletor de Canal / Destinatário */}
-      <div className="message-box__channel-bar">
-        <label htmlFor={`destinatario-select-${author}`} className="message-box__channel-label">
+      <div className="flex flex-col gap-1.5">
+        <label
+          htmlFor={`destinatario-select-${author}`}
+          className="flex flex-wrap items-center justify-between gap-2 font-body text-[13px] font-bold text-black"
+        >
           <span>Conversar com / Canal:</span>
           {author === "voluntario" && (
-            <span style={{ fontSize: "11px", fontWeight: 600, color: "#1a745a" }}>
-              🔒 Acesso restrito a Colaboradores & Adm
+            <span className="inline-flex items-center gap-1 font-body text-[11px] font-semibold text-volunteer">
+              <Lock size={12} />
+              Acesso restrito a Colaboradores & Adm
             </span>
           )}
         </label>
-        <div className="message-box__select-wrap">
-          <select
-            id={`destinatario-select-${author}`}
-            className="message-box__select"
-            value={destinatarioSelecionadoId}
-            onChange={(e) => setDestinatarioSelecionadoId(e.target.value)}
-          >
-            {destinatarios.map((contato) => (
-              <option key={contato.id} value={contato.id}>
-                {contato.nome} {contato.descricao ? `— ${contato.descricao}` : ""}
-              </option>
-            ))}
-          </select>
-        </div>
+        <select
+          id={`destinatario-select-${author}`}
+          value={destinatarioSelecionadoId}
+          onChange={(e) => setDestinatarioSelecionadoId(e.target.value)}
+          className="w-full rounded-sm border border-black/[0.18] bg-white px-4 py-3 font-body text-sm text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-1"
+        >
+          {destinatarios.map((contato) => (
+            <option key={contato.id} value={contato.id}>
+              {contato.nome} {contato.descricao ? `— ${contato.descricao}` : ""}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Barra de Status do Canal Ativo */}
-      <div className="message-box__active-channel-info">
-        <div className="message-box__active-target">
-          <span className="message-box__active-name">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-parchment/50 px-4 py-3">
+        <div className="flex flex-wrap items-baseline gap-1.5">
+          <span className="font-body text-sm font-bold text-black">
             {destinatarioAtivo.nome}
           </span>
           {destinatarioAtivo.descricao && (
-            <span className="message-box__active-desc">
+            <span className="font-body text-xs text-ink-soft">
               ({destinatarioAtivo.descricao})
             </span>
           )}
         </div>
         {destinatarioAtivo.id === "geral" ? (
-          <span className="message-box__security-notice">
-            📢 Grupo com todos os usuários para avisos
+          <span className="inline-flex items-center gap-1.5 font-body text-xs font-semibold text-ink-soft">
+            <Megaphone size={13} />
+            Grupo com todos os usuários para avisos
           </span>
         ) : (
-          <span className="message-box__security-notice">
-            💬 Conversa privada direta
+          <span className="inline-flex items-center gap-1.5 font-body text-xs font-semibold text-ink-soft">
+            <MessageSquareText size={13} />
+            Conversa privada direta
           </span>
         )}
       </div>
 
       {/* Thread de Mensagens */}
-      <div className="message-box__thread">
+      <div className="flex max-h-[360px] flex-col gap-3 overflow-y-auto rounded-md border border-black/10 p-4">
         {mensagensFiltradas.length === 0 ? (
-          <div className="message-box__empty">
-            <span className="message-box__empty-icon">💬</span>
-            <p className="message-box__empty-title">Nenhuma mensagem nesta conversa ainda.</p>
-            <p className="message-box__empty-desc">
+          <div className="flex flex-col items-center gap-1.5 py-10 text-center">
+            <MessageSquareText size={28} className="text-black/25" />
+            <p className="m-0 font-body text-sm font-bold text-black">
+              Nenhuma mensagem nesta conversa ainda.
+            </p>
+            <p className="m-0 max-w-xs font-body text-xs text-ink-soft">
               {destinatarioAtivo.id === "geral"
                 ? "Envie um aviso para toda a equipe da ONG usando o campo abaixo."
                 : `Inicie uma conversa direta com ${destinatarioAtivo.nome}.`}
@@ -201,18 +219,32 @@ export function MessageBox({
             return (
               <article
                 key={msg.id}
-                className={`message-box__bubble ${
-                  ehMinha ? "message-box__bubble--mine" : "message-box__bubble--theirs"
+                className={`flex max-w-[85%] flex-col gap-1 rounded-lg px-4 py-3 ${
+                  ehMinha
+                    ? "ml-auto bg-black text-parchment"
+                    : "mr-auto border border-black/10 bg-white text-black"
                 }`}
               >
-                <div className="message-box__bubble-meta">
-                  <span className="message-box__sender">
-                    👤 {ehMinha ? "Você" : msg.remetenteNome}{" "}
-                    <span className={`message-box__badge ${badge.className}`}>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span
+                    className={`inline-flex items-center gap-1.5 font-body text-xs font-bold ${
+                      ehMinha ? "text-parchment/80" : "text-black"
+                    }`}
+                  >
+                    <User size={12} />
+                    {ehMinha ? "Você" : msg.remetenteNome}
+                    <span
+                      className={`rounded-pill px-2 py-0.5 font-body text-[10px] font-bold ${badge.className}`}
+                    >
                       {badge.label}
                     </span>
                   </span>
-                  <time className="message-box__time" dateTime={msg.criadaEm}>
+                  <time
+                    dateTime={msg.criadaEm}
+                    className={`font-body text-[10px] ${
+                      ehMinha ? "text-parchment/60" : "text-black/40"
+                    }`}
+                  >
                     {new Date(msg.criadaEm).toLocaleString("pt-BR", {
                       day: "2-digit",
                       month: "short",
@@ -221,7 +253,9 @@ export function MessageBox({
                     })}
                   </time>
                 </div>
-                <p className="message-box__text">{msg.texto}</p>
+                <p className="m-0 font-body text-sm leading-relaxed">
+                  {msg.texto}
+                </p>
               </article>
             );
           })
@@ -230,17 +264,16 @@ export function MessageBox({
       </div>
 
       {erroEnvio && (
-        <div style={{ padding: "8px 20px", background: "#fde8e8", color: "#b91c1c", fontSize: "12px", fontWeight: 600 }}>
-          ⚠️ {erroEnvio}
+        <div className="rounded-md border border-error/30 bg-error/10 px-4 py-2.5 font-body text-xs font-semibold text-error">
+          {erroEnvio}
         </div>
       )}
 
       {/* Formulário de Envio */}
-      <form className="message-box__form" onSubmit={handleEnviar}>
-        <div className="message-box__input-row">
+      <form onSubmit={handleEnviar} className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
           <textarea
             id={`mensagem-input-${author}`}
-            className="message-box__textarea"
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -251,17 +284,21 @@ export function MessageBox({
             }
             rows={2}
             required
+            className="w-full resize-none rounded-sm border border-black/[0.18] bg-white px-4 py-3 font-body text-sm text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-1"
           />
           <button
             type="submit"
-            className="message-box__send-btn"
             disabled={!texto.trim()}
+            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-pill bg-black px-5 py-3 font-body text-[13px] font-bold text-parchment transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <span>Enviar</span> ✈️
+            Enviar
+            <Send size={14} />
           </button>
         </div>
-        <p className="message-box__input-hint">
-          Dica: Pressione <strong>Enter</strong> para enviar ou <strong>Shift + Enter</strong> para quebra de linha.
+        <p className="m-0 font-body text-xs text-ink-soft">
+          Dica: Pressione <strong className="font-bold text-black">Enter</strong> para
+          enviar ou <strong className="font-bold text-black">Shift + Enter</strong>{" "}
+          para quebra de linha.
         </p>
       </form>
     </section>

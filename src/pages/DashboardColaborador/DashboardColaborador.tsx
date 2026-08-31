@@ -7,6 +7,7 @@ import { MuralBoard } from "../../components/MuralBoard/MuralBoard";
 import { Kicker, DatePill, Button, FormField } from "../../components";
 import type { UsuarioAutenticado } from "../../types/auth";
 import type { DashboardColaboradorData } from "../../types/dashboard";
+import { VolunteerList } from "../../components/VolunteerList/VolunteerList";
 
 function saudacaoPorHorario(): string {
   const hora = new Date().getHours();
@@ -269,102 +270,45 @@ export default function DashboardColaborador({
                   const inscritos = acao.voluntariosInscritos || 0;
                   const aberto = acaoInscritosAberta === acao.id;
 
-                  return (
-                    <div
-                      key={acao.id}
-                      className="rounded-md border border-black/10 p-3.5 bg-white transition"
-                    >
-                      <div className="flex items-center justify-between gap-3 flex-wrap">
-                        <div className="flex items-center gap-3">
-                          <DatePill label={`${dia} ${mes.toUpperCase()}`} />
-                          <div className="flex flex-col gap-0.5">
-                            <h3 className="m-0 font-display text-[15px] font-semibold text-black">
-                              {acao.titulo}
-                            </h3>
-                            <span className="font-body text-xs text-ink-soft">
-                              {acao.local || "Campinas"} · {inscritos}{" "}
-                              {inscritos === 1 ? "voluntário" : "voluntários"}{" "}
-                              inscritos
-                            </span>
-                          </div>
-                        </div>
+                 return (
+  <div
+    key={acao.id}
+    className="rounded-md border border-black/10 p-3.5 bg-white transition"
+  >
+    <div className="flex items-center justify-between gap-3 flex-wrap">
+      <div className="flex items-center gap-3">
+        <DatePill label={`${dia} ${mes.toUpperCase()}`} />
+        <div className="flex flex-col gap-0.5">
+          <h3 className="m-0 font-display text-[15px] font-semibold text-black">
+            {acao.titulo}
+          </h3>
+          <span className="font-body text-xs text-ink-soft">
+            {acao.local || "Campinas"} · {inscritos}{" "}
+            {inscritos === 1 ? "voluntário" : "voluntários"}{" "}
+            inscritos
+          </span>
+        </div>
+      </div>
+    </div>
+    
 
-                        <button
-                          type="button"
-                          className="cursor-pointer rounded-pill border border-[#1a745a] px-3 py-1 font-body text-xs font-bold text-[#1a745a] hover:bg-[#e6f4ea] transition"
-                          onClick={() =>
-                            setAcaoInscritosAberta((atual) =>
-                              atual === acao.id ? null : acao.id,
-                            )
-                          }
-                        >
-                          👥 {inscritos} voluntários{" "}
-                          {aberto ? "▲ Fechar" : "▼ Ver equipe"}
-                        </button>
-                      </div>
-
-                      {aberto && (
-                        <div className="mt-3.5 pt-3 border-t border-black/10 flex flex-col gap-2 bg-[#faf8f4] p-3 rounded-md">
-                          <h4 className="m-0 text-xs font-bold uppercase tracking-wider text-ink-soft">
-                            Voluntários que confirmaram presença (
-                            {acao.inscritosDetalhes?.length || 0}):
-                          </h4>
-
-                          {!acao.inscritosDetalhes ||
-                          acao.inscritosDetalhes.length === 0 ? (
-                            <p className="m-0 text-xs text-ink-soft italic">
-                              Nenhum voluntário inscrito nesta ação ainda.
-                            </p>
-                          ) : (
-                            acao.inscritosDetalhes.map((vol, idx) => (
-                              <div
-                                key={idx}
-                                className="flex justify-between items-start flex-wrap gap-2 p-2 bg-white rounded border border-black/5 text-xs"
-                              >
-                                <div>
-                                  <strong className="text-black font-semibold block">
-                                    👤 {vol.nome}
-                                  </strong>
-                                  <span className="text-ink-soft block">
-                                    ✉️{" "}
-                                    <a
-                                      href={`mailto:${vol.email}`}
-                                      className="text-[#1a745a] underline"
-                                    >
-                                      {vol.email}
-                                    </a>
-                                  </span>
-                                  {vol.sobre && (
-                                    <p className="m-0 mt-1 italic text-ink-soft">
-                                      "{vol.sobre}"
-                                    </p>
-                                  )}
-                                </div>
-                                {vol.telefone && (
-                                  <div className="text-right">
-                                    <span className="font-mono text-black font-semibold block">
-                                      📞 {vol.telefone}
-                                    </span>
-                                    <a
-                                      href={`https://wa.me/55${vol.telefone.replace(/\D/g, "")}`}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="text-[#1a745a] font-bold underline text-[11px]"
-                                    >
-                                      Chamar no WhatsApp →
-                                    </a>
-                                  </div>
-                                )}
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+  <VolunteerList
+  inscritos={acao.inscritosDetalhes || []}
+  vagas={acao.vagas || 6}
+  aberto={acaoInscritosAberta === acao.id}
+  onToggle={() =>
+    setAcaoInscritosAberta((atual) =>
+      atual === acao.id ? null : acao.id,
+    )
+  }
+  somenteLeitura={true}
+  onRemover={() => {}}
+/>
+  </div>
+);
+})}
+</div>
+)}
             <div className="mt-5">
               <EventCalendar
                 events={eventosCompartilhados.map((acao) => ({

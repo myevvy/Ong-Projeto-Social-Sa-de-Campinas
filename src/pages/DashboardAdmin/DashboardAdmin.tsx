@@ -10,6 +10,27 @@ import {
   type StatusAcesso,
 } from "../../services/authService";
 import {
+  Pill,
+  HandCoins,
+  ArrowRight,
+  Plus,
+  X,
+  ChevronUp,
+  ChevronDown,
+  Users,
+  User,
+  Mail,
+  Phone,
+  MessageCircle,
+  UserX,
+  Pencil,
+  Trash2,
+  Check,
+  LogOut,
+  RotateCcw,
+  Search,
+} from "lucide-react";
+import {
   obterEventos,
   adicionarEvento,
   atualizarEvento,
@@ -18,7 +39,7 @@ import {
   type EventoGlobal,
   type VoluntarioInscrito,
 } from "../../services/eventService";
-import "./DashboardAdmin.css";
+import { VolunteerList } from "../../components/VolunteerList/VolunteerList";
 
 function navegarPara(caminho: string) {
   window.history.pushState({}, "", caminho);
@@ -27,8 +48,8 @@ function navegarPara(caminho: string) {
 
 export default function DashboardAdmin() {
   const [eventos, setEventos] = useState<EventoGlobal[]>([]);
-  const [eventoInscritosAberto, setEventoInscritosAberto] = useState<
-    number | null
+  const [eventoInscritosAberto, setEventoInscritosAberto] = useState
+   < number | null
   >(null);
   const [solicitacoes, setSolicitacoes] = useState<SolicitacaoAcesso[]>([]);
   const [novoEvento, setNovoEvento] = useState({
@@ -130,107 +151,188 @@ export default function DashboardAdmin() {
   }
 
   return (
-    <main className="admin-page">
-      <header className="admin-page__header">
+    <main className="mx-auto flex max-w-[1200px] flex-col gap-8 px-6 py-8 md:px-10">
+      <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="admin-page__kicker">
+          <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-black/50">
             Central de gestão · acesso restrito
           </p>
-          <h1>Olá, administração.</h1>
-          <p className="admin-page__intro">
+          <h1 className="m-0 font-display text-[28px] font-semibold text-black md:text-[32px]">
+            Olá, administração.
+          </h1>
+          <p className="m-0 mt-1.5 max-w-md font-body text-sm text-ink-soft">
             Uma visão geral para cuidar da operação e das pessoas que fazem a
             missão acontecer.
           </p>
         </div>
         <button
-          className="admin-page__logout"
           type="button"
           onClick={() => {
             localStorage.removeItem("usuario");
             localStorage.removeItem("token");
             navegarPara("/login");
           }}
+          className="inline-flex items-center gap-1.5 rounded-pill border border-black/15 bg-white px-4 py-2.5 font-body text-[13px] font-bold text-black transition-colors hover:bg-black/5"
         >
+          <LogOut size={15} />
           Sair
         </button>
       </header>
 
       <section
-        className="admin-page__metrics"
         aria-label="Resumos da organização"
+        className="grid grid-cols-2 gap-3 md:grid-cols-4"
       >
-        <article>
-          <span>Estoque total</span>
-          <strong>248</strong>
-          <small>unidades cadastradas</small>
+        <article className="flex flex-col gap-1 rounded-md border border-black/10 bg-white p-5">
+          <span className="font-body text-[12.5px] text-ink-soft">
+            Estoque total
+          </span>
+          <strong className="font-display text-2xl font-semibold text-black">
+            248
+          </strong>
+          <small className="font-body text-xs text-ink-soft">
+            unidades cadastradas
+          </small>
         </article>
-        <article>
-          <span>Doações no mês</span>
-          <strong>R$ 4.230,50</strong>
-          <small>27 registros manuais</small>
+        <article className="flex flex-col gap-1 rounded-md border border-black/10 bg-white p-5">
+          <span className="font-body text-[12.5px] text-ink-soft">
+            Doações no mês
+          </span>
+          <strong className="font-display text-2xl font-semibold text-black">
+            R$ 4.230,50
+          </strong>
+          <small className="font-body text-xs text-ink-soft">
+            27 registros manuais
+          </small>
         </article>
-        <article>
-          <span>Voluntários</span>
-          <strong>{totalVoluntarios || 1}</strong>
-          <small>{pendentesVoluntarios} aguardando análise</small>
+        <article className="flex flex-col gap-1 rounded-md border border-volunteer/25 bg-volunteer-soft p-5">
+          <span className="font-body text-[12.5px] text-ink-soft">
+            Voluntários
+          </span>
+          <strong className="font-display text-2xl font-semibold text-volunteer">
+            {totalVoluntarios || 1}
+          </strong>
+          <small className="font-body text-xs text-ink-soft">
+            {pendentesVoluntarios} aguardando análise
+          </small>
         </article>
-        <article>
-          <span>Colaboradores</span>
-          <strong>{totalColaboradores || 1}</strong>
-          <small>{pendentesColaboradores} solicitações pendentes</small>
+        <article className="flex flex-col gap-1 rounded-md border border-amber/25 bg-amber/10 p-5">
+          <span className="font-body text-[12.5px] text-ink-soft">
+            Colaboradores
+          </span>
+          <strong className="font-display text-2xl font-semibold text-amber">
+            {totalColaboradores || 1}
+          </strong>
+          <small className="font-body text-xs text-ink-soft">
+            {pendentesColaboradores} solicitações pendentes
+          </small>
         </article>
       </section>
 
-      <section className="admin-page__grid" aria-label="Gestão operacional">
-        <article className="admin-panel admin-panel--inventory">
-          <p className="admin-page__kicker">Farmácia social</p>
-          <h2>Medicamentos</h2>
-          <p>
+      {/* medicamentos + doacoes */}
+      <section
+        className="grid grid-cols-1 gap-6 sm:grid-cols-2"
+        aria-label="Gestão operacional"
+      >
+        <article className="group flex flex-col gap-3 rounded-xl border border-black/10 bg-white p-7 transition-all hover:border-black/20 hover:shadow-md">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber/10 text-amber">
+              <Pill size={20} />
+            </span>
+            <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-black/50">
+              Farmácia social
+            </p>
+          </div>
+
+          <h2 className="m-0 font-display text-[1.15rem] font-semibold text-black">
+            Medicamentos
+          </h2>
+
+          <p className="m-0 flex-grow font-body text-sm text-ink-soft">
             Confira validade, lotes e níveis de estoque antes dos próximos
             atendimentos.
           </p>
+
           <button
-            className="admin-page__button"
             type="button"
             onClick={() => navegarPara("/dashboard/medicamentos")}
+            className="mt-2 inline-flex items-center justify-between gap-2 rounded-pill border border-black/15 bg-white px-4 py-3 font-body text-[13px] font-bold text-black transition-colors hover:bg-black/5 active:scale-[0.98]"
           >
             Abrir cadastro de medicamentos
+            <ArrowRight
+              size={16}
+              className="transition-transform group-hover:translate-x-0.5"
+            />
           </button>
         </article>
-        <article className="admin-panel admin-panel--donations">
-          <p className="admin-page__kicker">Financeiro</p>
-          <h2>Doações</h2>
-          <p>
+
+        <article className="group flex flex-col gap-3 rounded-xl border border-black/10 bg-white p-7 transition-all hover:border-black/20 hover:shadow-md">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-volunteer/10 text-volunteer">
+              <HandCoins size={20} />
+            </span>
+            <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-black/50">
+              Financeiro
+            </p>
+          </div>
+
+          <h2 className="m-0 font-display text-[1.15rem] font-semibold text-black">
+            Doações
+          </h2>
+
+          <p className="m-0 flex-grow font-body text-sm text-ink-soft">
             Registre manualmente cada contribuição com os dados de contato do
             doador.
           </p>
+
           <button
-            className="admin-page__button"
             type="button"
             onClick={() => navegarPara("/dashboard/doacoes")}
+            className="mt-2 inline-flex items-center justify-between gap-2 rounded-pill border border-black/15 bg-white px-4 py-3 font-body text-[13px] font-bold text-black transition-colors hover:bg-black/5 active:scale-[0.98]"
           >
             Abrir cadastro de doações
+            <ArrowRight
+              size={16}
+              className="transition-transform group-hover:translate-x-0.5"
+            />
           </button>
         </article>
       </section>
 
-      <section className="admin-panel admin-panel--events">
-        <div className="admin-panel__heading">
+      {/* acao de rua */}
+      <section className="flex flex-col gap-5 rounded-xl border border-black/10 bg-white p-7">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="admin-page__kicker">Agenda da rua</p>
-            <h2>Eventos e ações</h2>
+            <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-black/50">
+              Agenda da rua
+            </p>
+            <h2 className="m-0 font-display text-[1.15rem] font-semibold text-black">
+              Eventos e ações
+            </h2>
           </div>
           <button
-            className="admin-page__button"
             type="button"
             onClick={() => setFormularioAberto((aberto) => !aberto)}
+            className="inline-flex items-center gap-1.5 rounded-pill border border-black/15 bg-white px-4 py-2.5 font-body text-[13px] font-bold text-black transition-colors hover:bg-black/5"
           >
-            {formularioAberto ? "Fechar" : "+ Criar evento"}
+            {formularioAberto ? (
+              <>
+                <X size={15} /> Fechar
+              </>
+            ) : (
+              <>
+                <Plus size={15} /> Criar evento
+              </>
+            )}
           </button>
         </div>
+
         {formularioAberto && (
-          <form className="admin-event-form" onSubmit={criarEvento}>
-            <label>
+          <form
+            onSubmit={criarEvento}
+            className="grid grid-cols-1 gap-4 rounded-lg border border-black/10 bg-parchment/40 p-6 md:grid-cols-2"
+          >
+            <label className="flex flex-col gap-1.5 font-body text-[13px] font-bold text-black">
               Nome do evento *
               <input
                 required
@@ -239,9 +341,11 @@ export default function DashboardAdmin() {
                 onChange={(e) =>
                   setNovoEvento({ ...novoEvento, titulo: e.target.value })
                 }
+                className="rounded-sm border border-black/[0.18] bg-white px-4 py-3 font-body text-sm font-normal text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-1"
               />
             </label>
-            <label>
+
+            <label className="flex flex-col gap-1.5 font-body text-[13px] font-bold text-black">
               Data *
               <input
                 required
@@ -250,9 +354,11 @@ export default function DashboardAdmin() {
                 onChange={(e) =>
                   setNovoEvento({ ...novoEvento, data: e.target.value })
                 }
+                className="rounded-sm border border-black/[0.18] bg-white px-4 py-3 font-body text-sm font-normal text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-1"
               />
             </label>
-            <label>
+
+            <label className="flex flex-col gap-1.5 font-body text-[13px] font-bold text-black">
               Local da ação
               <input
                 placeholder="Ex.: Vila Industrial, Campinas"
@@ -260,22 +366,26 @@ export default function DashboardAdmin() {
                 onChange={(e) =>
                   setNovoEvento({ ...novoEvento, local: e.target.value })
                 }
+                className="rounded-sm border border-black/[0.18] bg-white px-4 py-3 font-body text-sm font-normal text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-1"
               />
             </label>
-            <label>
+
+            <label className="flex flex-col gap-1.5 font-body text-[13px] font-bold text-black">
               Categoria
               <select
                 value={novoEvento.category}
                 onChange={(e) =>
                   setNovoEvento({ ...novoEvento, category: e.target.value })
                 }
+                className="rounded-sm border border-black/[0.18] bg-white px-4 py-3 font-body text-sm font-normal text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-1"
               >
                 <option value="Mutirão">Mutirão</option>
                 <option value="Campanha">Campanha</option>
                 <option value="Capacitação">Capacitação</option>
               </select>
             </label>
-            <label>
+
+            <label className="flex flex-col gap-1.5 font-body text-[13px] font-bold text-black">
               Vagas para voluntários
               <input
                 type="number"
@@ -287,9 +397,11 @@ export default function DashboardAdmin() {
                     vagas: Number(e.target.value),
                   })
                 }
+                className="rounded-sm border border-black/[0.18] bg-white px-4 py-3 font-body text-sm font-normal text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-1"
               />
             </label>
-            <label>
+
+            <label className="flex flex-col gap-1.5 font-body text-[13px] font-bold text-black md:col-span-2">
               Comentários / Descrição
               <textarea
                 value={novoEvento.comentarios}
@@ -297,14 +409,21 @@ export default function DashboardAdmin() {
                   setNovoEvento({ ...novoEvento, comentarios: e.target.value })
                 }
                 placeholder="Orientações para a equipe e descrição do evento"
+                rows={3}
+                className="resize-y rounded-sm border border-black/[0.18] bg-white px-4 py-3 font-body text-sm font-normal text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-1"
               />
             </label>
-            <button className="admin-page__button" type="submit">
+
+            <button
+              type="submit"
+              className="inline-flex w-fit items-center rounded-pill bg-black px-5 py-3 font-body text-[13px] font-bold text-parchment transition-opacity hover:opacity-90 md:col-span-2"
+            >
               {eventoEmEdicao ? "Atualizar evento" : "Salvar evento"}
             </button>
           </form>
         )}
-        <div className="admin-events-layout">
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
           <EventCalendar
             events={eventos.map((evento) => ({
               id: evento.id,
@@ -314,269 +433,118 @@ export default function DashboardAdmin() {
               meta: `${evento.category || "Evento"} · ${evento.local || "Campinas"}`,
             }))}
           />
-          <div className="admin-events-list">
-            {eventos.map((evento) => (
-              <div className="admin-event" key={evento.id}>
-                <div
-                  className="admin-event__day"
-                  aria-label={`Dia ${new Date(`${evento.data}T00:00:00`).getDate()}`}
-                >
-                  {new Date(`${evento.data}T00:00:00`).getDate()}
-                </div>
-                <div className="admin-event__details">
-                  <strong>{evento.titulo}</strong>
-                  <span>
-                    {new Date(`${evento.data}T00:00:00`).toLocaleDateString(
-                      "pt-BR",
-                    )}{" "}
-                    · {evento.category || "Mutirão"} ·{" "}
-                    {evento.local || "Campinas"}
-                  </span>
-                  <p>
-                    {evento.comentarios ||
-                      evento.description ||
-                      "Sem comentários registrados."}
-                  </p>
 
-                  <div style={{ marginTop: "10px" }}>
-                    <button
-                      type="button"
-                      style={{
-                        padding: "5px 12px",
-                        borderRadius: "20px",
-                        border: "1px solid #1a745a",
-                        background:
-                          eventoInscritosAberto === evento.id
-                            ? "#1a745a"
-                            : "#e6f4ea",
-                        color:
-                          eventoInscritosAberto === evento.id
-                            ? "#ffffff"
-                            : "#137333",
-                        fontWeight: 700,
-                        fontSize: "12px",
-                        cursor: "pointer",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "6px",
-                      }}
-                      onClick={() =>
-                        setEventoInscritosAberto((atual) =>
-                          atual === evento.id ? null : evento.id,
-                        )
-                      }
-                    >
-                      👥 {evento.inscritosDetalhes?.length || 0} de{" "}
-                      {evento.vagas || 6} voluntários inscritos
-                      <span>
-                        {eventoInscritosAberto === evento.id
-                          ? "▲ Fechar lista"
-                          : "▼ Ver detalhes"}
-                      </span>
-                    </button>
+          <div className="flex flex-col gap-3">
+            {eventos.map((evento) => {
+              const dia = new Date(`${evento.data}T00:00:00`).getDate();
+              const listaAberta = eventoInscritosAberto === evento.id;
+              const totalInscritos = evento.inscritosDetalhes?.length || 0;
+
+              return (
+                <div
+                  key={evento.id}
+                  className="flex flex-col gap-3 rounded-lg border border-black/10 p-4 md:flex-row"
+                >
+                  <div
+                    aria-label={`Dia ${dia}`}
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-black font-display text-lg font-bold text-parchment"
+                  >
+                    {dia}
                   </div>
 
-                  {eventoInscritosAberto === evento.id && (
-                    <div
-                      style={{
-                        marginTop: "12px",
-                        padding: "14px",
-                        borderRadius: "10px",
-                        background: "#faf8f4",
-                        border: "1px solid #e0dacf",
-                        display: "grid",
-                        gap: "10px",
-                      }}
-                    >
-                      <h4
-                        style={{
-                          margin: 0,
-                          fontSize: "13px",
-                          color: "#211811",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em",
+                  <div className="flex flex-1 flex-col gap-1">
+                    <strong className="font-body text-sm font-bold text-black">
+                      {evento.titulo}
+                    </strong>
+                    <span className="font-body text-xs text-ink-soft">
+                      {new Date(`${evento.data}T00:00:00`).toLocaleDateString(
+                        "pt-BR",
+                      )}{" "}
+                      · {evento.category || "Mutirão"} ·{" "}
+                      {evento.local || "Campinas"}
+                    </span>
+                    <p className="m-0 font-body text-sm text-ink-soft">
+                      {evento.comentarios ||
+                        evento.description ||
+                        "Sem comentários registrados."}
+                    </p>
+
+                    
+<VolunteerList
+  inscritos={evento.inscritosDetalhes || []}
+  vagas={evento.vagas || 6}
+  aberto={eventoInscritosAberto === evento.id}
+  onToggle={() =>
+    setEventoInscritosAberto((atual) =>
+      atual === evento.id ? null : evento.id,
+    )
+  }
+  onRemover={(nomeOuEmail) =>
+    handleRemoverVoluntario(evento.id, nomeOuEmail)
+  }
+/>
+
+                    <div className="mt-3 flex flex-wrap gap-2 border-t border-black/10 pt-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNovoEvento({
+                            titulo: evento.titulo,
+                            data: evento.data,
+                            comentarios:
+                              evento.comentarios || evento.description || "",
+                            local: evento.local || "Centro de Campinas",
+                            category: evento.category || "Mutirão",
+                            vagas: evento.vagas || 6,
+                          });
+                          setEventoEmEdicao(evento.id);
+                          setFormularioAberto(true);
                         }}
+                        className="inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-pill border border-black/20 bg-white px-3 font-body text-[13px] font-bold text-black transition-colors hover:bg-black/5"
                       >
-                        Lista de Voluntários Confirmados (
-                        {evento.inscritosDetalhes?.length || 0})
-                      </h4>
-
-                      {!evento.inscritosDetalhes ||
-                      evento.inscritosDetalhes.length === 0 ? (
-                        <p
-                          style={{ margin: 0, fontSize: "12px", color: "#666" }}
-                        >
-                          Nenhum voluntário inscrito nesta ação até o momento.
-                        </p>
-                      ) : (
-                        evento.inscritosDetalhes.map((voluntario, idx) => (
-                          <div
-                            key={idx}
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "flex-start",
-                              padding: "10px 12px",
-                              background: "#ffffff",
-                              borderRadius: "8px",
-                              border: "1px solid #ece7de",
-                              flexWrap: "wrap",
-                              gap: "8px",
-                            }}
-                          >
-                            <div style={{ display: "grid", gap: "3px" }}>
-                              <strong
-                                style={{ fontSize: "14px", color: "#000000" }}
-                              >
-                                👤 {voluntario.nome}
-                              </strong>
-                              <span style={{ fontSize: "12px", color: "#555" }}>
-                                ✉️{" "}
-                                <a
-                                  href={`mailto:${voluntario.email}`}
-                                  style={{
-                                    color: "#1a745a",
-                                    textDecoration: "underline",
-                                  }}
-                                >
-                                  {voluntario.email}
-                                </a>
-                              </span>
-                              {voluntario.telefone && (
-                                <span
-                                  style={{ fontSize: "12px", color: "#555" }}
-                                >
-                                  📞{" "}
-                                  <a
-                                    href={`tel:${voluntario.telefone}`}
-                                    style={{
-                                      color: "#211811",
-                                      fontWeight: 600,
-                                    }}
-                                  >
-                                    {voluntario.telefone}
-                                  </a>
-                                  {" · "}
-                                  <a
-                                    href={`https://wa.me/55${voluntario.telefone.replace(/\D/g, "")}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    style={{
-                                      color: "#1a745a",
-                                      fontWeight: 700,
-                                      textDecoration: "underline",
-                                    }}
-                                  >
-                                    WhatsApp
-                                  </a>
-                                </span>
-                              )}
-                              {voluntario.sobre && (
-                                <p
-                                  style={{
-                                    margin: "4px 0 0",
-                                    fontSize: "12px",
-                                    fontStyle: "italic",
-                                    color: "#666",
-                                  }}
-                                >
-                                  "{voluntario.sobre}"
-                                </p>
-                              )}
-                              {voluntario.dataInscricao && (
-                                <small
-                                  style={{
-                                    fontSize: "10px",
-                                    color: "#888",
-                                    marginTop: "3px",
-                                  }}
-                                >
-                                  Inscrito(a) em:{" "}
-                                  {new Date(
-                                    `${voluntario.dataInscricao}T00:00:00`,
-                                  ).toLocaleDateString("pt-BR")}
-                                </small>
-                              )}
-                            </div>
-
-                            <button
-                              type="button"
-                              style={{
-                                padding: "4px 8px",
-                                borderRadius: "6px",
-                                border: "1px solid #f8b4b4",
-                                background: "#fde8e8",
-                                color: "#b91c1c",
-                                fontSize: "11px",
-                                fontWeight: 700,
-                                cursor: "pointer",
-                              }}
-                              onClick={() =>
-                                handleRemoverVoluntario(
-                                  evento.id,
-                                  voluntario.email || voluntario.nome,
-                                )
-                              }
-                            >
-                              Remover da ação
-                            </button>
-                          </div>
-                        ))
-                      )}
+                        <Pencil size={14} className="shrink-0" />
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => excluirEvento(evento.id)}
+                        className="inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-pill px-3 font-body text-[13px] font-bold text-error/70 transition-colors hover:bg-error/10 hover:text-error"
+                      >
+                        <Trash2 size={14} className="shrink-0" />
+                        Excluir
+                      </button>
                     </div>
-                  )}
+                  </div>
                 </div>
-                <div className="admin-event__actions">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setNovoEvento({
-                        titulo: evento.titulo,
-                        data: evento.data,
-                        comentarios:
-                          evento.comentarios || evento.description || "",
-                        local: evento.local || "Centro de Campinas",
-                        category: evento.category || "Mutirão",
-                        vagas: evento.vagas || 6,
-                      });
-                      setEventoEmEdicao(evento.id);
-                      setFormularioAberto(true);
-                    }}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => excluirEvento(evento.id)}
-                  >
-                    Excluir
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* Seção única de Gestão e Aprovação de Usuários (Voluntários e Colaboradores) */}
       <section
-        className="admin-panel approval-panel"
         aria-label="Gestão de cadastros e acessos"
+        className="flex flex-col gap-4 rounded-xl border border-black/10 bg-white p-7"
       >
-        <div className="admin-panel__heading">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="admin-page__kicker">Central de Cadastros</p>
-            <h2>Aprovação e Gestão de Acessos</h2>
+            <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-black/50">
+              Central de Cadastros
+            </p>
+            <h2 className="m-0 font-display text-[1.15rem] font-semibold text-black">
+              Aprovação e Gestão de Acessos
+            </h2>
           </div>
-          <span className="admin-badge">
+          <span className="inline-flex h-fit items-center rounded-pill bg-amber/15 px-3 py-1.5 font-body text-xs font-bold text-amber">
             {solicitacoes.filter((s) => s.status === "pendente").length}{" "}
             pendentes
           </span>
         </div>
-        <p className="approval-description">
+        <p className="m-0 max-w-2xl font-body text-sm text-ink-soft">
           Avalie e aprove solicitações de cadastro. Você pode decidir se o
-          usuário atuará como Voluntário ou Colaborador e definir sua permissão
-          de acesso.
+          usuário atuará como Voluntário ou Colaborador e definir sua
+          permissão de acesso.
         </p>
 
         <ApprovalPanelContent
@@ -588,13 +556,8 @@ export default function DashboardAdmin() {
 
       {/* Seção de Comunicação Interna e Mural da Equipe */}
       <section
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
-          gap: "24px",
-          marginTop: "16px",
-        }}
         aria-label="Comunicação e Mural"
+        className="grid grid-cols-1 gap-6 md:grid-cols-2"
       >
         <MessageBox
           author="admin"
@@ -623,8 +586,8 @@ function ApprovalPanelContent({
   const [filtroStatus, setFiltroStatus] = useState<StatusAcesso | "todos">(
     "pendente",
   );
-  const [filtroTipo, setFiltroTipo] = useState<
-    "todos" | "voluntario" | "colaborador"
+  const [filtroTipo, setFiltroTipo] = useState
+    <"todos" | "voluntario" | "colaborador"
   >("todos");
   const [busca, setBusca] = useState("");
   const [mensagemFeedback, setMensagemFeedback] = useState<string | null>(null);
@@ -681,108 +644,125 @@ function ApprovalPanelContent({
       {mensagemFeedback && (
         <div
           role="status"
-          style={{
-            marginTop: "14px",
-            padding: "10px 16px",
-            borderRadius: "10px",
-            backgroundColor: "#e6f4ea",
-            color: "#137333",
-            fontWeight: 600,
-            fontSize: "13px",
-            border: "1px solid #ceead6",
-          }}
+          className="inline-flex w-fit items-center gap-1.5 rounded-md border border-volunteer/25 bg-volunteer-soft px-4 py-2.5 font-body text-[13px] font-semibold text-volunteer"
         >
-          ✓ {mensagemFeedback}
+          <Check size={14} />
+          {mensagemFeedback}
         </div>
       )}
-      <div className="approval-filters">
-        <div className="approval-summary" aria-label="Filtro por status">
-          <button
-            className={filtroStatus === "pendente" ? "ativo" : ""}
-            type="button"
-            onClick={() => setFiltroStatus("pendente")}
-          >
-            <strong>{contagens.pendente}</strong>
-            <span>Pendentes</span>
-          </button>
-          <button
-            className={filtroStatus === "aceito" ? "ativo" : ""}
-            type="button"
-            onClick={() => setFiltroStatus("aceito")}
-          >
-            <strong>{contagens.aceito}</strong>
-            <span>Aceitos</span>
-          </button>
-          <button
-            className={filtroStatus === "recusado" ? "ativo" : ""}
-            type="button"
-            onClick={() => setFiltroStatus("recusado")}
-          >
-            <strong>{contagens.recusado}</strong>
-            <span>Recusados</span>
-          </button>
-          <button
-            className={filtroStatus === "todos" ? "ativo" : ""}
-            type="button"
-            onClick={() => setFiltroStatus("todos")}
-          >
-            <strong>{contagens.todos}</strong>
-            <span>Todos</span>
-          </button>
+
+      <div className="flex flex-col gap-4">
+        <div
+          aria-label="Filtro por status"
+          className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+        >
+          {(
+            [
+              { key: "pendente", label: "Pendentes" },
+              { key: "aceito", label: "Aceitos" },
+              { key: "recusado", label: "Recusados" },
+              { key: "todos", label: "Todos" },
+            ] as const
+          ).map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => setFiltroStatus(item.key)}
+              className={`flex flex-col items-center gap-0.5 rounded-md border px-3 py-3 transition-colors ${
+                filtroStatus === item.key
+                  ? "border-black bg-black text-parchment"
+                  : "border-black/15 bg-white text-black hover:bg-black/5"
+              }`}
+            >
+              <strong className="font-display text-lg font-semibold">
+                {contagens[item.key]}
+              </strong>
+              <span className="font-body text-xs">{item.label}</span>
+            </button>
+          ))}
         </div>
 
-        <div className="approval-type-tabs">
-          <span>Filtrar perfil:</span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-body text-[13px] font-bold text-black">
+            Filtrar perfil:
+          </span>
           <button
             type="button"
-            className={filtroTipo === "todos" ? "ativo" : ""}
             onClick={() => setFiltroTipo("todos")}
+            className={`rounded-pill px-3.5 py-1.5 font-body text-[13px] font-bold transition-colors ${
+              filtroTipo === "todos"
+                ? "bg-black text-parchment"
+                : "border border-black/20 bg-white text-black hover:bg-black/5"
+            }`}
           >
             Todos os perfis
           </button>
           <button
             type="button"
-            className={filtroTipo === "voluntario" ? "ativo" : ""}
             onClick={() => setFiltroTipo("voluntario")}
+            className={`rounded-pill px-3.5 py-1.5 font-body text-[13px] font-bold transition-colors ${
+              filtroTipo === "voluntario"
+                ? "bg-volunteer text-parchment"
+                : "border border-volunteer/30 bg-volunteer-soft text-volunteer hover:opacity-90"
+            }`}
           >
             Voluntários
           </button>
           <button
             type="button"
-            className={filtroTipo === "colaborador" ? "ativo" : ""}
             onClick={() => setFiltroTipo("colaborador")}
+            className={`rounded-pill px-3.5 py-1.5 font-body text-[13px] font-bold transition-colors ${
+              filtroTipo === "colaborador"
+                ? "bg-amber text-parchment"
+                : "border border-amber/30 bg-amber/10 text-amber hover:opacity-90"
+            }`}
           >
             Colaboradores
           </button>
         </div>
       </div>
 
-      <label className="approval-search">
+      <label className="flex flex-col gap-1.5 font-body text-[13px] font-bold text-black">
         Buscar pessoa
-        <input
-          type="search"
-          placeholder="Nome, e-mail, telefone ou interesse"
-          value={busca}
-          onChange={(evento) => setBusca(evento.target.value)}
-        />
+        <div className="flex items-center gap-2 rounded-sm border border-black/[0.18] bg-white px-4 py-3 focus-within:outline focus-within:outline-2 focus-within:outline-amber focus-within:outline-offset-1">
+          <Search size={15} className="shrink-0 text-black/40" />
+          <input
+            type="search"
+            placeholder="Nome, e-mail, telefone ou interesse"
+            value={busca}
+            onChange={(evento) => setBusca(evento.target.value)}
+            className="w-full border-none bg-transparent font-body text-sm font-normal text-black outline-none"
+          />
+        </div>
       </label>
 
-      <div className="approval-list">
+      <div className="flex flex-col gap-3">
         {exibidos.length === 0 && (
-          <p className="approval-empty">
+          <p className="m-0 font-body text-sm text-ink-soft">
             Nenhuma solicitação encontrada para os filtros selecionados.
           </p>
         )}
         {exibidos.map((registro) => (
-          <div className="approval-item" key={registro.id}>
-            <div className="approval-person">
-              <strong>{registro.nome}</strong>
-              <span>{registro.email}</span>
-              <span>{registro.telefone}</span>
+          <div
+            key={registro.id}
+            className="flex flex-col gap-4 rounded-lg border border-black/10 p-4 lg:flex-row lg:items-start lg:justify-between"
+          >
+            <div className="flex flex-col gap-0.5">
+              <strong className="font-body text-sm font-bold text-black">
+                {registro.nome}
+              </strong>
+              <span className="font-body text-xs text-ink-soft">
+                {registro.email}
+              </span>
+              <span className="font-body text-xs text-ink-soft">
+                {registro.telefone}
+              </span>
               {registro.sobre && (
-                <p className="approval-sobre">"{registro.sobre}"</p>
+                <p className="m-0 mt-1 max-w-md font-body text-xs italic text-ink-soft">
+                  "{registro.sobre}"
+                </p>
               )}
-              <small>
+              <small className="mt-1 font-body text-[10px] text-black/40">
                 Solicitado em{" "}
                 {new Date(
                   `${registro.dataSolicitacao}T00:00:00`,
@@ -790,16 +770,16 @@ function ApprovalPanelContent({
               </small>
             </div>
 
-            <div className="approval-item__right">
-              {/* Botões para o administrador decidir se a pessoa é Voluntário ou Colaborador */}
+            <div className="flex flex-col items-start gap-3 lg:items-end">
               <div
-                className="approval-role-selector"
                 title="Definir perfil da pessoa"
+                className="flex items-center gap-2"
               >
-                <span className="approval-role-label">Perfil:</span>
+                <span className="font-body text-xs font-bold text-black/50">
+                  Perfil:
+                </span>
                 <button
                   type="button"
-                  className={`approval-role-btn ${registro.tipo === "voluntario" ? "ativo" : ""}`}
                   onClick={() =>
                     executarAtualizarTipo(
                       registro.id,
@@ -807,12 +787,16 @@ function ApprovalPanelContent({
                       registro.nome,
                     )
                   }
+                  className={`rounded-pill px-3 py-1.5 font-body text-xs font-bold transition-colors ${
+                    registro.tipo === "voluntario"
+                      ? "bg-volunteer text-parchment"
+                      : "border border-black/15 bg-white text-black hover:bg-black/5"
+                  }`}
                 >
                   Voluntário
                 </button>
                 <button
                   type="button"
-                  className={`approval-role-btn ${registro.tipo === "colaborador" ? "ativo" : ""}`}
                   onClick={() =>
                     executarAtualizarTipo(
                       registro.id,
@@ -820,24 +804,33 @@ function ApprovalPanelContent({
                       registro.nome,
                     )
                   }
+                  className={`rounded-pill px-3 py-1.5 font-body text-xs font-bold transition-colors ${
+                    registro.tipo === "colaborador"
+                      ? "bg-amber text-parchment"
+                      : "border border-black/15 bg-white text-black hover:bg-black/5"
+                  }`}
                 >
                   Colaborador
                 </button>
               </div>
 
               <span
-                className={`approval-status approval-status--${registro.status}`}
+                className={`rounded-pill px-3 py-1 font-body text-xs font-bold capitalize ${
+                  registro.status === "aceito"
+                    ? "bg-volunteer-soft text-volunteer"
+                    : registro.status === "recusado"
+                      ? "bg-error/10 text-error"
+                      : "bg-amber/15 text-amber"
+                }`}
               >
                 {registro.status}
               </span>
 
-              {/* Botões de Ação: Aceitar / Recusar / Reabrir */}
-              <div className="approval-actions">
+              <div className="flex flex-wrap gap-2">
                 {registro.status === "pendente" && (
                   <>
                     <button
                       type="button"
-                      className="btn-accept"
                       onClick={() =>
                         executarAtualizarStatus(
                           registro.id,
@@ -845,12 +838,13 @@ function ApprovalPanelContent({
                           registro.nome,
                         )
                       }
+                      className="inline-flex items-center gap-1.5 rounded-pill bg-volunteer px-3.5 py-2 font-body text-[13px] font-bold text-parchment transition-opacity hover:opacity-90"
                     >
-                      ✓ Aceitar
+                      <Check size={14} />
+                      Aceitar
                     </button>
                     <button
                       type="button"
-                      className="btn-reject"
                       onClick={() =>
                         executarAtualizarStatus(
                           registro.id,
@@ -858,8 +852,10 @@ function ApprovalPanelContent({
                           registro.nome,
                         )
                       }
+                      className="inline-flex items-center gap-1.5 rounded-pill border border-error/40 px-3.5 py-2 font-body text-[13px] font-bold text-error transition-colors hover:bg-error/10"
                     >
-                      ✕ Recusar
+                      <X size={14} />
+                      Recusar
                     </button>
                   </>
                 )}
@@ -868,7 +864,6 @@ function ApprovalPanelContent({
                   <>
                     <button
                       type="button"
-                      className="btn-reject"
                       onClick={() =>
                         executarAtualizarStatus(
                           registro.id,
@@ -876,12 +871,13 @@ function ApprovalPanelContent({
                           registro.nome,
                         )
                       }
+                      className="inline-flex items-center gap-1.5 rounded-pill border border-error/40 px-3.5 py-2 font-body text-[13px] font-bold text-error transition-colors hover:bg-error/10"
                     >
+                      <X size={14} />
                       Mudar p/ Recusar
                     </button>
                     <button
                       type="button"
-                      className="btn-reopen"
                       onClick={() =>
                         executarAtualizarStatus(
                           registro.id,
@@ -889,7 +885,9 @@ function ApprovalPanelContent({
                           registro.nome,
                         )
                       }
+                      className="inline-flex items-center gap-1.5 rounded-pill border border-black/20 bg-white px-3.5 py-2 font-body text-[13px] font-bold text-black transition-colors hover:bg-black/5"
                     >
+                      <RotateCcw size={14} />
                       Reabrir análise
                     </button>
                   </>
@@ -899,7 +897,6 @@ function ApprovalPanelContent({
                   <>
                     <button
                       type="button"
-                      className="btn-accept"
                       onClick={() =>
                         executarAtualizarStatus(
                           registro.id,
@@ -907,12 +904,13 @@ function ApprovalPanelContent({
                           registro.nome,
                         )
                       }
+                      className="inline-flex items-center gap-1.5 rounded-pill bg-volunteer px-3.5 py-2 font-body text-[13px] font-bold text-parchment transition-opacity hover:opacity-90"
                     >
+                      <Check size={14} />
                       Aprovar acesso
                     </button>
                     <button
                       type="button"
-                      className="btn-reopen"
                       onClick={() =>
                         executarAtualizarStatus(
                           registro.id,
@@ -920,7 +918,9 @@ function ApprovalPanelContent({
                           registro.nome,
                         )
                       }
+                      className="inline-flex items-center gap-1.5 rounded-pill border border-black/20 bg-white px-3.5 py-2 font-body text-[13px] font-bold text-black transition-colors hover:bg-black/5"
                     >
+                      <RotateCcw size={14} />
                       Reabrir análise
                     </button>
                   </>

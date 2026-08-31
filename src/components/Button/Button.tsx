@@ -9,7 +9,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
-  primary: "bg-gold text-black",
+  primary: "bg-amber/15 text-amber",
   dark: "bg-black text-parchment",
   outline: "bg-transparent text-black border border-black",
 };
