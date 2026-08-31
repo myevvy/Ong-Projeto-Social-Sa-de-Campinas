@@ -8,7 +8,7 @@ import { Kicker, DatePill, Button, FormField } from "../../components";
 import type { UsuarioAutenticado } from "../../types/auth";
 import type { DashboardColaboradorData } from "../../types/dashboard";
 import { VolunteerList } from "../../components/VolunteerList/VolunteerList";
-
+import { LogoutButton } from "../../components/LogoutButton/LogoutButton";
 function saudacaoPorHorario(): string {
   const hora = new Date().getHours();
   if (hora < 12) return "Bom dia";
@@ -38,11 +38,14 @@ const TONE_CARD_CLASSES: Record<StatTone, string> = {
   baixo: "bg-gold/10 border border-gold/25",
 };
 
+// Valor sempre em preto quente: cor do tom fica só no fundo/borda (decorativo),
+// nunca carregando sozinha o significado — evita contraste insuficiente
+// e não depende só de cor pra passar a informação (label abaixo já reforça).
 const TONE_VALUE_CLASSES: Record<StatTone, string> = {
   neutro: "text-black",
-  atencao: "text-amber",
+  atencao: "text-black",
   critico: "text-error",
-  baixo: "text-[#b5872f]",
+  baixo: "text-black",
 };
 
 function StatCard({
@@ -56,7 +59,7 @@ function StatCard({
 }) {
   return (
     <div
-      className={`flex flex-col gap-1 rounded-md p-4 ${TONE_CARD_CLASSES[tone]}`}
+      className={`flex flex-col gap-1 rounded-2xl p-4 ${TONE_CARD_CLASSES[tone]}`}
     >
       <span
         className={`font-display text-xl font-semibold ${TONE_VALUE_CLASSES[tone]}`}
@@ -83,7 +86,7 @@ function SectionCard({
   return (
     <section
       aria-labelledby={id}
-      className="rounded-lg border border-black/10 bg-white p-6"
+      className="rounded-2xl border border-black/10 bg-white p-6"
     >
       <h2
         id={id}
@@ -191,19 +194,19 @@ export default function DashboardColaborador({
     // max-w limita a largura útil — é isso que resolve o "muito largo".
     // Sem isso, em monitor grande cada seção estica até a borda da tela.
     <div className="mx-auto flex max-w-[1120px] flex-col gap-6 px-6 py-8 md:px-10">
-      <header className="flex items-center justify-between">
+      <header className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1.5">
           <Kicker>Painel do colaborador</Kicker>
           <h1 className="m-0 font-display text-[26px] font-semibold text-black md:text-[32px]">
             {saudacaoPorHorario()}, {nomeColaborador.split(" ")[0]}
           </h1>
         </div>
-        <button
-          type="button"
-          className="cursor-pointer rounded-pill border border-black px-4 py-2 font-body text-xs font-bold text-black transition hover:bg-black hover:text-white"
-          onClick={() => {
-            localStorage.removeItem("usuario");
-            localStorage.removeItem("token");
+        <LogoutButton />
+      </header>
+
+      {/* Grid 2 colunas no desktop: conteúdo principal (2/3) + lateral (1/3).
+      lg:items-start + sticky na lateral evita o "buraco" que sobrava quando
+      a coluna principal (estoque + ações) fica mais alta que a lateral —
             window.location.assign("/login");
           }}
         >
@@ -212,8 +215,10 @@ export default function DashboardColaborador({
       </header>
 
       {/* Grid 2 colunas no desktop: conteúdo principal (2/3) + lateral (1/3).
-      É o que dá a "cara de dashboard organizado" em vez de tudo empilhado. */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      lg:items-start + sticky na lateral evita o "buraco" que sobrava quando
+      a coluna principal (estoque + ações) fica mais alta que a lateral —
+      em vez de deixar espaço vazio embaixo, a lateral acompanha o scroll. */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
         <div className="flex flex-col gap-6 lg:col-span-2">
           <SectionCard id="secao-estoque" title="Estoque de medicamentos">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -270,45 +275,44 @@ export default function DashboardColaborador({
                   const inscritos = acao.voluntariosInscritos || 0;
                   const aberto = acaoInscritosAberta === acao.id;
 
-                 return (
-  <div
-    key={acao.id}
-    className="rounded-md border border-black/10 p-3.5 bg-white transition"
-  >
-    <div className="flex items-center justify-between gap-3 flex-wrap">
-      <div className="flex items-center gap-3">
-        <DatePill label={`${dia} ${mes.toUpperCase()}`} />
-        <div className="flex flex-col gap-0.5">
-          <h3 className="m-0 font-display text-[15px] font-semibold text-black">
-            {acao.titulo}
-          </h3>
-          <span className="font-body text-xs text-ink-soft">
-            {acao.local || "Campinas"} · {inscritos}{" "}
-            {inscritos === 1 ? "voluntário" : "voluntários"}{" "}
-            inscritos
-          </span>
-        </div>
-      </div>
-    </div>
-    
+                  return (
+                    <div
+                      key={acao.id}
+                      className="rounded-2xl border border-black/10 bg-white p-3.5 transition hover:border-black/20"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <DatePill label={`${dia} ${mes.toUpperCase()}`} />
+                          <div className="flex flex-col gap-0.5">
+                            <h3 className="m-0 font-display text-[15px] font-semibold text-black">
+                              {acao.titulo}
+                            </h3>
+                            <span className="font-body text-xs text-ink-soft">
+                              {acao.local || "Campinas"} · {inscritos}{" "}
+                              {inscritos === 1 ? "voluntário" : "voluntários"}{" "}
+                              inscritos
+                            </span>
+                          </div>
+                        </div>
+                      </div>
 
-  <VolunteerList
-  inscritos={acao.inscritosDetalhes || []}
-  vagas={acao.vagas || 6}
-  aberto={acaoInscritosAberta === acao.id}
-  onToggle={() =>
-    setAcaoInscritosAberta((atual) =>
-      atual === acao.id ? null : acao.id,
-    )
-  }
-  somenteLeitura={true}
-  onRemover={() => {}}
-/>
-  </div>
-);
-})}
-</div>
-)}
+                      <VolunteerList
+                        inscritos={acao.inscritosDetalhes || []}
+                        vagas={acao.vagas || 6}
+                        aberto={acaoInscritosAberta === acao.id}
+                        onToggle={() =>
+                          setAcaoInscritosAberta((atual) =>
+                            atual === acao.id ? null : acao.id,
+                          )
+                        }
+                        somenteLeitura={true}
+                        onRemover={() => {}}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             <div className="mt-5">
               <EventCalendar
                 events={eventosCompartilhados.map((acao) => ({
@@ -322,49 +326,51 @@ export default function DashboardColaborador({
           </SectionCard>
         </div>
 
-        {/* Coluna lateral: cards mais curtos e independentes — o que antes
-        eram 2 seções full-width viram blocos compactos lado a lado
-        com o conteúdo principal, aproveitando a largura da tela. */}
-        <div className="flex flex-col gap-6">
-          <SectionCard id="secao-doacoes" title="Doações do mês">
-            <div className="flex flex-col gap-4 rounded-md bg-black p-5">
-              <div>
-                <span className="block font-display text-xl font-semibold text-parchment">
-                  {formatarMoeda(doacoes.valorTotalMes)}
-                </span>
-                <span className="font-body text-xs text-[#c8c8c3]">
-                  arrecadados este mês
-                </span>
-              </div>
-              <div>
-                <span className="block font-display text-xl font-semibold text-parchment">
-                  {doacoes.quantidadeMes}
-                </span>
-                <span className="font-body text-xs text-[#c8c8c3]">
-                  {doacoes.quantidadeMes === 1
-                    ? "doação recebida"
-                    : "doações recebidas"}
-                </span>
-              </div>
-            </div>
-            <a
-              href="/dashboard/doacoes"
-              onClick={abrirDoacoes}
-              className="mt-3 inline-block font-body text-sm font-bold text-black underline underline-offset-2"
-            >
-              Ver gestão de doações →
-            </a>
-          </SectionCard>
+        {/* Coluna lateral: sticky no desktop pra não deixar "buraco" quando
+        a coluna principal cresce (mais eventos, mais medicamentos etc). */}
+        <div className="flex flex-col gap-6 lg:sticky lg:top-8">
+         <SectionCard id="secao-doacoes" title="Doações do mês">
+ <div className="grid grid-cols-1 gap-2 rounded-2xl bg-black p-5 ring-1 ring-white/5 lg:gap-3 lg:p-8">
+  <div className="flex min-w-0 flex-col gap-1 border-r border-white/10 pr-4 lg:pr-6">
+    <span className="font-mono text-[11px] font-semibold uppercase tracking-wide text-gold">
+      Arrecadado
+    </span>
+    <span className="font-display text-lg font-semibold text-parchment break-words sm:text-xl">
+      {formatarMoeda(doacoes.valorTotalMes)}
+    </span>
+    <span className="font-body text-xs text-parchment/60">este mês</span>
+  </div>
+  <div className="flex min-w-0 flex-col gap-1 pl-1 lg:pl-2">
+    <span className="font-mono text-[11px] font-semibold uppercase tracking-wide text-gold">
+      Doações
+    </span>
+    <span className="font-display text-lg font-semibold text-parchment sm:text-xl">
+      {doacoes.quantidadeMes}
+    </span>
+    <span className="font-body text-xs text-parchment/60">
+      {doacoes.quantidadeMes === 1 ? "recebida" : "recebidas"}
+    </span>
+  </div>
+</div>
 
+  
+   <a href="/dashboard/doacoes"
+    onClick={abrirDoacoes}
+    className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-pill bg-amber px-5 py-2.5 font-body text-sm font-bold text-black transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
+  >
+    Ver gestão de doações
+    <span aria-hidden="true">→</span>
+  </a>
+</SectionCard>
           <SectionCard id="secao-voluntarios" title="Voluntários">
             <div className="flex flex-col gap-3">
-              <div className="flex items-baseline justify-between">
+              <div className="flex items-baseline justify-between gap-3">
                 <span className="font-body text-sm text-ink-soft">Ativos</span>
                 <strong className="font-display text-lg font-semibold text-black">
                   9
                 </strong>
               </div>
-              <div className="flex items-baseline justify-between">
+              <div className="flex items-baseline justify-between gap-3">
                 <span className="font-body text-sm text-ink-soft">
                   Aguardando confirmação
                 </span>
@@ -372,9 +378,9 @@ export default function DashboardColaborador({
                   3
                 </strong>
               </div>
-              <div className="flex items-baseline justify-between">
+              <div className="flex items-baseline justify-between gap-3">
                 <span className="font-body text-sm text-ink-soft">
-                  Inscrições nas próximas <br /> ações
+                  Inscrições nas próximas ações
                 </span>
                 <strong className="font-display text-lg font-semibold text-black">
                   18

@@ -104,7 +104,7 @@ export function MuralBoard({
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-black/50">
+          <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-gold">
             Comunidade & Relatos
           </p>
           <h2
@@ -114,7 +114,7 @@ export function MuralBoard({
             Mural da Equipe
           </h2>
         </div>
-        <span className="rounded-pill border border-black/15 px-3 py-1 font-body text-xs font-bold text-ink-soft">
+        <span className="rounded-pill border border-gold bg-gold/10 px-3 py-1 font-body text-xs font-bold text-gold">
           {postagens.length}{" "}
           {postagens.length === 1 ? "publicação" : "publicações"}
         </span>

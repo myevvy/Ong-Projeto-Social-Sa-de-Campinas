@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import "./DashboardMedicamentos.css";
+import { Pencil, Trash2, X } from "lucide-react";
 
 export interface MedicamentosProps {
   nome: string;
@@ -134,6 +134,23 @@ function agruparMedicamentos(
   return Array.from(grupos.values());
 }
 
+// Classifica a urgência da validade para dar destaque visual sem alterar a lógica de dados
+function statusValidade(validade: string): "vencido" | "proximo" | "ok" {
+  const hoje = new Date();
+  const dataValidade = new Date(`${validade}T00:00:00`);
+  const inicioHoje = new Date(
+    hoje.getFullYear(),
+    hoje.getMonth(),
+    hoje.getDate(),
+  );
+  const diferencaEmDias = Math.ceil(
+    (dataValidade.getTime() - inicioHoje.getTime()) / (1000 * 60 * 60 * 24),
+  );
+  if (diferencaEmDias < 0) return "vencido";
+  if (diferencaEmDias <= 30) return "proximo";
+  return "ok";
+}
+
 export default function DashboardMedicamentos({
   medicamentosIniciais = [],
 }: DashboardMedicamentosProps) {
@@ -251,49 +268,81 @@ export default function DashboardMedicamentos({
   }
 
   return (
-    <div className="dashboard-medicamentos">
-      <a href="/dashboard/colaborador" onClick={voltarParaDashboard}>
-        Voltar para o dashboard
+    <div className="mx-auto flex max-w-[1120px] flex-col gap-6 px-6 py-8 md:px-10">
+      
+        <a href="/dashboard/colaborador"
+        onClick={voltarParaDashboard}
+        className="inline-flex w-fit items-center gap-1.5 font-body text-sm font-bold text-black underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-2"
+      >
+        <span aria-hidden="true">←</span> Voltar para o dashboard
       </a>
-      <header className="dashboard-medicamentos__header">
+
+      <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="dashboard-medicamentos__eyebrow">Controle de estoque</p>
-          <h1>Medicamentos</h1>
-          <p className="dashboard-medicamentos__intro">
+          <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-gold">
+            Controle de estoque
+          </p>
+          <h1 className="m-0 font-display text-[28px] font-semibold text-black md:text-[32px]">
+            Medicamentos
+          </h1>
+          <p className="m-0 mt-1.5 max-w-md font-body text-sm text-ink-soft">
             Cadastre e acompanhe os itens disponíveis para atendimento.
           </p>
         </div>
         <button
-          className="dashboard-medicamentos__primary-button"
           type="button"
           onClick={() => setFormularioAberto((estadoAtual) => !estadoAtual)}
+          aria-expanded={formularioAberto}
+          className="inline-flex items-center gap-1.5 rounded-pill bg-black  px-4 py-2.5 font-body text-[13px] font-bold text-white mt-15 border transition-colors hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-2"
         >
-          {formularioAberto ? "Fechar cadastro" : "+ Adicionar medicamento"}
+          {formularioAberto ? (
+            <>
+              <X size={15} aria-hidden="true" /> Fechar cadastro
+            </>
+          ) : (
+            "+ Adicionar medicamento"
+          )}
         </button>
       </header>
 
       {formularioAberto && (
-        <form className="medicamento-form" onSubmit={criarMedicamento}>
-          <div className="medicamento-form__heading">
+        <form
+          onSubmit={criarMedicamento}
+          aria-labelledby="novo-registro-titulo"
+          className="grid grid-cols-1 gap-4 rounded-lg border border-black/10 bg-white p-6 md:grid-cols-2"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2 md:col-span-2">
             <div>
-              <p className="dashboard-medicamentos__eyebrow">Novo registro</p>
-              <h2>Adicionar medicamento</h2>
+              <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-gold">
+                Novo registro
+              </p>
+              <h2
+                id="novo-registro-titulo"
+                className="m-0 font-display text-lg font-semibold text-black"
+              >
+                Adicionar medicamento
+              </h2>
             </div>
-            <span className="medicamento-form__required">
+            <span className="font-body text-xs text-ink-soft">
               * campos obrigatórios
             </span>
           </div>
-          <label className="medicamento-form__field">
-            Nome
+
+          <label className="flex flex-col gap-1.5 font-body text-[13px] font-bold text-black">
+            Nome *
             <input
               type="text"
               value={formulario.nome}
-              onChange={(evento) => atualizarCampo("nome", evento.target.value)}
+              onChange={(evento) =>
+                atualizarCampo("nome", evento.target.value)
+              }
               required
+              className="rounded-sm border border-black/[0.18] bg-white px-4 py-3 font-body text-sm font-normal text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-1"
             />
           </label>
-          <label className="medicamento-form__field">
-            Quantidade
+
+          <label className="flex flex-col gap-1.5 font-body text-[13px] font-bold text-black">
+            Quantidade *
             <input
               type="number"
               min="0"
@@ -303,16 +352,19 @@ export default function DashboardMedicamentos({
                 atualizarCampo("quantidade", evento.target.value)
               }
               required
+              className="rounded-sm border border-black/[0.18] bg-white px-4 py-3 font-body text-sm font-normal text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-1"
             />
           </label>
-          <label className="medicamento-form__field">
-            Veículo
+
+          <label className="flex flex-col gap-1.5 font-body text-[13px] font-bold text-black">
+            Veículo *
             <select
               value={formulario.veiculo}
               onChange={(evento) =>
                 atualizarCampo("veiculo", evento.target.value)
               }
               required
+              className="rounded-sm border border-black/[0.18] bg-white px-4 py-3 font-body text-sm font-normal text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-1"
             >
               <option value="">Selecione o veículo</option>
               {VEICULOS.map((veiculo) => (
@@ -322,14 +374,16 @@ export default function DashboardMedicamentos({
               ))}
             </select>
           </label>
-          <label className="medicamento-form__field">
-            Via de Administração
+
+          <label className="flex flex-col gap-1.5 font-body text-[13px] font-bold text-black">
+            Via de administração *
             <select
               value={formulario.viaAdm}
               onChange={(evento) =>
                 atualizarCampo("viaAdm", evento.target.value)
               }
               required
+              className="rounded-sm border border-black/[0.18] bg-white px-4 py-3 font-body text-sm font-normal text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-1"
             >
               <option value="">Selecione a via</option>
               {VIAS_DE_ADMINISTRACAO.map((via) => (
@@ -339,24 +393,29 @@ export default function DashboardMedicamentos({
               ))}
             </select>
           </label>
-          <label className="medicamento-form__field">
-            Dose ({unidadePorVeiculo(formulario.veiculo)})
+
+          <label className="flex flex-col gap-1.5 font-body text-[13px] font-bold text-black">
+            Dose ({unidadePorVeiculo(formulario.veiculo)}) *
             <input
               type="number"
               min="0"
               step="any"
               value={formulario.dose}
               onWheel={impedirAlteracaoPorScroll}
-              onChange={(evento) => atualizarCampo("dose", evento.target.value)}
+              onChange={(evento) =>
+                atualizarCampo("dose", evento.target.value)
+              }
               required
+              className="rounded-sm border border-black/[0.18] bg-white px-4 py-3 font-body text-sm font-normal text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-1"
             />
-            <small>
+            <small className="font-body text-xs font-normal text-ink-soft">
               Unidade definida pelo veículo selecionado:{" "}
               {unidadePorVeiculo(formulario.veiculo)}
             </small>
           </label>
-          <label className="medicamento-form__field">
-            Validade
+
+          <label className="flex flex-col gap-1.5 font-body text-[13px] font-bold text-black">
+            Validade *
             <input
               type="date"
               value={formulario.validade}
@@ -364,77 +423,137 @@ export default function DashboardMedicamentos({
                 atualizarCampo("validade", evento.target.value)
               }
               required
+              className="rounded-sm border border-black/[0.18] bg-white px-4 py-3 font-body text-sm font-normal text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-1"
             />
           </label>
-          <button className="medicamento-form__submit" type="submit">
+
+          <button
+            type="submit"
+            className="inline-flex w-fit items-center justify-self-center rounded-pill bg-black px-5 py-3 font-body text-[13px] font-bold text-parchment transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-2 md:col-span-2"
+          >
             Salvar medicamento
           </button>
         </form>
       )}
 
       <section
-        className="medicamentos-section"
         aria-labelledby="medicamentos-cadastrados"
+        className="flex flex-col gap-4 rounded-xl border border-black/10 bg-white p-7"
       >
-        <div className="medicamentos-section__heading">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="dashboard-medicamentos__eyebrow">Inventário</p>
-            <h2 id="medicamentos-cadastrados">Medicamentos cadastrados</h2>
+            <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-gold">
+              Inventário
+            </p>
+            <h2
+              id="medicamentos-cadastrados"
+              className="m-0 font-display text-[1.15rem] font-semibold text-black"
+            >
+              Medicamentos cadastrados
+            </h2>
           </div>
-          <span className="medicamentos-section__count">
+          <span className="rounded-pill border border-gold px-3 py-1.5 font-body text-xs font-bold text-gold">
             {quantidadeTotal} unidades · {medicamentosAgrupados.length} tipos
           </span>
         </div>
-        <div className="medicamentos-list">
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {medicamentosAgrupados.map((grupo) => (
-            <div className="medicamento-card" key={normalizarNome(grupo.nome)}>
-              <div className="medicamento-card__header">
-                <h2>{grupo.nome}</h2>
-                <span>
+            <div
+              key={normalizarNome(grupo.nome)}
+              className="flex flex-col gap-3 rounded-lg border border-black/10 p-5"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <h2 className="m-0 font-display text-base font-semibold text-black">
+                  {grupo.nome}
+                </h2>
+                <span className="rounded-pill bg-gold/15 px-2.5 py-1 font-body text-[11px] font-bold text-gold">
                   {grupo.lotes.length}{" "}
                   {grupo.lotes.length === 1 ? "validade" : "validades"}
                 </span>
               </div>
-              <p className="medicamento-card__total">
+              <p className="m-0 font-body text-sm text-ink-soft">
                 Total em estoque:{" "}
-                {grupo.lotes.reduce(
-                  (total, lote) => total + lote.quantidade,
-                  0,
-                )}{" "}
-                unidades
+                <strong className="font-bold text-black">
+                  {grupo.lotes.reduce(
+                    (total, lote) => total + lote.quantidade,
+                    0,
+                  )}{" "}
+                  unidades
+                </strong>
               </p>
-              <div className="medicamento-card__lotes">
-                {grupo.lotes.map((lote) => (
-                  <div className="medicamento-lote" key={lote.validade}>
-                    <div className="medicamento-lote__heading">
-                      <strong>{lote.quantidade} unidades</strong>
-                      <span>{formatarData(lote.validade)}</span>
-                    </div>
-                    <p>Veículo: {lote.veiculo}</p>
-                    <p>Via: {lote.viaAdm}</p>
-                    <p>
-                      Dose: {lote.dose} {lote.unidadeDose}
-                    </p>
-                    <small>{mensagemDeValidade(lote.validade)}</small>
-                    <div className="medicamento-lote__actions">
-                      <button type="button" onClick={() => editarLote(lote)}>
-                        Editar
-                      </button>
-                      <button
-                        type="button"
-                        className="medicamento-lote__delete"
-                        onClick={() => solicitarExclusao(lote)}
+
+              <div className="flex flex-col gap-2.5">
+                {grupo.lotes.map((lote) => {
+                  const status = statusValidade(lote.validade);
+                  return (
+                    <div
+                      key={lote.validade}
+                      className={`flex flex-col gap-1 rounded-md border p-3.5 ${
+                        status === "vencido"
+                          ? "border-error/30 bg-error/5"
+                          : status === "proximo"
+                            ? "border-amber/30 bg-amber/5"
+                            : "border-black/10 bg-parchment/40"
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <strong className="font-body text-sm font-bold text-black">
+                          {lote.quantidade} unidades
+                        </strong>
+                        <span className="font-body text-xs text-ink-soft">
+                          {formatarData(lote.validade)}
+                        </span>
+                      </div>
+                      <p className="m-0 font-body text-xs text-ink-soft">
+                        Veículo: {lote.veiculo}
+                      </p>
+                      <p className="m-0 font-body text-xs text-ink-soft">
+                        Via: {lote.viaAdm}
+                      </p>
+                      <p className="m-0 font-body text-xs text-ink-soft">
+                        Dose: {lote.dose} {lote.unidadeDose}
+                      </p>
+                      <small
+                        className={`font-body text-xs font-bold ${
+                          status === "vencido"
+                            ? "text-error"
+                            : status === "proximo"
+                              ? "text-amber"
+                              : "text-ink-soft"
+                        }`}
                       >
-                        Excluir
-                      </button>
+                        {mensagemDeValidade(lote.validade)}
+                      </small>
+                      <div className="mt-2 flex flex-wrap gap-2 border-t border-black/10 pt-2.5">
+                        <button
+                          type="button"
+                          onClick={() => editarLote(lote)}
+                          aria-label={`Editar lote de ${lote.quantidade} unidades de ${grupo.nome}, validade ${formatarData(lote.validade)}`}
+                          className="inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-pill border border-black/20 bg-white px-3 font-body text-[13px] font-bold text-black transition-colors hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-2"
+                        >
+                          <Pencil size={14} className="shrink-0" />
+                          Editar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => solicitarExclusao(lote)}
+                          aria-label={`Excluir lote de ${lote.quantidade} unidades de ${grupo.nome}, validade ${formatarData(lote.validade)}`}
+                          className="inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-pill px-3 font-body text-[13px] font-bold text-error/70 transition-colors hover:bg-error/10 hover:text-error focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-2"
+                        >
+                          <Trash2 size={14} className="shrink-0" />
+                          Excluir
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}
+
           {medicamentosAgrupados.length === 0 && (
-            <p className="medicamentos-list__empty">
+            <p className="m-0 rounded-md border border-dashed border-black/15 px-4 py-8 text-center font-body text-sm text-ink-soft md:col-span-2">
               Nenhum medicamento cadastrado. Adicione o primeiro item acima.
             </p>
           )}
@@ -442,36 +561,47 @@ export default function DashboardMedicamentos({
       </section>
 
       {confirmacao && (
-        <div className="confirmacao-overlay" role="presentation">
+        <div
+          role="presentation"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+        >
           <div
-            className="confirmacao-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="confirmacao-titulo"
+            className="flex w-full max-w-sm flex-col gap-3 rounded-xl bg-white p-6"
           >
-            <p className="dashboard-medicamentos__eyebrow">Confirmação</p>
-            <h2 id="confirmacao-titulo">
+            <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-black/50">
+              Confirmação
+            </p>
+            <h2
+              id="confirmacao-titulo"
+              className="m-0 font-display text-lg font-semibold text-black"
+            >
               {confirmacao.tipo === "editar"
                 ? "Salvar alterações?"
                 : "Excluir este lote?"}
             </h2>
-            <p>
+            <p className="m-0 font-body text-sm text-ink-soft">
               {confirmacao.tipo === "editar"
                 ? "As informações deste lote serão atualizadas no estoque."
                 : "Esta ação removerá todas as unidades deste lote e não poderá ser desfeita."}
             </p>
-            <div className="confirmacao-modal__actions">
-              <button type="button" onClick={() => setConfirmacao(null)}>
+            <div className="mt-2 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmacao(null)}
+                autoFocus
+                className="inline-flex items-center rounded-pill border border-black/20 bg-white px-4 py-2.5 font-body text-[13px] font-bold text-black transition-colors hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-2"
+              >
                 Cancelar
               </button>
               <button
                 type="button"
-                className={
-                  confirmacao.tipo === "excluir"
-                    ? "confirmacao-modal__confirm--danger"
-                    : "confirmacao-modal__confirm"
-                }
                 onClick={confirmarAcao}
+                className={`inline-flex items-center rounded-pill px-4 py-2.5 font-body text-[13px] font-bold text-parchment transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-2 ${
+                  confirmacao.tipo === "excluir" ? "bg-error" : "bg-black"
+                }`}
               >
                 {confirmacao.tipo === "editar"
                   ? "Salvar alterações"

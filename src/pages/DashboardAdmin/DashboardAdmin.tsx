@@ -2,6 +2,7 @@ import { useState, useEffect, type FormEvent } from "react";
 import { EventCalendar } from "../../components/EventCalendar/EventCalendar";
 import { MessageBox } from "../../components/MessageBox/MessageBox";
 import { MuralBoard } from "../../components/MuralBoard/MuralBoard";
+import { LogoutButton } from "../../components/LogoutButton/LogoutButton";
 import {
   obterSolicitacoes,
   atualizarStatusSolicitacao,
@@ -154,7 +155,7 @@ export default function DashboardAdmin() {
     <main className="mx-auto flex max-w-[1200px] flex-col gap-8 px-6 py-8 md:px-10">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-black/50">
+          <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-gold">
             Central de gestão · acesso restrito
           </p>
           <h1 className="m-0 font-display text-[28px] font-semibold text-black md:text-[32px]">
@@ -165,18 +166,7 @@ export default function DashboardAdmin() {
             missão acontecer.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            localStorage.removeItem("usuario");
-            localStorage.removeItem("token");
-            navegarPara("/login");
-          }}
-          className="inline-flex items-center gap-1.5 rounded-pill border border-black/15 bg-white px-4 py-2.5 font-body text-[13px] font-bold text-black transition-colors hover:bg-black/5"
-        >
-          <LogOut size={15} />
-          Sair
-        </button>
+        <LogoutButton />
       </header>
 
       <section
@@ -236,10 +226,10 @@ export default function DashboardAdmin() {
       >
         <article className="group flex flex-col gap-3 rounded-xl border border-black/10 bg-white p-7 transition-all hover:border-black/20 hover:shadow-md">
           <div className="flex items-center gap-2">
-            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber/10 text-amber">
+            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold/10 text-gold">
               <Pill size={20} />
             </span>
-            <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-black/50">
+            <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-gold">
               Farmácia social
             </p>
           </div>
@@ -268,10 +258,10 @@ export default function DashboardAdmin() {
 
         <article className="group flex flex-col gap-3 rounded-xl border border-black/10 bg-white p-7 transition-all hover:border-black/20 hover:shadow-md">
           <div className="flex items-center gap-2">
-            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-volunteer/10 text-volunteer">
+            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold/10 text-gold">
               <HandCoins size={20} />
             </span>
-            <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-black/50">
+            <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-gold">
               Financeiro
             </p>
           </div>
@@ -303,7 +293,7 @@ export default function DashboardAdmin() {
       <section className="flex flex-col gap-5 rounded-xl border border-black/10 bg-white p-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-black/50">
+            <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-gold">
               Agenda da rua
             </p>
             <h2 className="m-0 font-display text-[1.15rem] font-semibold text-black">
@@ -313,7 +303,7 @@ export default function DashboardAdmin() {
           <button
             type="button"
             onClick={() => setFormularioAberto((aberto) => !aberto)}
-            className="inline-flex items-center gap-1.5 rounded-pill border border-black/15 bg-white px-4 py-2.5 font-body text-[13px] font-bold text-black transition-colors hover:bg-black/5"
+            className="inline-flex items-center gap-1.5 rounded-pill border bg-black px-4 py-2.5 font-body text-[13px] font-bold text-white transition-colors hover:bg-gold/10"
           >
             {formularioAberto ? (
               <>
@@ -416,7 +406,7 @@ export default function DashboardAdmin() {
 
             <button
               type="submit"
-              className="inline-flex w-fit items-center rounded-pill bg-black px-5 py-3 font-body text-[13px] font-bold text-parchment transition-opacity hover:opacity-90 md:col-span-2"
+              className="inline-flex w-fit justify-self-center items-center rounded-pill bg-black px-5 py-3 font-body text-[13px] font-bold text-parchment transition-opacity hover:opacity-90 md:col-span-2"
             >
               {eventoEmEdicao ? "Atualizar evento" : "Salvar evento"}
             </button>
@@ -529,7 +519,7 @@ export default function DashboardAdmin() {
       >
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-black/50">
+            <p className="m-0 font-body text-xs font-bold uppercase tracking-wide text-gold">
               Central de Cadastros
             </p>
             <h2 className="m-0 font-display text-[1.15rem] font-semibold text-black">

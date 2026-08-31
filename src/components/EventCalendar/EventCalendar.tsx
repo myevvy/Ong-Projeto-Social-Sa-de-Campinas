@@ -128,14 +128,14 @@ export function EventCalendar({
             <time dateTime={event.date}>{formatDate(event.date)}</time>
             <button
               type="button"
-              className="event-calendar__event-toggle"
+              className="event-calendar__event-toggle text-gold"
               onClick={() =>
                 setExpandedEvent(expandedEvent === event.id ? null : event.id)
               }
               aria-expanded={expandedEvent === event.id}
             >
               <strong>{event.title}</strong>
-              <span>
+              <span  className="text-gold [&]:!text-[#D4AF37]">
                 {expandedEvent === event.id
                   ? "Ocultar detalhes"
                   : "Ver detalhes"}

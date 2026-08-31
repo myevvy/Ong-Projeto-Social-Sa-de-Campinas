@@ -200,7 +200,7 @@ export default function DashboardDoacoes({ usuario }: DashboardDoacoesProps) {
 <Button
           variant={formularioAberto ? "outline" : "primary"}
           onClick={() => setFormularioAberto((aberto) => !aberto)}
-          className="mt-15 px-3 py-1.5 font-body text-xs font-bold text-amber"
+          className="mt-15 px-3 py-1.5 font-body text-xs font-bold bg-black text-white"
         >
           {formularioAberto ? "Fechar cadastro" : "+ Nova doação"}
         </Button>

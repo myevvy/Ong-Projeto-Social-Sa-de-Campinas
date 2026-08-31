@@ -126,7 +126,7 @@ export function MessageBox({
     >
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <span className="m-0 block font-body text-xs font-bold uppercase tracking-wide text-black/50">
+          <span className="m-0 block font-body text-xs font-bold uppercase tracking-wide text-gold">
             Comunicação Interna
           </span>
           <h2
@@ -136,7 +136,7 @@ export function MessageBox({
             Mensagens & Avisos
           </h2>
         </div>
-        <span className="rounded-pill border border-black/15 px-3 py-1 font-body text-xs font-bold text-ink-soft">
+        <span className="rounded-pill border border-gold bg-gold/10 px-3 py-1 font-body text-xs  font-bold text-gold">
           {mensagensFiltradas.length}{" "}
           {mensagensFiltradas.length === 1 ? "mensagem" : "mensagens"}
         </span>
