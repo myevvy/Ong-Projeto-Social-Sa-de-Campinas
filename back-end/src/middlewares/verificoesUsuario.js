@@ -36,8 +36,8 @@ const verificaAdm = (req, res, next) => {
 };
 
 const verificaFunc = (req, res, next) => {
-  if (req.usuario.tipo !== "adm") {
-    return res.status(403).json({ mensagem: "Acesso restrito a administradores." });
+  if (req.usuario.tipo !== "func") {
+    return res.status(403).json({ mensagem: "Acesso restrito a funcionários." });
   }
   next();
 };

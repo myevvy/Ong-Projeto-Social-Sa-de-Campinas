@@ -30,7 +30,7 @@ routes.delete("/eventos/:id", middleware.verificaToken ,middleware.verificaAdmFu
 routes.get("/remedio", remedioC.getRemedioC);
 routes.post("/remedio", middleware.verificaToken ,middleware.verificaAdm , remedioC.postRemedioC);
 routes.put("/remedio/:id", middleware.verificaToken ,middleware.verificaAdm ,remedioC.putRemedioC);
-routes.put("/remedio/:id/quantidade", middleware.verificaToken ,middleware.verificaAdmFunc ,usuarioC.cadastro);
+routes.put("/remedio/:id/quantidade", middleware.verificaToken ,middleware.verificaFunc ,remedioC.putRemedioQuantidadeC);
 routes.delete("/remedio/:id", middleware.verificaToken ,middleware.verificaAdm ,remedioC.deleteRemedioC);
 
 export default routes;
