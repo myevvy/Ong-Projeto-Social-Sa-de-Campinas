@@ -16,16 +16,15 @@ export default function Home() {
         ]}
       />
 
-      <section class="flex flex-col items-center text-center pt-12 px-6 pb-10 max-w-[560px] mx-auto">
-
-        <h4>PROJETO SOCIAL SAÚDE CAMPINAS</h4>
+      <section className="um">
+        <h4 className="flex flex-col items-center text-center pt-12 px-6 pb-10 max-w-[560px] mx-auto">PROJETO SOCIAL SAÚDE CAMPINAS</h4>
         <h1>Cuidado que pousa onde é preciso.</h1>
         <p>
           Levamos atendimento de saúde, escuta e acolhimento para pessoas em
           situação de rua e vulnerabilidade em Campinas - conduzido por estudantes
           de medicina e da área da saúde, há 6 anos.
         </p>
-        <button id="botao-quero-ser" type="button">Quero ser voluntário</button>
+        <button id="flex justify-center text-white bg-black mb-5 leading-tight max-w-[15ch]" type="button">Quero ser voluntário</button>
         <button id="botao-doar" type="button">Doar medicamentos</button>
 <a href="/dashboard/admin">
   <button>Ir para Admin</button>

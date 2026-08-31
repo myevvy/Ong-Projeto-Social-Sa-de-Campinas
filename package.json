@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "nodemon back-end/src/index.js",
+    "predev": "npm install",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
