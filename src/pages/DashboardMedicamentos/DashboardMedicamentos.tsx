@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
-import { Pencil, Trash2, X } from "lucide-react";
+import { Pencil, Trash2, X, Check } from "lucide-react";
+
 
 export interface MedicamentosProps {
   nome: string;
@@ -161,6 +162,9 @@ export default function DashboardMedicamentos({
     useState<FormularioMedicamento>(FORMULARIO_VAZIO);
   const [loteEmEdicao, setLoteEmEdicao] = useState<LoteEmEdicao | null>(null);
   const [confirmacao, setConfirmacao] = useState<Confirmacao | null>(null);
+  const [medicamentoAdicionado, setMedicamentoAdicionado] = useState
+ < string | null
+>(null);
   const medicamentosAgrupados = agruparMedicamentos(medicamentos);
   const quantidadeTotal = medicamentos.reduce(
     (total, medicamento) => total + medicamento.quantidade,
@@ -200,6 +204,7 @@ export default function DashboardMedicamentos({
     }
 
     setMedicamentos((listaAtual) => [...listaAtual, novoMedicamento]);
+    setMedicamentoAdicionado(novoMedicamento.nome);
     fecharFormulario();
   }
 
@@ -610,7 +615,43 @@ export default function DashboardMedicamentos({
             </div>
           </div>
         </div>
+          )}
+         {medicamentoAdicionado && (
+        <div
+          role="presentation"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+        >
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="sucesso-titulo"
+            className="flex w-full max-w-sm flex-col items-center gap-3 rounded-xl bg-white p-6 text-center"
+          >
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-volunteer-soft text-volunteer">
+              <Check size={22} />
+            </span>
+            <h2
+              id="sucesso-titulo"
+              className="m-0 font-display text-lg font-semibold text-black"
+            >
+              Medicamento adicionado!
+            </h2>
+            <p className="m-0 font-body text-sm text-ink-soft">
+              <strong className="text-black">{medicamentoAdicionado}</strong>{" "}
+              foi salvo no estoque com sucesso.
+            </p>
+            <button
+              type="button"
+              onClick={() => setMedicamentoAdicionado(null)}
+              autoFocus
+              className="mt-2 inline-flex items-center rounded-pill bg-black px-5 py-2.5 font-body text-sm font-bold text-parchment transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-2"
+            >
+              Entendi
+            </button>
+          </div>
+        </div>
       )}
+     
     </div>
   );
 }
