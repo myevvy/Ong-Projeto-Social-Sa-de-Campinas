@@ -1,9 +1,9 @@
 import express from "express";
 const routes = express.Router();
 import usuarioC from "./controllers/usuarioController.js";
-import eventoC from "./controllers/eventoController.js";
-// import remedioC from "./controllers/remediosController.js";
 import middleware from './middlewares/verificoesUsuario.js'
+import eventoC from "./controllers/eventoController.js";
+import remedioC from "./controllers/remedioController.js";
 
 routes.post("/cadastro", usuarioC.cadastro);
 
@@ -22,13 +22,15 @@ routes.post("/funcionarios", middleware.verificaToken ,middleware.verificaAdm ,u
 routes.put("/funcionarios/:id", middleware.verificaToken ,middleware.verificaAdm ,usuarioC.putUsuarioC);
 routes.delete("/funcionarios/:id", middleware.verificaToken ,middleware.verificaAdm ,usuarioC.deleteUsuarioC);
 
-
 routes.get("/eventos", eventoC.getEventoC);
 routes.post("/eventos", middleware.verificaToken ,middleware.verificaAdmFunc ,eventoC.postEventoC);
 routes.put("/eventos/:id", middleware.verificaToken ,middleware.verificaAdmFunc ,eventoC.putEventoC);
 routes.delete("/eventos/:id", middleware.verificaToken ,middleware.verificaAdmFunc ,eventoC.deleteUsuarioC);
 
-
-// routes.post("/cadRemedio", middleware.verificaToken ,middleware.verificaAdm ,usuarioC.cadastro);
+routes.get("/remedio", remedioC.getRemedioC);
+routes.post("/remedio", middleware.verificaToken ,middleware.verificaAdm , remedioC.postRemedioC);
+routes.put("/remedio/:id", middleware.verificaToken ,middleware.verificaAdm ,remedioC.putRemedioC);
+routes.put("/remedio/:id/quantidade", middleware.verificaToken ,middleware.verificaAdmFunc ,usuarioC.cadastro);
+routes.delete("/remedio/:id", middleware.verificaToken ,middleware.verificaAdm ,remedioC.deleteRemedioC);
 
 export default routes;
