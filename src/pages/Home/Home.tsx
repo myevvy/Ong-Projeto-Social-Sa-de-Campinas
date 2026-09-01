@@ -1,5 +1,10 @@
 import { Header } from '../../components/Header/Header'
 import { Footer } from '../../components/Footer/Footer'
+import img3 from "/src/assets/img3.jpg";
+import img4 from "/src/assets/img4.jpg";
+import img5 from "/src/assets/img5.jpg";
+import insta from "/src/assets/insta.png";
+import email from "/src/assets/email.png";
 
 export default function Home() {
   return (
@@ -82,20 +87,20 @@ export default function Home() {
       </section>
 
       <section className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl shadow-sm p-8 text-center flex flex-col items-center">
-          <img src="src/assets/person.png" className="fotos" alt="icone de pessoinha" />
-          <h2 className="font-serif text-lg text-[#211d1a] mb-2">Humanização</h2>
-          <p className="text-sm text-[#6b665f] leading-relaxed">Cada atendimento parte da conversa, antes de qualquer procedimento.</p>
+         <div className="bg-white rounded-xl shadow-sm p-8 text-center flex flex-col items-center">
+           <img src="src/assets/person.png" className="fotos" alt="icone de pessoinha" />
+           <h2 className="font-serif text-lg text-[#211d1a] mb-2">Humanização</h2>
+           <p className="text-sm text-[#6b665f] leading-relaxed">Cada atendimento parte da conversa, antes de qualquer procedimento.</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm p-8 text-center flex flex-col items-center">
-          <img src="src/assets/circle.png" className="fotos" alt="icone circulo" />
-          <h2 className="font-serif text-lg text-[#211d1a] mb-2">Respeito</h2>
-          <p className="text-sm text-[#6b665f] leading-relaxed">Reconhecemos a história e a autonomia de cada pessoa atendida.</p>
+           <img src="src/assets/circle.png" className="fotos" alt="icone circulo" />
+           <h2 className="font-serif text-lg text-[#211d1a] mb-2">Respeito</h2>
+           <p className="text-sm text-[#6b665f] leading-relaxed">Reconhecemos a história e a autonomia de cada pessoa atendida.</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm p-8 text-center flex flex-col items-center">
-          <img src="src/assets/people.png" className="fotos" alt="icone de 3 pessoas" />
-          <h2 className="font-serif text-lg text-[#211d1a] mb-2">Altruísmo</h2>
-          <p className="text-sm text-[#6b665f] leading-relaxed">Voluntários que doam tempo e conhecimento sem esperar retorno.</p>
+           <img src="src/assets/people.png" className="fotos" alt="icone de 3 pessoas" />
+           <h2 className="font-serif text-lg text-[#211d1a] mb-2">Altruísmo</h2>
+           <p className="text-sm text-[#6b665f] leading-relaxed">Voluntários que doam tempo e conhecimento sem esperar retorno.</p>
         </div>
       </section>
 
@@ -129,35 +134,45 @@ export default function Home() {
       </section>
 
       <section className="bg-[#F2EDE5] py-20 px-6">
-        <h3 className="text-[#D9A441]">Próximos eventos</h3>
-        <h1 className="text-[#5c5852] text-[15px] leading-relaxed">Onde estaremos nas próximas semanas.</h1>
-        <p>
-          Nossas ações acontecem direto na rua, sem endereço fixo. Confira as
-          próximas datas e junte-se a nós.
-        </p>
-        <button className="shrink-0 bg-transparent text-[#211d1a] text-sm font-medium px-6 py-3 rounded-full border border-[#2b241f] hover:bg-[#e9e2d6] transition-colors">Ver agenda completa</button>
+       <div className="max-w-[1100px] mx-auto">
+         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14">
+           <div>
+             <p className="text-xs tracking-widest text-[#D9A441] font-semibold uppercase mb-4"> Próximos eventos </p>
+             <h1 className="font-serif text-[#211d1a] text-4xl md:text-5xl leading-tight mb-4 max-w-md"> Onde estaremos nas próximas semanas. </h1>
+             <p className="text-[#5c5852] text-sm leading-relaxed max-w-sm"> Nossas ações acontecem direto na rua, sem endereço fixo. Confira as
+             próximas datas e junte-se a nós. </p>
+            </div>
+         <button type="button" className="shrink-0 bg-transparent text-[#211d1a] text-sm font-medium px-6 py-3 rounded-full border border-[#2b241f] 
+          hover:bg-[#e9e2d6] transition-colors -bottom-4 left-4"> Ver agenda completa </button>
+    </div>
 
-        <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
-          <p className="text-xs tracking-widest text-[#C98A3A] font-semibold uppercase mb-3">14 DE SETEMBRO - MUTIRÃO</p>
-          <h5 className="font-serif text-[#211d1a] text-lg mb-4">Atendimento de rua</h5>
-          <img alt="foto de exemplo" />
-          <button className="quero-participar" type="button">Quero participar</button>
-        </div>
+   
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+      
+      {[
+        { data: "14 SET · MUTIRÃO", titulo: "Atendimento de rua", img: img3, },
+        { data: "21 SET · CAMPANHA", titulo: "Coleta de medicamentos", img: img4, },
+        { data: "05 OUT · CAPACITAÇÃO", titulo: "Roda de novos voluntários", img: img5, },
+      ].map((evento) => (
+        <div key={evento.titulo}>
+          <p className="text-xs tracking-widest text-[#C98A3A] font-semibold uppercase mb-3">
+            {evento.data}
+          </p>
+          <h5 className="font-serif text-[#211d1a] text-lg mb-4">
+            {evento.titulo}
+          </h5>
 
-        <div className="calendario-2">
-          <p className="text-xs tracking-widest text-[#C98A3A] font-semibold uppercase mb-3">21 DE SETEMBRO - CAPACITAÇÃO</p>
-          <h5 className="font-serif text-[#211d1a] text-lg mb-4">Coleta de medicamentos</h5>
-          <img className="w-full h-56 object-cover rounded-sm" alt="foto de exemplo" />
-          <button className="quero-participar absolute -bottom-4 left-4 bg-[#2b241f] text-white text-xs font-medium px-4 py-2.5 rounded-md hover:opacity-90 transition-opacity" type="button">Quero participar</button>
+          <div className="relative">
+            <img src={evento.img} alt={evento.titulo}
+             className="w-full h-56 object-cover rounded-sm"/>
+            <button type="button"className="absolute -bottom-4 left-4 bg-[#2b241f] text-white text-xs font-medium px-4 py-2.5 rounded-md hover:opacity-90 transition-opacity">
+            Quero participar </button>
+          </div>
         </div>
-
-        <div className="pb-8">
-          <p className="text-xs tracking-widest text-[#C98A3A] font-semibold uppercase mb-3">5 DE OUTUBRO - CAPACITAÇÃO</p>
-          <h5 className="font-serif text-[#211d1a] text-lg mb-4">Doação de alimentos</h5>
-          <img alt="foto de exemplo" />
-          <button className="text-white bg-black rounded-[7px]" type="button">Quero participar</button>
-        </div>
-      </section>
+      ))}
+    </div>
+  </div>
+</section>
 
       <section className="bg-[#F2EDE5] px-6 pt-16 pb-20">
         <h1 className="font-serif text-[#211d1a] text-3xl md:text-[34px] text-center mb-10">
@@ -196,13 +211,13 @@ export default function Home() {
             <h2 className="font-serif text-[#211d1a] text-2xl mb-4">Gestão de estoque e eventos</h2>
             <ul className="mb-10 space-y-2">
               <li className="text-[#4a4a42] text-sm flex gap-2">
-                <p> Estoque em tempo real</p>
+                <span>—</span> Estoque em tempo real
               </li>
               <li className="text-[#4a4a42] text-sm flex gap-2">
-                <p> Alertas de validade</p>
+                <span>—</span> Alertas de validade
               </li>
               <li className="text-[#4a4a42] text-sm flex gap-2">
-                <p>Histórico de alterações</p>
+                <span>—</span> Histórico de alterações
               </li>
             </ul>
             <button type="button"
@@ -229,33 +244,41 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="carrossel-fotos">
-        <p>NO DIA A DIA</p>
-        <h2>Um retrato de cada ação</h2>
-      </section>
+        <section className="bg-[#F2EDE5] py-20 px-6 text-center">
+  <p className="text-xs tracking-widest text-[#D9A441] font-semibold uppercase mb-5">SIGA DE PERTO</p>
+  <h2 className="font-serif text-[#211d1a] text-3xl md:text-4xl font-bold mb-4">Acompanhe cada ação nas nossas redes</h2>
+  <p className="text-[#5c5852] text-sm md:text-base mb-10">Fotos, bastidores e próximas datas em primeira mão.</p>
 
-      <section className="contato">
-        <p>SIGA DE PERTO</p>
-        <h2>Acompanhe cada ação nas nossas redes</h2>
-        <p>Fotos, bastidores e próximas datas em primeira mão.</p>
-        <div className="redes-sociais">
-          <img alt="icone instagram" />
-          <p className="nome-redes">INSTAGRAM</p>
-          <h2 className="id-redes">@projetosaudecps</h2>
+  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+    <div className="flex items-center gap-3 bg-[#2b241f] rounded-full pl-2 pr-6 py-2">
+      <div className="w-9 h-9 rounded-full bg-[#D9A441] flex items-center justify-center shrink-0">
+        <img src={insta} alt="icone instagram" className="w-4 h-4" />
+      </div>
+      <div className="text-left">
+        <p className="nome-redes text-[10px] tracking-widest text-[#c9a876] font-semibold uppercase">INSTAGRAM</p>
+        <h2 className="id-redes text-white text-sm font-semibold">@projetosaudecps</h2>
+      </div>
+    </div>
 
-          <img alt="icone arroba" />
-          <p className="nome-redes">E-MAIL</p>
-          <h2 className="id-redes">contato@saudecampinas.br</h2>
-        </div>
-      </section>
+    <div className="flex items-center gap-3 bg-[#2b241f] rounded-full pl-2 pr-6 py-2">
+      <div className="w-9 h-9 rounded-full bg-[#D9A441] flex items-center justify-center shrink-0">
+        <img src={email} alt="icone arroba" className="w-4 h-4" />
+      </div>
+      <div className="text-left">
+        <p className="nome-redes text-[10px] tracking-widest text-[#c9a876] font-semibold uppercase">E-MAIL</p>
+        <h2 className="id-redes text-white text-sm font-semibold">contato@saudecampinas.br</h2>
+      </div>
+    </div>
+  </div>
+</section>
 
       <Footer
         navLinks={[
-          { label: 'Sobre', href: '/sobre' },
-          { label: 'Como ajudar', href: '/como-ajudar' },
-          { label: 'Eventos', href: '/eventos' },
-          { label: 'Área do voluntário', href: '/login' },
-          { label: 'Contato', href: '/contato' },
+          { label: "Sobre", href: "/sobre" },
+          { label: "Como ajudar", href: "/doacao" },
+          { label: "Eventos", href: "/eventos" },
+          { label: "Área do voluntário", href: "/voluntario" },
+          { label: "Contato", href: "/contato" },
         ]}
         email="contato@saudecampinas.org"
         whatsappLabel="(19) 99999-9999"
@@ -263,5 +286,5 @@ export default function Home() {
         location="Campinas, SP"
       />
     </div>
-  )
+  );
 }
