@@ -20,7 +20,7 @@ export default function Home() {
           PROJETO SOCIAL SAÚDE CAMPINAS
         </p>
 
-       <h1 className="font-serif text-[#211d1a] text-4xl md:text-5xl leading-tight max-w-[680px] mx-auto mb-6">
+        <h1 className="font-serif text-[#211d1a] text-4xl md:text-5xl leading-tight max-w-[680px] mx-auto mb-6">
           Cuidado que pousa onde é preciso.
         </h1>
 
@@ -99,26 +99,33 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="como-ajudar flex flex-col md:flex-row gap-6 p-6 items-stretch max-w-5xl mx-auto">
-        <div className="dicas doacao bg-white rounded-[2rem] p-8 md:p-12 flex flex-col justify-between items-center text-center shadow-sm">
-          <h1 className="font-serif text-[#211d1a] text-2xl md:text-3xl font-bold leading-tight max-w-sm mb-10">Duas formas diretas de fazer parte.</h1>
-          <img src="src/assets/pills.png" className="fotos" alt="icone de remedio" />
-          <h5 className="text-xl font-bold mb-2 text-gray-800">Doe medicamentos e insumos</h5>
-          <p className="text-gray-600 text-sm">
-            Remédios e amostras grátis parados no armário podem completar o
-            estoque que levamos para as ações.
-          </p>
+      <section className="bg-[#f5f2eb] py-8 px-4">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+          <div className="bg-white rounded-2xl p-6 flex flex-col justify-between items-center text-center shadow-sm">
+            <h2 className="font-serif text-[#211d1a] text-xl md:text-2xl font-bold leading-snug max-w-xs mb-6">
+              Duas formas diretas de fazer parte. </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative w-full mb-6">
+              <div className="hidden sm:block absolute left-1/2 top-0 bottom-0 w-[1px] bg-gray-200 -translate-x-1/2" />
+              <div className="flex flex-col items-center px-1">
+                <img src="src/assets/pills.png" className="w-7 h-7 object-contain mb-2" alt="icone de remedio" />
+                <h3 className="font-bold text-[#211d1a] text-xs mb-1">Doe medicamentos e insumos</h3>
+                <p className="text-[#6b665f] text-[11px] leading-tight">
+                  Remédios e amostras grátis parados no armário podem completar o estoque que levamos para as ações. </p>
+              </div>
+              <div className="flex flex-col items-center px-1">
+                <img src="src/assets/hand.png" className="w-7 h-7 object-contain mb-2" alt="mao com coracao" />
+                <h3 className="font-bold text-[#211d1a] text-xs mb-1">Seja voluntário nas ações</h3>
+                <p className="text-[#6b665f] text-[11px] leading-tight">
+                  Estudantes de medicina e de outras áreas da saúde encontram aqui um espaço para aprender cuidando.  </p>
+              </div>
+            </div>
+            <button className="text-white bg-[#c97e39] hover:bg-[#b46e2d] px-6 py-2 rounded-full text-xs font-medium transition-colors" type="button">
+              Quero ajudar </button>
+          </div>
+          <div className="w-full h-full max-h-[380px]">
+            <img src="src/assets/img2.jpg" className="w-full h-full object-cover rounded-2xl" alt="foto da ong" />
+          </div>
         </div>
-        <div className="bg-white rounded-[10px]">
-          <img src="src/assets/hand.png" className="fotos" alt="mao com coracao" />
-          <h5 className="text-xl font-bold mb-2 text-gray-800">Seja voluntário nas ações</h5>
-          <p className="text-gray-600 text-sm mb-4">
-            Estudantes de medicina e de outras áreas da saúde encontram aqui um
-            espaço para aprender cuidando.
-          </p>
-          <button className="text-white bg-[rgb(201,126,57)] px-6 py-2 rounded-md font-medium hover:bg-[rgb(180,110,45)] transition-colors w-full mt-auto" type="button">Quero ajudar</button>
-        </div>
-        <img src="src/assets/img2.jpg" className="fotos w-16 h-16 object-contain mb-4" alt="foto random da ong" />
       </section>
 
       <section className="bg-[#F2EDE5] py-20 px-6">
@@ -141,7 +148,7 @@ export default function Home() {
           <p className="text-xs tracking-widest text-[#C98A3A] font-semibold uppercase mb-3">21 DE SETEMBRO - CAPACITAÇÃO</p>
           <h5 className="font-serif text-[#211d1a] text-lg mb-4">Coleta de medicamentos</h5>
           <img className="w-full h-56 object-cover rounded-sm" alt="foto de exemplo" />
-          <button  className="quero-participar absolute -bottom-4 left-4 bg-[#2b241f] text-white text-xs font-medium px-4 py-2.5 rounded-md hover:opacity-90 transition-opacity" type="button">Quero participar</button>
+          <button className="quero-participar absolute -bottom-4 left-4 bg-[#2b241f] text-white text-xs font-medium px-4 py-2.5 rounded-md hover:opacity-90 transition-opacity" type="button">Quero participar</button>
         </div>
 
         <div className="pb-8">
@@ -199,9 +206,9 @@ export default function Home() {
               </li>
             </ul>
             <button type="button"
-             className="bg-[#2b241f] text-white text-sm font-medium px-6 py-3 rounded-full hover:opacity-90 transition-opacity">
+              className="bg-[#2b241f] text-white text-sm font-medium px-6 py-3 rounded-full hover:opacity-90 transition-opacity">
               Entrar
-             </button>
+            </button>
           </div>
         </div>
       </section>
