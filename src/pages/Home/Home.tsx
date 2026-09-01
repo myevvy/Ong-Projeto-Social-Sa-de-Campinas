@@ -1,6 +1,5 @@
 import { Header } from '../../components/Header/Header'
 import { Footer } from '../../components/Footer/Footer'
-import './Home.css'
 
 export default function Home() {
   return (
@@ -16,35 +15,50 @@ export default function Home() {
         ]}
       />
 
-      <section className="um">
-        <p className="bg-[#F2EDE5] py-20 px-6 text-center">PROJETO SOCIAL SAÚDE CAMPINAS</p>
-        
-        <h1 className="font-serif text-[#211d1a] text-4xl md:text-5xl leading-tight max-w-[680px] mx-auto mb-6">Cuidado que pousa onde é preciso.</h1>
-        
+      <section className="principal bg-[#F2EDE5] py-20 px-6 text-center">
+        <p className="text-xs md:text-sm tracking-[0.25em] text-[#C98A3A] font-semibold uppercase mb-5">
+          PROJETO SOCIAL SAÚDE CAMPINAS
+        </p>
+
+       <h1 className="font-serif text-[#211d1a] text-4xl md:text-5xl leading-tight max-w-[680px] mx-auto mb-6">
+          Cuidado que pousa onde é preciso.
+        </h1>
+
         <p className="text-[#5c5852] text-base md:text-[17px] leading-relaxed max-w-[620px] mx-auto mb-9">
           Levamos atendimento de saúde, escuta e acolhimento para pessoas em
           situação de rua e vulnerabilidade em Campinas - conduzido por estudantes
           de medicina e da área da saúde, há 6 anos.
         </p>
 
-
-        <button className="flex justify-center text-white bg-black mb-5 leading-tight max-w-[15ch]" type="button">Quero ser voluntário</button>
-        <button className="block w-full max-w-[320px] px-6 py-[15px] rounded-full transition-[opacity,background,color] duration-150 ease-in-ou" type="button">Doar medicamentos</button>
-        <a href="/dashboard/admin">
-        <button>Ir para Admin</button>
+        <button
+          className="inline-flex items-center justify-center bg-[#2b241f] text-white text-sm font-medium px-6 py-3 rounded-full mr-4 mb-5 hover:opacity-90 transition-opacity"
+          type="button"
+        >
+          Quero ser voluntário
+        </button>
+        <button
+          className="inline-flex items-center justify-center bg-white text-[#2b241f] text-sm font-medium px-6 py-3 rounded-full border border-[#e2ddd3] mb-5 hover:bg-[#faf8f4] transition-colors"
+          type="button"
+        >
+          Doar medicamentos
+        </button>
+        <a href="/dashboard/admin" className="block mb-2">
+          <button className="text-sm text-[#2b241f] underline underline-offset-4 hover:opacity-70" type="button">
+            Ir para Admin
+          </button>
         </a>
-        <section>
-          <div className="bg-white rounded-[10px] mb-6">
-            <h5 className="text-[#D9A441] mb-1">6 anos</h5>
-            <p className="text-black m-0 text-[13px]">de atuação contínua em Campinas</p>
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-[720px] mx-auto text-left mt-10">
+          <div className="border-l-2 border-[#D9A441] pl-4">
+            <h5 className="text-[#D9A441] font-semibold text-lg mb-1">6 anos</h5>
+            <p className="text-[#6b665f] text-[13px] leading-snug">de atuação contínua em Campinas</p>
           </div>
-          <div className="bg-white rounded-[10px] mb-6">
-            <h5 className="text-[#D9A441] mb-1">100%</h5>
-            <p className="text-black m-0 text-[13px]">Conduzido por estudantes da área da saúde</p>
+          <div className="border-l-2 border-[#D9A441] pl-4">
+            <h5 className="text-[#D9A441] font-semibold text-lg mb-1">100%</h5>
+            <p className="text-[#6b665f] text-[13px] leading-snug">Conduzido por estudantes da área da saúde</p>
           </div>
-          <div className="bg-white rounded-[10px] mb-6">
-            <h5 className="text-[#D9A441] mb-1">Rua a rua</h5>
-            <p className="text-black m-0 text-[13px]">Atuação itinerante, sem sede fixa</p>
+          <div className="border-l-2 border-[#D9A441] pl-4">
+            <h5 className="text-[#D9A441] font-semibold text-lg mb-1">Rua a rua</h5>
+            <p className="text-[#6b665f] text-[13px] leading-snug">Atuação itinerante, sem sede fixa</p>
           </div>
         </section>
       </section>
@@ -59,7 +73,7 @@ export default function Home() {
         </p>
       </section>
 
-      <section className="block px-5 pb-12 max-w-[560px] w-10 h-10 mx-auto mb-4">
+      <section className="block px-5 pb-12 max-w-[560px] mx-auto mb-4">
         <div className="cartao1">
           <img className="fotos" alt="icone de pessoinha" />
           <h2>Humanização</h2>
