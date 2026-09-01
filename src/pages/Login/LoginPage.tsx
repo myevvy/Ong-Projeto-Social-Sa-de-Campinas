@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   verificarStatusUsuario,
   adicionarSolicitacao,
@@ -67,10 +67,16 @@ const LABEL_CLASS =
 export default function LoginPage() {
   const [modo, setModo] = useState<ViewMode>("login");
   const [carregando, setCarregando] = useState(false);
+  // FIX: lê o alerta de segurança já na inicialização do state (mesmo padrão
+  // usado em AppRoutes.tsx), em vez de um useEffect que chama setState
+  // sincronamente logo após a montagem.
   const [mensagem, setMensagem] = useState<{
     tipo: "sucesso" | "erro" | "info";
     texto: string;
-  } | null>(null);
+  } | null>(() => {
+    const alerta = obterEConsumirAlertaSeguranca();
+    return alerta ? { tipo: "erro", texto: alerta } : null;
+  });
 
   const [login, setLogin] = useState({ email: "", senha: "" });
   const [cadastro, setCadastro] = useState({
@@ -86,13 +92,6 @@ export default function LoginPage() {
     sobre: "",
   });
   const [recuperar, setRecuperar] = useState({ email: "" });
-
-  useEffect(() => {
-    const alerta = obterEConsumirAlertaSeguranca();
-    if (alerta) {
-      setMensagem({ tipo: "erro", texto: alerta });
-    }
-  }, []);
 
   const validarEmail = (valor: string) => /\S+@\S+\.\S+/.test(valor);
 
@@ -115,9 +114,15 @@ export default function LoginPage() {
     }
 
     // 1. Verificação prévia do status de aprovação pelo Administrador
+    // FIX: o bloqueio abaixo só vale para quem TEM registro local
+    // (checagemAcesso.encontrado). Antes, verificarStatusUsuario devolvia
+    // status "aceito" para qualquer e-mail sem registro local, então essa
+    // checagem não bloqueava ninguém desconhecido — mas se a lógica dela for
+    // revista no futuro, o "encontrado" aqui evita bloquear por engano um
+    // usuário real do backend que simplesmente ainda não está na lista local.
     const checagemAcesso = verificarStatusUsuario(emailNormalizado);
 
-    if (checagemAcesso.status === "pendente") {
+    if (checagemAcesso.encontrado && checagemAcesso.status === "pendente") {
       setMensagem({
         tipo: "erro",
         texto:
@@ -126,7 +131,8 @@ export default function LoginPage() {
       return;
     }
 
-    if (checagemAcesso.status === "recusado") {
+    if (checagemAcesso.encontrado && checagemAcesso.status === "recusado") {
+      limparSessaoUsuario();
       setMensagem({
         tipo: "erro",
         texto:
@@ -175,7 +181,7 @@ export default function LoginPage() {
           );
         } else {
           // Backend online mas sem token retornado
-          if (checagemAcesso.status === "aceito") {
+          if (checagemAcesso.encontrado && checagemAcesso.status === "aceito") {
             loginSucesso = true;
             tokenFinal = "auth_session_" + Date.now();
           } else {
@@ -183,19 +189,26 @@ export default function LoginPage() {
           }
         }
       } catch (fetchErr) {
-        if (
-          fetchErr instanceof Error &&
-          fetchErr.message !== "Failed to fetch"
-        ) {
+        // FIX: "Failed to fetch" é a mensagem específica do Chrome/V8 para
+        // falha de rede — no Firefox e no Safari a mensagem é outra, então
+        // essa comparação de string não detectava o modo offline em todo
+        // navegador. `fetch` sempre lança um TypeError quando não consegue
+        // se conectar, então checar isso é confiável em qualquer navegador.
+        const isNetworkError = fetchErr instanceof TypeError;
+
+        if (!isNetworkError) {
           throw fetchErr;
         }
 
-        // Se o servidor backend estiver offline (modo demonstração local/mock):
-        if (checagemAcesso.status === "aceito") {
+        // Se o servidor backend estiver offline (modo demonstração local/mock),
+        // só libera acesso a quem já tem registro local aprovado.
+        if (checagemAcesso.encontrado && checagemAcesso.status === "aceito") {
           loginSucesso = true;
           tokenFinal = "auth_session_" + Date.now();
         } else {
-          throw new Error("Usuário não encontrado ou aguardando aprovação.");
+          throw new Error("Não foi possível conectar ao servidor. Tente novamente em instantes.", {
+            cause: fetchErr,
+          });
         }
       }
 
@@ -203,16 +216,16 @@ export default function LoginPage() {
         // Armazena o token JWT imediatamente para evitar qualquer chamada desautenticada
         localStorage.setItem("token", tokenFinal);
 
-        // Define o tipo de perfil do usuário (admin, colaborador ou voluntário)
-        let tipoUsuario =
+        // FIX: removida a heurística que promovia a admin qualquer e-mail
+        // contendo a substring "adm" (ex.: "adamteste@gmail.com",
+        // "administrativo@x.com"). Isso rodava depois de QUALQUER login bem-
+        // sucedido, inclusive contra o backend real, então um usuário comum
+        // com esse e-mail virava admin no front mesmo o JWT dizendo outro
+        // tipo. O tipo agora vem só do JWT (fonte de verdade, checado no
+        // backend) ou, na ausência dele (sessão local de demonstração), do
+        // registro de aprovação local.
+        const tipoUsuario =
           payloadFinal?.tipo || checagemAcesso.tipo || "voluntario";
-        if (
-          emailNormalizado.includes("adm") ||
-          emailNormalizado === "admin@saudecampinas.org" ||
-          emailNormalizado === "admin@teste.com"
-        ) {
-          tipoUsuario = "adm";
-        }
 
         const tipoFinal = normalizarTipoUsuario(tipoUsuario);
 

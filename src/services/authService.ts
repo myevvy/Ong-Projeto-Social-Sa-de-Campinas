@@ -1,83 +1,17 @@
 // src/services/authService.ts
-import type {
-  LoginCredentials,
-  LoginResponse,
-  ApiErrorPayload,
-} from "../types/auth";
 
-// Configure VITE_API_URL no .env do front.
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
-
-export class AuthApiError extends Error {
-  status: number;
-  codigo?: ApiErrorPayload["codigo"];
-
-  constructor(
-    message: string,
-    status: number,
-    codigo?: ApiErrorPayload["codigo"],
-  ) {
-    super(message);
-    this.name = "AuthApiError";
-    this.status = status;
-    this.codigo = codigo;
-  }
-}
-
-export async function login(
-  credentials: LoginCredentials,
-): Promise<LoginResponse> {
-  const response = await fetch(`${API_BASE_URL}/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(credentials),
-  });
-
-  let data: LoginResponse & Partial<ApiErrorPayload>;
-  try {
-    data = await response.json();
-  } catch {
-    throw new AuthApiError("Resposta inválida do servidor.", response.status);
-  }
-
-  if (!response.ok) {
-    throw new AuthApiError(
-      data.mensagem ?? "Não foi possível entrar. Tente novamente.",
-      response.status,
-      data.codigo,
-    );
-  }
-
-  return data as LoginResponse;
-}
+// FIX: removidas login(), AuthApiError e verificarSessao() — código morto,
+// nunca chamado em nenhuma tela, e com um contrato (LoginResponse { usuario, mensagem })
+// que não bate com o que o backend realmente devolve em POST /login: { mensagem, token }
+// (um JWT com { id, tipo } no payload). Quem realmente autentica é o fetch feito
+// direto em LoginPage.tsx, que já usa o formato correto. Manter essas funções aqui
+// só criava confusão sobre qual era a implementação "certa" de login.
+// verificarSessao() também dependia de GET /pagAdm, uma rota protegida só para
+// admins (ver back-end/src/routes.js), então nunca funcionaria para os outros tipos
+// de usuário mesmo se estivesse sendo chamada.
 
 export async function logout(): Promise<void> {
   limparSessaoUsuario();
-}
-
-export async function verificarSessao(): Promise<
-  LoginResponse["usuario"] | null
-> {
-  const token = localStorage.getItem("token");
-  if (!token) return null;
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/pagAdm`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      return data.usuario ?? null;
-    }
-  } catch {}
-
-  return null;
 }
 
 export type StatusAcesso = "pendente" | "aceito" | "recusado";
@@ -237,12 +171,10 @@ export function verificarStatusUsuario(email: string): {
 } {
   const emailNorm = email.toLowerCase().trim();
 
-  // Contas com privilégio de administração
-  if (
-    emailNorm.includes("adm") ||
-    emailNorm === "admin@saudecampinas.org" ||
-    emailNorm === "admin@teste.com"
-  ) {
+  // FIX: lista exata de e-mails de admin, nunca substring — "adminha@x.com",
+  // "sadmin@x.com" etc. não devem virar admin só por conter "adm".
+  const EMAILS_ADMIN = ["admin@saudecampinas.org", "admin@teste.com"];
+  if (EMAILS_ADMIN.includes(emailNorm)) {
     return {
       encontrado: true,
       status: "aceito",
@@ -256,14 +188,16 @@ export function verificarStatusUsuario(email: string): {
   const usuario = lista.find((u) => u.email.toLowerCase().trim() === emailNorm);
 
   if (!usuario) {
-    // Se o usuário não está na lista local de solicitações, mas fez login no backend com token válido:
+    // FIX: usuário sem registro local não deve ser tratado como "aceito" por
+    // padrão — isso bypassava toda a fila de aprovação (bastava não estar na
+    // lista local, ex.: localStorage limpo, outro navegador, aba anônima).
+    // Aqui só dizemos que não há registro local; quem decide se o login é
+    // válido de fato é o backend (ver enviarLogin em LoginPage.tsx), que só
+    // libera acesso a quem realmente tem e-mail/senha corretos no banco.
     return {
       encontrado: false,
       status: "aceito",
-      tipo:
-        emailNorm.includes("func") || emailNorm.includes("colab")
-          ? "colaborador"
-          : "voluntario",
+      tipo: "voluntario",
     };
   }
 
@@ -348,7 +282,10 @@ export function limparSessaoUsuario(): void {
   try {
     localStorage.removeItem("token");
     localStorage.removeItem("usuario");
-    sessionStorage.clear();
+    // FIX: antes limpava a sessionStorage inteira (sessionStorage.clear()),
+    // apagando qualquer outro dado que outra parte do app guarde ali.
+    // Remove só a chave que este módulo é dono.
+    sessionStorage.removeItem(STORAGE_KEY_ALERTA_SEGURANCA);
     window.dispatchEvent(new CustomEvent("ong_auth_change"));
   } catch (error) {
     console.error("Erro ao limpar sessão:", error);
@@ -358,7 +295,10 @@ export function limparSessaoUsuario(): void {
 export function definirAlertaSeguranca(mensagem: string): void {
   try {
     sessionStorage.setItem(STORAGE_KEY_ALERTA_SEGURANCA, mensagem);
-  } catch {}
+  } catch {
+    // sessionStorage pode não estar disponível (modo privado restrito, quota
+    // cheia etc.); o alerta simplesmente não é exibido nesse caso.
+  }
 }
 
 export function obterEConsumirAlertaSeguranca(): string | null {
