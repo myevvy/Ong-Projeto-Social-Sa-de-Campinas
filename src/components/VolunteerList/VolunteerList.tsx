@@ -1,5 +1,14 @@
 // src/components/VolunteerList/VolunteerList.tsx
-import { Users, ChevronUp, ChevronDown, User, Mail, Phone, MessageCircle, UserX } from "lucide-react";
+import {
+  Users,
+  ChevronUp,
+  ChevronDown,
+  User,
+  Mail,
+  Phone,
+  MessageCircle,
+  UserX,
+} from "lucide-react";
 
 export interface VoluntarioInscritoInfo {
   nome: string;
@@ -39,22 +48,23 @@ export function VolunteerList({
       <button
         type="button"
         onClick={onToggle}
-        className={`mt-2.5 inline-flex w-fit items-center gap-1.5 rounded-pill border border-volunteer/40 px-3.5 py-1.5 font-body text-xs font-bold transition-colors ${
+        className={`mt-2.5 inline-flex w-fit cursor-pointer items-center gap-1.5 rounded-pill border border-volunteer/40 px-3.5 py-1.5 font-body text-xs font-bold transition-all hover:opacity-90 active:scale-95 ${
           aberto
-            ? "bg-volunteer text-parchment"
-            : "bg-volunteer-soft text-volunteer"
+            ? "bg-volunteer text-parchment shadow-sm"
+            : "bg-volunteer-soft text-volunteer hover:bg-volunteer/15"
         }`}
       >
         <Users size={14} />
-        {total} de {vagas || 6} voluntários inscritos
+        <span>
+          {total} {total === 1 ? "inscrito" : "inscritos"} de {vagas || 6} vagas
+        </span>
+        <span className="text-[11px] font-normal opacity-80">
+          ({aberto ? "ocultar voluntários" : "ver quem se inscreveu"})
+        </span>
         {aberto ? (
-          <>
-            <ChevronUp size={14} /> 
-          </>
+          <ChevronUp size={14} className="shrink-0" />
         ) : (
-          <>
-            <ChevronDown size={14} /> 
-          </>
+          <ChevronDown size={14} className="shrink-0" />
         )}
       </button>
 

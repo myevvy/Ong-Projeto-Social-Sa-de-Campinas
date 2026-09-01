@@ -4,13 +4,13 @@ import { MessageBox } from "../../components/MessageBox/MessageBox";
 import { MuralBoard } from "../../components/MuralBoard/MuralBoard";
 import {
   obterEventos,
+  buscarEventosApi,
   obterInscricoesVoluntario,
   alternarInscricaoVoluntario,
   type EventoGlobal,
 } from "../../services/eventService";
 import { LogoutButton } from "../../components/LogoutButton/LogoutButton";
 import { X } from "lucide-react";
-
 
 interface PerfilVoluntario {
   nascimento: string;
@@ -42,14 +42,25 @@ export default function DashboardVoluntario({
         if (u.email) emailUser = u.email;
       }
     } catch {}
-    setEmailUsuario(emailUser || "voluntario@saudecampinas.org");
+    const emailFinal = emailUser || "use18r@gmail.com";
+    setEmailUsuario(emailFinal);
 
     setEventos(obterEventos());
-    setInscritos(obterInscricoesVoluntario(nome));
+    setInscritos(obterInscricoesVoluntario(emailFinal));
+
+    // Busca eventos ativos da tabela evento do MySQL
+    buscarEventosApi()
+      .then((evs) => {
+        if (Array.isArray(evs) && evs.length > 0) {
+          setEventos(evs);
+          setInscritos(obterInscricoesVoluntario(emailFinal));
+        }
+      })
+      .catch(() => {});
 
     function recarregar() {
       setEventos(obterEventos());
-      setInscritos(obterInscricoesVoluntario(nome));
+      setInscritos(obterInscricoesVoluntario(emailFinal));
     }
     window.addEventListener("ong_eventos_atualizados", recarregar);
     return () => {
@@ -87,10 +98,11 @@ export default function DashboardVoluntario({
             Olá, {nome.split(" ")[0]}.
           </h1>
           <p className="m-0 font-body text-sm text-ink-soft">
-            Encontre sua próxima ação, compartilhe no mural e envie recados para a equipe.
+            Encontre sua próxima ação, compartilhe no mural e envie recados para
+            a equipe.
           </p>
         </div>
-       <LogoutButton />
+        <LogoutButton />
       </header>
 
       <section className="flex flex-col gap-6 rounded-2xl border border-black/10 bg-white p-6">
@@ -136,7 +148,9 @@ export default function DashboardVoluntario({
                       {data.getDate()}
                     </strong>
                     <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-volunteer">
-                      {data.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "")}
+                      {data
+                        .toLocaleDateString("pt-BR", { month: "short" })
+                        .replace(".", "")}
                     </span>
                   </div>
                   <div className="flex min-w-[160px] flex-1 flex-col gap-0.5">
@@ -194,19 +208,22 @@ export default function DashboardVoluntario({
               onClick={() => setEditando((atual) => !atual)}
               className="inline-flex min-h-11 items-center gap-2 justify-center rounded-pill border border-black px-5 py-2 font-body text-xs font-bold text-black transition hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
             >
-                {editando ? (
-    <>
-      <X size={16} />
-      <span>Fechar</span>
-    </>
-  ) : (
-    "Editar"
-  )}
+              {editando ? (
+                <>
+                  <X size={16} />
+                  <span>Fechar</span>
+                </>
+              ) : (
+                "Editar"
+              )}
             </button>
           </div>
 
           {editando ? (
-            <form className="flex flex-col gap-4 justify-self-center" onSubmit={salvarPerfil}>
+            <form
+              className="flex flex-col gap-4 justify-self-center"
+              onSubmit={salvarPerfil}
+            >
               <label className="flex flex-col gap-1.5">
                 <span className="font-body text-sm font-bold text-black">
                   Data de nascimento
@@ -262,7 +279,9 @@ export default function DashboardVoluntario({
                 </dt>
                 <dd className="m-0 font-body text-sm text-black">
                   {perfil.nascimento
-                    ? new Date(`${perfil.nascimento}T00:00:00`).toLocaleDateString("pt-BR")
+                    ? new Date(
+                        `${perfil.nascimento}T00:00:00`,
+                      ).toLocaleDateString("pt-BR")
                     : "Ainda não informado"}
                 </dd>
               </div>

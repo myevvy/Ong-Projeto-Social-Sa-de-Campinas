@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   verificarStatusUsuario,
   adicionarSolicitacao,
+  limparSessaoUsuario,
+  obterEConsumirAlertaSeguranca,
+  normalizarTipoUsuario
 } from "../../services/authService";
 
 type ViewMode = "login" | "cadastro" | "recuperar";
@@ -37,7 +40,7 @@ function decodificarToken(token: string): JwtPayload | null {
 
 // Determina para qual rota redirecionar conforme o tipo de usuário cadastrado no banco
 function obterRotaRedirecionamento(tipo?: string): string {
-  if (!tipo) return "/";
+  if (!tipo) return "/dashboard/voluntario";
   const tipoNormalizado = tipo.toLowerCase().trim();
   if (
     tipoNormalizado === "adm" ||
@@ -53,15 +56,13 @@ function obterRotaRedirecionamento(tipo?: string): string {
   ) {
     return "/dashboard/colaborador";
   }
-  if (tipoNormalizado === "voluntario") {
-    return "/dashboard/voluntario";
-  }
-  return "/";
+  return "/dashboard/voluntario";
 }
 
 const INPUT_CLASS =
   "w-full rounded-xl border border-black/15 bg-white px-3 py-2.5 font-body text-sm text-black placeholder:text-ink-soft/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold";
-const LABEL_CLASS = "flex flex-col gap-1.5 font-body text-sm font-bold text-black";
+const LABEL_CLASS =
+  "flex flex-col gap-1.5 font-body text-sm font-bold text-black";
 
 export default function LoginPage() {
   const [modo, setModo] = useState<ViewMode>("login");
@@ -86,12 +87,21 @@ export default function LoginPage() {
   });
   const [recuperar, setRecuperar] = useState({ email: "" });
 
+  useEffect(() => {
+    const alerta = obterEConsumirAlertaSeguranca();
+    if (alerta) {
+      setMensagem({ tipo: "erro", texto: alerta });
+    }
+  }, []);
+
   const validarEmail = (valor: string) => /\S+@\S+\.\S+/.test(valor);
 
   const enviarLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!login.email || !login.senha) {
+    const emailNormalizado = login.email.trim().toLowerCase();
+
+    if (!emailNormalizado || !login.senha) {
       setMensagem({
         tipo: "erro",
         texto: "Informe o e-mail e a senha para entrar.",
@@ -99,46 +109,36 @@ export default function LoginPage() {
       return;
     }
 
-    if (!validarEmail(login.email)) {
+    if (!validarEmail(emailNormalizado)) {
       setMensagem({ tipo: "erro", texto: "O e-mail informado não é válido." });
       return;
     }
 
-    // 1. Verificação do status de aprovação pelo Administrador
-    const checagemAcesso = verificarStatusUsuario(login.email);
+    // 1. Verificação prévia do status de aprovação pelo Administrador
+    const checagemAcesso = verificarStatusUsuario(emailNormalizado);
 
-    if (checagemAcesso.encontrado) {
-      if (checagemAcesso.status === "pendente") {
-        setMensagem({
-          tipo: "erro",
-          texto:
-            "Sua solicitação de acesso está pendente de aprovação pela administração. Aguarde a validação do seu perfil.",
-        });
-        return;
-      }
+    if (checagemAcesso.status === "pendente") {
+      setMensagem({
+        tipo: "erro",
+        texto:
+          "Sua solicitação de acesso está pendente de aprovação pela administração. Aguarde a validação do seu perfil.",
+      });
+      return;
+    }
 
-      if (checagemAcesso.status === "recusado") {
-        setMensagem({
-          tipo: "erro",
-          texto:
-            "Sua solicitação de acesso foi recusada pela administração. Entre em contato com a ONG para mais informações.",
-        });
-        return;
-      }
+    if (checagemAcesso.status === "recusado") {
+      setMensagem({
+        tipo: "erro",
+        texto:
+          "Sua solicitação de acesso foi recusada pela administração. Entre em contato com a ONG para mais informações.",
+      });
+      return;
     }
 
     setCarregando(true);
     setMensagem(null);
 
     try {
-      const tokenArmazenado = localStorage.getItem("token");
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-      };
-      if (tokenArmazenado) {
-        headers["Authorization"] = `Bearer ${tokenArmazenado}`;
-      }
-
       let loginSucesso = false;
       let tokenFinal = "";
       let payloadFinal: JwtPayload | null = null;
@@ -146,9 +146,11 @@ export default function LoginPage() {
       try {
         const resposta = await fetch(`${API_URL}/login`, {
           method: "POST",
-          headers,
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
-            email: login.email.trim(),
+            email: emailNormalizado,
             senha: login.senha,
           }),
         });
@@ -159,38 +161,66 @@ export default function LoginPage() {
           loginSucesso = true;
           tokenFinal = dados.token;
           payloadFinal = decodificarToken(dados.token);
+        } else if (
+          resposta.status === 401 ||
+          resposta.status === 400 ||
+          resposta.status === 404
+        ) {
+          throw new Error(
+            dados.mensagem ||
+              dados.message ||
+              (resposta.status === 404
+                ? "Usuário não encontrado."
+                : "E-mail ou senha incorretos."),
+          );
         } else {
-          // Se o backend respondeu com erro (ex: 401 por falta de token inicial ou validação):
-          // Como o usuário já foi aprovado pelo Administrador, garantimos o acesso
+          // Backend online mas sem token retornado
+          if (checagemAcesso.status === "aceito") {
+            loginSucesso = true;
+            tokenFinal = "auth_session_" + Date.now();
+          } else {
+            throw new Error("Acesso não autorizado.");
+          }
+        }
+      } catch (fetchErr) {
+        if (
+          fetchErr instanceof Error &&
+          fetchErr.message !== "Failed to fetch"
+        ) {
+          throw fetchErr;
+        }
+
+        // Se o servidor backend estiver offline (modo demonstração local/mock):
+        if (checagemAcesso.status === "aceito") {
           loginSucesso = true;
           tokenFinal = "auth_session_" + Date.now();
+        } else {
+          throw new Error("Usuário não encontrado ou aguardando aprovação.");
         }
-      } catch {
-        // Se o backend estiver indisponível/offline:
-        // Como o usuário já foi aprovado pelo Administrador, permitimos a navegação
-        loginSucesso = true;
-        tokenFinal = "auth_session_" + Date.now();
       }
 
-      if (loginSucesso) {
+      if (loginSucesso && tokenFinal) {
+        // Armazena o token JWT imediatamente para evitar qualquer chamada desautenticada
         localStorage.setItem("token", tokenFinal);
 
         // Define o tipo de perfil do usuário (admin, colaborador ou voluntário)
         let tipoUsuario =
-          checagemAcesso.tipo || payloadFinal?.tipo || "voluntario";
+          payloadFinal?.tipo || checagemAcesso.tipo || "voluntario";
         if (
-          login.email.toLowerCase().includes("adm") ||
-          login.email.toLowerCase() === "admin@saudecampinas.org" ||
-          login.email.toLowerCase() === "admin@teste.com"
+          emailNormalizado.includes("adm") ||
+          emailNormalizado === "admin@saudecampinas.org" ||
+          emailNormalizado === "admin@teste.com"
         ) {
           tipoUsuario = "adm";
         }
 
+        const tipoFinal = normalizarTipoUsuario(tipoUsuario);
+
         const nomeUsuario =
           checagemAcesso.nome ||
-          (tipoUsuario === "adm"
+          (tipoFinal === "admin"
             ? "Administrador"
-            : tipoUsuario === "colaborador"
+            : tipoFinal === "colaborador"
               ? "Colaborador"
               : "Voluntário");
 
@@ -198,13 +228,15 @@ export default function LoginPage() {
           "usuario",
           JSON.stringify({
             id: payloadFinal?.id ?? checagemAcesso.id ?? Date.now(),
-            tipo: tipoUsuario,
-            email: login.email.trim(),
+            tipo: tipoFinal,
+            email: emailNormalizado,
             nome: nomeUsuario,
           }),
         );
 
-        const destino = obterRotaRedirecionamento(tipoUsuario);
+        window.dispatchEvent(new CustomEvent("ong_auth_change"));
+
+        const destino = obterRotaRedirecionamento(tipoFinal);
 
         setMensagem({
           tipo: "sucesso",
@@ -212,8 +244,9 @@ export default function LoginPage() {
         });
 
         window.setTimeout(() => {
-          window.location.assign(destino);
-        }, 700);
+          window.history.pushState({}, "", destino);
+          window.dispatchEvent(new PopStateEvent("popstate"));
+        }, 300);
       }
     } catch (erro) {
       const mensagemErro =
@@ -367,12 +400,14 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-parchment px-4 py-10 sm:px-6">
-   <div
-  aria-live="polite"
-  className={`w-full rounded-2xl border border-black/10 bg-white p-6 sm:p-8 lg:p-12 ${
-    modo === "cadastro" ? "max-w-[750px] lg:max-w-[880px]" : "max-w-[440px] lg:max-w-[520px]"
-  }`}
->
+      <div
+        aria-live="polite"
+        className={`w-full rounded-2xl border border-black/10 bg-white p-6 sm:p-8 lg:p-12 ${
+          modo === "cadastro"
+            ? "max-w-[750px] lg:max-w-[880px]"
+            : "max-w-[440px] lg:max-w-[520px]"
+        }`}
+      >
         <div className="mb-6 flex flex-col gap-1.5 text-center">
           <span className="font-mono text-[11px] font-semibold uppercase tracking-wide text-gold">
             Projeto Social Saúde Campinas

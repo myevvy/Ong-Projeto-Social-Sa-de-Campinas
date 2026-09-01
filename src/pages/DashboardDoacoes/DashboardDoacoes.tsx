@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
 import type { UsuarioAutenticado } from "../../types/auth";
 import { Kicker, Button, FormField } from "../../components";
-import { Trash2, Pencil, Check, X, Mail, Phone, Plus} from "lucide-react";
+import { Trash2, Pencil, Check, X, Mail, Phone, Plus } from "lucide-react";
+import { LogoutButton } from "../../components/LogoutButton/LogoutButton";
 
 type StatusDoacao = "aprovada" | "pendente" | "recusada";
 
@@ -192,15 +193,15 @@ export default function DashboardDoacoes({ usuario }: DashboardDoacoesProps) {
             Gestão de doações
           </h1>
           <p className="m-0 max-w-md font-body text-sm text-ink-soft">
-            Acompanhe entradas, valide contribuições e mantenha o impacto da
-            ONG visível.
+            Acompanhe entradas, valide contribuições e mantenha o impacto da ONG
+            visível.
           </p>
-            
         </div>
-<button
-          type="button"
-          onClick={() => setFormularioAberto((aberto) => !aberto)}
-          className="inline-flex items-center gap-1.5 rounded-pill border bg-black px-4 py-2.5 font-body text-[13px] font-bold text-white transition-colors hover:bg-black/80"
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setFormularioAberto((aberto) => !aberto)}
+            className="inline-flex items-center gap-1.5 rounded-pill border bg-black px-4 py-2.5 font-body text-[13px] font-bold text-white transition-colors hover:bg-black/80"
           >
             {formularioAberto ? (
               <>
@@ -208,10 +209,12 @@ export default function DashboardDoacoes({ usuario }: DashboardDoacoesProps) {
               </>
             ) : (
               <>
-                <Plus size={15} /> Criar evento
+                <Plus size={15} /> Registrar doação
               </>
             )}
           </button>
+          <LogoutButton />
+        </div>
       </header>
 
       {formularioAberto && (
@@ -401,29 +404,27 @@ export default function DashboardDoacoes({ usuario }: DashboardDoacoesProps) {
               </h2>
             </div>
             <div className="flex flex-wrap gap-2">
-              {(["aprovada", "pendente", "recusada"] as const).map(
-                (status) => {
-                  const labels: Record<StatusDoacao, string> = {
-                    aprovada: `Aprovadas (${aprovadas.length})`,
-                    pendente: `Pendentes (${pendentes.length})`,
-                    recusada: `Recusadas (${recusadas.length})`,
-                  };
-                  return (
-                    <button
-                      key={status}
-                      type="button"
-                      onClick={() => setAba(status)}
-                      className={`rounded-pill px-4 py-2 font-body text-[13px] font-bold transition-colors ${
-                        aba === status
-                          ? "bg-black text-parchment"
-                          : "border border-black/20 bg-white text-black"
-                      }`}
-                    >
-                      {labels[status]}
-                    </button>
-                  );
-                },
-              )}
+              {(["aprovada", "pendente", "recusada"] as const).map((status) => {
+                const labels: Record<StatusDoacao, string> = {
+                  aprovada: `Aprovadas (${aprovadas.length})`,
+                  pendente: `Pendentes (${pendentes.length})`,
+                  recusada: `Recusadas (${recusadas.length})`,
+                };
+                return (
+                  <button
+                    key={status}
+                    type="button"
+                    onClick={() => setAba(status)}
+                    className={`rounded-pill px-4 py-2 font-body text-[13px] font-bold transition-colors ${
+                      aba === status
+                        ? "bg-black text-parchment"
+                        : "border border-black/20 bg-white text-black"
+                    }`}
+                  >
+                    {labels[status]}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -433,89 +434,89 @@ export default function DashboardDoacoes({ usuario }: DashboardDoacoesProps) {
               {meses[mesSelecionado].toLocaleLowerCase()}.
             </p>
           ) : (
-           <div className="flex flex-col gap-3">
-  {exibidas.map((doacao) => (
-    <article
-      key={doacao.id}
-      className="grid grid-cols-1 gap-4 rounded-md border border-black/10 p-4 md:grid-cols-[1fr_auto_auto] md:items-center"
-    >
-      {/* Coluna 1 — dados do doador */}
-      <div className="flex flex-col gap-1">
-        <strong className="font-body text-sm font-bold text-black">
-          {doacao.nome}
-        </strong>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 font-body text-xs text-ink-soft">
-          <span className="inline-flex items-center gap-1">
-            <Mail size={12} className="shrink-0" />
-            {doacao.email}
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <Phone size={12} className="shrink-0" />
-            {doacao.telefone}
-          </span>
-        </div>
-      </div>
+            <div className="flex flex-col gap-3">
+              {exibidas.map((doacao) => (
+                <article
+                  key={doacao.id}
+                  className="grid grid-cols-1 gap-4 rounded-md border border-black/10 p-4 md:grid-cols-[1fr_auto_auto] md:items-center"
+                >
+                  {/* Coluna 1 — dados do doador */}
+                  <div className="flex flex-col gap-1">
+                    <strong className="font-body text-sm font-bold text-black">
+                      {doacao.nome}
+                    </strong>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 font-body text-xs text-ink-soft">
+                      <span className="inline-flex items-center gap-1">
+                        <Mail size={12} className="shrink-0" />
+                        {doacao.email}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <Phone size={12} className="shrink-0" />
+                        {doacao.telefone}
+                      </span>
+                    </div>
+                  </div>
 
-      {/* Coluna 2 — valor, separada por borda no desktop */}
-      <div className="flex items-center justify-between gap-4 border-black/10 md:flex-col md:items-end md:justify-center md:border-l md:pl-4">
-        <strong className="font-display text-lg font-semibold text-black">
-          {moeda(doacao.valor)}
-        </strong>
-        <span className="font-body text-xs text-ink-soft">
-          Dia {doacao.data.slice(8, 10)}
-        </span>
-      </div>
+                  {/* Coluna 2 — valor, separada por borda no desktop */}
+                  <div className="flex items-center justify-between gap-4 border-black/10 md:flex-col md:items-end md:justify-center md:border-l md:pl-4">
+                    <strong className="font-display text-lg font-semibold text-black">
+                      {moeda(doacao.valor)}
+                    </strong>
+                    <span className="font-body text-xs text-ink-soft">
+                      Dia {doacao.data.slice(8, 10)}
+                    </span>
+                  </div>
 
-      {/* Coluna 3 — ações, separadas por borda no desktop */}
-      <div className="flex flex-wrap items-center gap-2 border-black/10 md:border-l md:pl-4">
-        {aba === "pendente" && (
-          <>
-            <button
-              type="button"
-              onClick={() => atualizarStatus(doacao.id, "aprovada")}
-              className="inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-pill bg-volunteer px-3 font-body text-[13px] font-bold text-parchment transition-opacity hover:opacity-90"
-            >
-              <Check size={14} className="shrink-0" />
-              Aceitar
-            </button>
-            <button
-              type="button"
-              onClick={() => atualizarStatus(doacao.id, "recusada")}
-              className="inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-pill border border-error/40 px-3 font-body text-[13px] font-bold text-error transition-colors hover:bg-error/10"
-            >
-              <X size={14} className="shrink-0" />
-              Recusar
-            </button>
-          </>
-        )}
+                  {/* Coluna 3 — ações, separadas por borda no desktop */}
+                  <div className="flex flex-wrap items-center gap-2 border-black/10 md:border-l md:pl-4">
+                    {aba === "pendente" && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => atualizarStatus(doacao.id, "aprovada")}
+                          className="inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-pill bg-volunteer px-3 font-body text-[13px] font-bold text-parchment transition-opacity hover:opacity-90"
+                        >
+                          <Check size={14} className="shrink-0" />
+                          Aceitar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => atualizarStatus(doacao.id, "recusada")}
+                          className="inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-pill border border-error/40 px-3 font-body text-[13px] font-bold text-error transition-colors hover:bg-error/10"
+                        >
+                          <X size={14} className="shrink-0" />
+                          Recusar
+                        </button>
+                      </>
+                    )}
 
-        <button
-          type="button"
-          onClick={() => editarDoacao(doacao)}
-          className="inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-pill border border-black/20 bg-white px-3 font-body text-[13px] font-bold text-black transition-colors hover:bg-black/5"
-        >
-          <Pencil size={14} className="shrink-0" />
-          <span className="hidden sm:inline">Editar</span>
-        </button>
+                    <button
+                      type="button"
+                      onClick={() => editarDoacao(doacao)}
+                      className="inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-pill border border-black/20 bg-white px-3 font-body text-[13px] font-bold text-black transition-colors hover:bg-black/5"
+                    >
+                      <Pencil size={14} className="shrink-0" />
+                      <span className="hidden sm:inline">Editar</span>
+                    </button>
 
-        <button
-          type="button"
-          onClick={() =>
-            setDoacoes((atuais) =>
-              atuais.filter((item) => item.id !== doacao.id),
-            )
-          }
-          className="ml-1 inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-pill px-3 font-body text-[13px] font-bold text-error/70 transition-colors hover:bg-error/10 hover:text-error"
-          aria-label="Excluir doação"
-          title="Excluir"
-        >
-          <Trash2 size={14} className="shrink-0" />
-          <span className="hidden sm:inline">Excluir</span>
-        </button>
-      </div>
-    </article>
-  ))}
-</div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setDoacoes((atuais) =>
+                          atuais.filter((item) => item.id !== doacao.id),
+                        )
+                      }
+                      className="ml-1 inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-pill px-3 font-body text-[13px] font-bold text-error/70 transition-colors hover:bg-error/10 hover:text-error"
+                      aria-label="Excluir doação"
+                      title="Excluir"
+                    >
+                      <Trash2 size={14} className="shrink-0" />
+                      <span className="hidden sm:inline">Excluir</span>
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
           )}
         </div>
       </section>

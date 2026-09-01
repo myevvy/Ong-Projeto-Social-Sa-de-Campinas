@@ -1,7 +1,6 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { EventCalendar } from "../../components/EventCalendar/EventCalendar";
 import { MessageBox } from "../../components/MessageBox/MessageBox";
-import { MuralBoard } from "../../components/MuralBoard/MuralBoard";
 import { LogoutButton } from "../../components/LogoutButton/LogoutButton";
 import {
   obterSolicitacoes,
@@ -10,6 +9,11 @@ import {
   type SolicitacaoAcesso,
   type StatusAcesso,
 } from "../../services/authService";
+import {
+  buscarMedicamentosApi,
+  obterMedicamentosCache,
+  type MedicamentoItem,
+} from "../../services/remedioService";
 import {
   Pill,
   HandCoins,
@@ -33,9 +37,10 @@ import {
 } from "lucide-react";
 import {
   obterEventos,
-  adicionarEvento,
-  atualizarEvento,
-  removerEvento,
+  buscarEventosApi,
+  criarEventoApi,
+  atualizarEventoApi,
+  removerEventoApi,
   removerVoluntarioDeEvento,
   type EventoGlobal,
   type VoluntarioInscrito,
@@ -49,8 +54,8 @@ function navegarPara(caminho: string) {
 
 export default function DashboardAdmin() {
   const [eventos, setEventos] = useState<EventoGlobal[]>([]);
-  const [eventoInscritosAberto, setEventoInscritosAberto] = useState
-   < number | null
+  const [eventoInscritosAberto, setEventoInscritosAberto] = useState<
+    number | null
   >(null);
   const [solicitacoes, setSolicitacoes] = useState<SolicitacaoAcesso[]>([]);
   const [novoEvento, setNovoEvento] = useState({
@@ -63,22 +68,68 @@ export default function DashboardAdmin() {
   });
   const [eventoEmEdicao, setEventoEmEdicao] = useState<number | null>(null);
   const [formularioAberto, setFormularioAberto] = useState(false);
+  const [salvandoEvento, setSalvandoEvento] = useState(false);
+
+  const [medicamentos, setMedicamentos] = useState<MedicamentoItem[]>([]);
 
   useEffect(() => {
     setSolicitacoes(obterSolicitacoes());
     setEventos(obterEventos());
+    setMedicamentos(obterMedicamentosCache());
 
-    function atualizarEventosAoVivo() {
+    // Busca eventos ativos diretamente do banco de dados MySQL
+    buscarEventosApi()
+      .then((evs) => {
+        if (Array.isArray(evs) && evs.length > 0) {
+          setEventos(evs);
+        }
+      })
+      .catch(() => {});
+
+    // Busca medicamentos do banco de dados MySQL
+    buscarMedicamentosApi()
+      .then((meds) => {
+        if (Array.isArray(meds)) {
+          setMedicamentos(meds);
+        }
+      })
+      .catch(() => {});
+
+    function atualizarDadosAoVivo() {
       setEventos(obterEventos());
+      setSolicitacoes(obterSolicitacoes());
+      setMedicamentos(obterMedicamentosCache());
     }
-    window.addEventListener("ong_eventos_atualizados", atualizarEventosAoVivo);
+
+    window.addEventListener("ong_eventos_atualizados", atualizarDadosAoVivo);
+    window.addEventListener(
+      "ong_solicitacoes_atualizadas",
+      atualizarDadosAoVivo,
+    );
+    window.addEventListener(
+      "ong_medicamentos_atualizados",
+      atualizarDadosAoVivo,
+    );
+    window.addEventListener("ong_auth_change", atualizarDadosAoVivo);
+
     return () => {
       window.removeEventListener(
         "ong_eventos_atualizados",
-        atualizarEventosAoVivo,
+        atualizarDadosAoVivo,
       );
+      window.removeEventListener(
+        "ong_solicitacoes_atualizadas",
+        atualizarDadosAoVivo,
+      );
+      window.removeEventListener(
+        "ong_medicamentos_atualizados",
+        atualizarDadosAoVivo,
+      );
+      window.removeEventListener("ong_auth_change", atualizarDadosAoVivo);
     };
   }, []);
+
+  const totalEstoque = medicamentos.reduce((acc, m) => acc + m.quantidade, 0);
 
   const totalVoluntarios = solicitacoes.filter(
     (s) => s.tipo === "voluntario" && s.status === "aceito",
@@ -94,45 +145,51 @@ export default function DashboardAdmin() {
     (s) => s.tipo === "colaborador" && s.status === "pendente",
   ).length;
 
-  function criarEvento(evento: FormEvent<HTMLFormElement>) {
+  async function criarEvento(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     if (!novoEvento.titulo.trim() || !novoEvento.data) return;
 
-    if (eventoEmEdicao) {
-      const atualizados = atualizarEvento(eventoEmEdicao, {
-        titulo: novoEvento.titulo.trim(),
-        data: novoEvento.data,
-        comentarios: novoEvento.comentarios.trim(),
-        local: novoEvento.local.trim(),
-        category: novoEvento.category,
-        vagas: Number(novoEvento.vagas) || 6,
+    setSalvandoEvento(true);
+
+    try {
+      if (eventoEmEdicao) {
+        const atualizados = await atualizarEventoApi(eventoEmEdicao, {
+          titulo: novoEvento.titulo.trim(),
+          data: novoEvento.data,
+          comentarios: novoEvento.comentarios.trim(),
+          local: novoEvento.local.trim(),
+          category: novoEvento.category,
+          vagas: Number(novoEvento.vagas) || 6,
+        });
+        setEventos(atualizados);
+      } else {
+        const atualizados = await criarEventoApi({
+          titulo: novoEvento.titulo.trim(),
+          data: novoEvento.data,
+          comentarios: novoEvento.comentarios.trim(),
+          local: novoEvento.local.trim(),
+          category: novoEvento.category,
+          vagas: Number(novoEvento.vagas) || 6,
+        });
+        setEventos(atualizados);
+      }
+    } finally {
+      setSalvandoEvento(false);
+      setNovoEvento({
+        titulo: "",
+        data: "",
+        comentarios: "",
+        local: "Centro de Campinas",
+        category: "Mutirão",
+        vagas: 6,
       });
-      setEventos(atualizados);
-    } else {
-      const atualizados = adicionarEvento({
-        titulo: novoEvento.titulo.trim(),
-        data: novoEvento.data,
-        comentarios: novoEvento.comentarios.trim(),
-        local: novoEvento.local.trim(),
-        category: novoEvento.category,
-        vagas: Number(novoEvento.vagas) || 6,
-      });
-      setEventos(atualizados);
+      setEventoEmEdicao(null);
+      setFormularioAberto(false);
     }
-    setNovoEvento({
-      titulo: "",
-      data: "",
-      comentarios: "",
-      local: "Centro de Campinas",
-      category: "Mutirão",
-      vagas: 6,
-    });
-    setEventoEmEdicao(null);
-    setFormularioAberto(false);
   }
 
-  function excluirEvento(id: number) {
-    const atualizados = removerEvento(id);
+  async function excluirEvento(id: number) {
+    const atualizados = await removerEventoApi(id);
     setEventos(atualizados);
   }
 
@@ -178,7 +235,7 @@ export default function DashboardAdmin() {
             Estoque total
           </span>
           <strong className="font-display text-2xl font-semibold text-black">
-            248
+            {totalEstoque || medicamentos.length}
           </strong>
           <small className="font-body text-xs text-ink-soft">
             unidades cadastradas
@@ -406,9 +463,14 @@ export default function DashboardAdmin() {
 
             <button
               type="submit"
-              className="inline-flex w-fit justify-self-center items-center rounded-pill bg-black px-5 py-3 font-body text-[14px] font-bold text-parchment transition-opacity hover:opacity-90 md:col-span-2"
+              disabled={salvandoEvento}
+              className="inline-flex w-fit justify-self-center items-center rounded-pill bg-black px-5 py-3 font-body text-[14px] font-bold text-parchment transition-opacity hover:opacity-90 disabled:opacity-50 md:col-span-2"
             >
-              {eventoEmEdicao ? "Atualizar evento" : "Salvar evento"}
+              {salvandoEvento
+                ? "Salvando no banco..."
+                : eventoEmEdicao
+                  ? "Atualizar evento"
+                  : "Salvar evento"}
             </button>
           </form>
         )}
@@ -459,20 +521,24 @@ export default function DashboardAdmin() {
                         "Sem comentários registrados."}
                     </p>
 
-                    
-<VolunteerList
-  inscritos={evento.inscritosDetalhes || []}
-  vagas={evento.vagas || 6}
-  aberto={eventoInscritosAberto === evento.id}
-  onToggle={() =>
-    setEventoInscritosAberto((atual) =>
-      atual === evento.id ? null : evento.id,
-    )
-  }
-  onRemover={(nomeOuEmail) =>
-    handleRemoverVoluntario(evento.id, nomeOuEmail)
-  }
-/>
+                    <VolunteerList
+                      inscritos={evento.inscritosDetalhes || []}
+                      vagas={evento.vagas || 6}
+                      aberto={
+                        eventoInscritosAberto !== null &&
+                        String(eventoInscritosAberto) === String(evento.id)
+                      }
+                      onToggle={() =>
+                        setEventoInscritosAberto((atual) =>
+                          String(atual) === String(evento.id)
+                            ? null
+                            : evento.id,
+                        )
+                      }
+                      onRemover={(nomeOuEmail) =>
+                        handleRemoverVoluntario(evento.id, nomeOuEmail)
+                      }
+                    />
 
                     <div className="mt-3 flex flex-wrap gap-2 border-t border-black/10 pt-3">
                       <button
@@ -533,8 +599,8 @@ export default function DashboardAdmin() {
         </div>
         <p className="m-0 max-w-2xl font-body text-sm text-ink-soft">
           Avalie e aprove solicitações de cadastro. Você pode decidir se o
-          usuário atuará como Voluntário ou Colaborador e definir sua
-          permissão de acesso.
+          usuário atuará como Voluntário ou Colaborador e definir sua permissão
+          de acesso.
         </p>
 
         <ApprovalPanelContent
@@ -544,18 +610,10 @@ export default function DashboardAdmin() {
         />
       </section>
 
-      {/* Seção de Comunicação Interna e Mural da Equipe */}
-      <section
-        aria-label="Comunicação e Mural"
-        className="grid grid-cols-1 gap-6 md:grid-cols-2"
-      >
+      {/* Seção de Comunicação Interna & Mensagens */}
+      <section aria-label="Comunicação Interna" className="w-full">
         <MessageBox
           author="admin"
-          usuarioNome="Coordenação Geral"
-          usuarioEmail="admin@saudecampinas.org"
-        />
-        <MuralBoard
-          tipoUsuario="admin"
           usuarioNome="Coordenação Geral"
           usuarioEmail="admin@saudecampinas.org"
         />
@@ -576,8 +634,8 @@ function ApprovalPanelContent({
   const [filtroStatus, setFiltroStatus] = useState<StatusAcesso | "todos">(
     "pendente",
   );
-  const [filtroTipo, setFiltroTipo] = useState
-    <"todos" | "voluntario" | "colaborador"
+  const [filtroTipo, setFiltroTipo] = useState<
+    "todos" | "voluntario" | "colaborador"
   >("todos");
   const [busca, setBusca] = useState("");
   const [mensagemFeedback, setMensagemFeedback] = useState<string | null>(null);

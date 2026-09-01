@@ -7,6 +7,7 @@ import { Button } from "../../components/Button/Button";
 import { EventCard } from "../../components/EventCard/EventCard";
 import {
   obterEventos,
+  buscarEventosApi,
   type EventoGlobal,
   type CategoriaEvento,
 } from "../../services/eventService";
@@ -53,6 +54,15 @@ function Eventos() {
 
   useEffect(() => {
     setEventos(obterEventos());
+
+    // Busca eventos ativos da tabela evento no MySQL
+    buscarEventosApi()
+      .then((evs) => {
+        if (Array.isArray(evs) && evs.length > 0) {
+          setEventos(evs);
+        }
+      })
+      .catch(() => {});
 
     function recarregarEventos() {
       setEventos(obterEventos());

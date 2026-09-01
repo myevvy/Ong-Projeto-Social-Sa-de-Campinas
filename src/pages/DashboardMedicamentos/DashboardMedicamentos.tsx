@@ -1,6 +1,11 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { Pencil, Trash2, X, Check } from "lucide-react";
-
+import { LogoutButton } from "../../components/LogoutButton/LogoutButton";
+import {
+  buscarMedicamentosApi,
+  obterMedicamentosCache,
+  salvarMedicamentosCache,
+} from "../../services/remedioService";
 
 export interface MedicamentosProps {
   nome: string;
@@ -155,16 +160,41 @@ function statusValidade(validade: string): "vencido" | "proximo" | "ok" {
 export default function DashboardMedicamentos({
   medicamentosIniciais = [],
 }: DashboardMedicamentosProps) {
-  const [medicamentos, setMedicamentos] =
-    useState<MedicamentosProps[]>(medicamentosIniciais);
+  const [medicamentos, setMedicamentos] = useState<MedicamentosProps[]>(() => {
+    const cache = obterMedicamentosCache();
+    return cache.length > 0 ? cache : medicamentosIniciais;
+  });
+
+  useEffect(() => {
+    buscarMedicamentosApi()
+      .then((meds) => {
+        if (Array.isArray(meds) && meds.length > 0) {
+          setMedicamentos(meds);
+        }
+      })
+      .catch(() => {});
+
+    function sincronizar() {
+      const cache = obterMedicamentosCache();
+      if (cache.length > 0) {
+        setMedicamentos(cache);
+      }
+    }
+
+    window.addEventListener("ong_medicamentos_atualizados", sincronizar);
+    return () => {
+      window.removeEventListener("ong_medicamentos_atualizados", sincronizar);
+    };
+  }, []);
+
   const [formularioAberto, setFormularioAberto] = useState(false);
   const [formulario, setFormulario] =
     useState<FormularioMedicamento>(FORMULARIO_VAZIO);
   const [loteEmEdicao, setLoteEmEdicao] = useState<LoteEmEdicao | null>(null);
   const [confirmacao, setConfirmacao] = useState<Confirmacao | null>(null);
-  const [medicamentoAdicionado, setMedicamentoAdicionado] = useState
- < string | null
->(null);
+  const [medicamentoAdicionado, setMedicamentoAdicionado] = useState<
+    string | null
+  >(null);
   const medicamentosAgrupados = agruparMedicamentos(medicamentos);
   const quantidadeTotal = medicamentos.reduce(
     (total, medicamento) => total + medicamento.quantidade,
@@ -267,15 +297,30 @@ export default function DashboardMedicamentos({
     setConfirmacao(null);
   }
 
-  function voltarParaDashboard() {
-    window.history.pushState({}, "", "/dashboard/colaborador");
+  function voltarParaDashboard(evento: React.MouseEvent<HTMLAnchorElement>) {
+    evento.preventDefault();
+    let dest = "/dashboard/colaborador";
+    try {
+      const u = localStorage.getItem("usuario");
+      if (u) {
+        const parsed = JSON.parse(u);
+        if (
+          parsed.tipo === "adm" ||
+          parsed.tipo === "admin" ||
+          parsed.tipo === "administrador"
+        ) {
+          dest = "/dashboard/admin";
+        }
+      }
+    } catch {}
+    window.history.pushState({}, "", dest);
     window.dispatchEvent(new PopStateEvent("popstate"));
   }
 
   return (
     <div className="mx-auto flex max-w-[1120px] flex-col gap-6 px-6 py-8 md:px-10">
-      
-        <a href="/dashboard/colaborador"
+      <a
+        href="/dashboard/colaborador"
         onClick={voltarParaDashboard}
         className="inline-flex w-fit items-center gap-1.5 font-body text-sm font-bold text-black underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-2"
       >
@@ -294,20 +339,23 @@ export default function DashboardMedicamentos({
             Cadastre e acompanhe os itens disponíveis para atendimento.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setFormularioAberto((estadoAtual) => !estadoAtual)}
-          aria-expanded={formularioAberto}
-          className="inline-flex items-center gap-1.5 rounded-pill bg-black  px-4 py-2.5 font-body text-[13px] font-bold text-white mt-15 border transition-colors hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-2"
-        >
-          {formularioAberto ? (
-            <>
-              <X size={15} aria-hidden="true" /> Fechar cadastro
-            </>
-          ) : (
-            "+ Adicionar medicamento"
-          )}
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setFormularioAberto((estadoAtual) => !estadoAtual)}
+            aria-expanded={formularioAberto}
+            className="inline-flex items-center gap-1.5 rounded-pill bg-black px-4 py-2.5 font-body text-[13px] font-bold text-white transition-colors hover:bg-black/80"
+          >
+            {formularioAberto ? (
+              <>
+                <X size={15} aria-hidden="true" /> Fechar cadastro
+              </>
+            ) : (
+              "+ Adicionar medicamento"
+            )}
+          </button>
+          <LogoutButton />
+        </div>
       </header>
 
       {formularioAberto && (
@@ -338,9 +386,7 @@ export default function DashboardMedicamentos({
             <input
               type="text"
               value={formulario.nome}
-              onChange={(evento) =>
-                atualizarCampo("nome", evento.target.value)
-              }
+              onChange={(evento) => atualizarCampo("nome", evento.target.value)}
               required
               className="rounded-sm border border-black/[0.18] bg-white px-4 py-3 font-body text-sm font-normal text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-1"
             />
@@ -407,9 +453,7 @@ export default function DashboardMedicamentos({
               step="any"
               value={formulario.dose}
               onWheel={impedirAlteracaoPorScroll}
-              onChange={(evento) =>
-                atualizarCampo("dose", evento.target.value)
-              }
+              onChange={(evento) => atualizarCampo("dose", evento.target.value)}
               required
               className="rounded-sm border border-black/[0.18] bg-white px-4 py-3 font-body text-sm font-normal text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber focus-visible:outline-offset-1"
             />
@@ -615,8 +659,8 @@ export default function DashboardMedicamentos({
             </div>
           </div>
         </div>
-          )}
-         {medicamentoAdicionado && (
+      )}
+      {medicamentoAdicionado && (
         <div
           role="presentation"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
@@ -651,7 +695,6 @@ export default function DashboardMedicamentos({
           </div>
         </div>
       )}
-     
     </div>
   );
 }

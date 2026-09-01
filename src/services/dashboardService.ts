@@ -1,14 +1,20 @@
 // src/services/dashboardService.ts
 import type { DashboardColaboradorData } from "../types/dashboard";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3333";
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
 export async function buscarDashboardColaborador(): Promise<DashboardColaboradorData> {
-  const response = await fetch(`${API_BASE_URL}/api/colaborador/dashboard`, {
+  const token = localStorage.getItem("token");
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/pagFunc`, {
     method: "GET",
-    // Envia o cookie httpOnly de sessão — o back identifica o colaborador por ele,
-    // então não é necessário (nem seguro) passar o id do usuário na URL.
-    credentials: "include",
+    headers,
   });
 
   if (response.status === 401) {

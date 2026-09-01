@@ -28,6 +28,39 @@ export interface EventoGlobal {
 const STORAGE_KEY_EVENTOS = "ong_eventos_compartilhados";
 const STORAGE_KEY_INSCRICOES = "ong_inscricoes_voluntarios";
 
+const NOMES_MOCK_FICTICIOS = [
+  "mariana souza",
+  "carlos eduardo lima",
+  "rafael nogueira",
+  "ana paula mendes",
+  "beatriz silveira",
+  "juliana castro",
+];
+
+function ehInscritoFicticio(voluntario: VoluntarioInscrito): boolean {
+  if (!voluntario) return true;
+  const idStr = String(voluntario.id || "").toLowerCase();
+  if (idStr.startsWith("mock-")) return true;
+  const nomeNorm = String(voluntario.nome || "")
+    .toLowerCase()
+    .trim();
+  if (NOMES_MOCK_FICTICIOS.includes(nomeNorm)) return true;
+  const emailNorm = String(voluntario.email || "")
+    .toLowerCase()
+    .trim();
+  if (
+    emailNorm.includes("mariana.souza") ||
+    emailNorm.includes("carlos.lima") ||
+    emailNorm.includes("rafael.nogueira") ||
+    emailNorm.includes("ana.mendes") ||
+    emailNorm.includes("beatriz.silveira") ||
+    emailNorm.includes("juliana.castro")
+  ) {
+    return true;
+  }
+  return false;
+}
+
 export const EVENTOS_INICIAIS: EventoGlobal[] = [
   {
     id: 1,
@@ -36,33 +69,8 @@ export const EVENTOS_INICIAIS: EventoGlobal[] = [
     local: "Vila Industrial, Campinas",
     category: "Mutirão",
     vagas: 6,
-    voluntariosInscritos: 3,
-    inscritosDetalhes: [
-      {
-        id: 3,
-        nome: "user+18",
-        email: "use18r@gmail.com",
-        telefone: "(19) 99124-3012",
-        sobre: "Estudante de enfermagem, disponível para triagem e acolhimento.",
-        dataInscricao: "2026-08-28",
-      },
-      {
-        id: "mock-1",
-        nome: "Mariana Souza",
-        email: "mariana.souza@gmail.com",
-        telefone: "(19) 99221-8833",
-        sobre: "Estudante de medicina na Unicamp. Atuação em primeiros socorros.",
-        dataInscricao: "2026-08-29",
-      },
-      {
-        id: "mock-2",
-        nome: "Carlos Eduardo Lima",
-        email: "carlos.lima@gmail.com",
-        telefone: "(19) 99876-1122",
-        sobre: "Apoio logístico e entrega de kits de higiene.",
-        dataInscricao: "2026-08-29",
-      },
-    ],
+    voluntariosInscritos: 0,
+    inscritosDetalhes: [],
     comentarios:
       "Levar kits de higiene e conferir os lotes de medicamentos recebidos.",
     description:
@@ -76,25 +84,8 @@ export const EVENTOS_INICIAIS: EventoGlobal[] = [
     local: "Centro de Campinas",
     category: "Campanha",
     vagas: 4,
-    voluntariosInscritos: 2,
-    inscritosDetalhes: [
-      {
-        id: "mock-3",
-        nome: "Rafael Nogueira",
-        email: "rafael.nogueira@gmail.com",
-        telefone: "(19) 99771-2244",
-        sobre: "Organização de estoque, conferência de validades e lotes.",
-        dataInscricao: "2026-08-27",
-      },
-      {
-        id: "mock-4",
-        nome: "Ana Paula Mendes",
-        email: "ana.mendes@gmail.com",
-        telefone: "(19) 99123-4567",
-        sobre: "Recepção e triagem das doações.",
-        dataInscricao: "2026-08-28",
-      },
-    ],
+    voluntariosInscritos: 0,
+    inscritosDetalhes: [],
     comentarios: "Confirmar transporte com a equipe até sexta-feira.",
     description:
       "Recolhemos remédios e amostras grátis parados no armário para reforçar o estoque das próximas ações.",
@@ -107,17 +98,8 @@ export const EVENTOS_INICIAIS: EventoGlobal[] = [
     local: "Centro, Campinas",
     category: "Mutirão",
     vagas: 8,
-    voluntariosInscritos: 1,
-    inscritosDetalhes: [
-      {
-        id: "mock-5",
-        nome: "Beatriz Silveira",
-        email: "beatriz.silveira@gmail.com",
-        telefone: "(19) 99333-4455",
-        sobre: "Disponível no período da manhã para atendimento humanizado.",
-        dataInscricao: "2026-08-29",
-      },
-    ],
+    voluntariosInscritos: 0,
+    inscritosDetalhes: [],
     comentarios:
       "Segunda rodada do mês, com apoio de novos voluntários da capacitação.",
     description:
@@ -131,25 +113,8 @@ export const EVENTOS_INICIAIS: EventoGlobal[] = [
     local: "Sede parceira - Campinas",
     category: "Capacitação",
     vagas: 12,
-    voluntariosInscritos: 2,
-    inscritosDetalhes: [
-      {
-        id: 3,
-        nome: "user+18",
-        email: "use18r@gmail.com",
-        telefone: "(19) 99124-3012",
-        sobre: "Interesse em conhecer a rotina dos atendimentos.",
-        dataInscricao: "2026-08-29",
-      },
-      {
-        id: "mock-6",
-        nome: "Juliana Castro",
-        email: "juliana.castro@gmail.com",
-        telefone: "(19) 99444-5566",
-        sobre: "Estudante de Farmácia, 3º ano.",
-        dataInscricao: "2026-08-30",
-      },
-    ],
+    voluntariosInscritos: 0,
+    inscritosDetalhes: [],
     comentarios:
       "Encontro para quem está começando: rotina das ações e primeiros socorros.",
     description:
@@ -172,6 +137,92 @@ export const EVENTOS_INICIAIS: EventoGlobal[] = [
   },
 ];
 
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+
+function obterHeaderAuth(): Record<string, string> {
+  const token = localStorage.getItem("token");
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
+function formatarDataIso(dataRaw: unknown): string {
+  if (!dataRaw) return new Date().toISOString().split("T")[0];
+  if (typeof dataRaw === "string") {
+    return dataRaw.split("T")[0];
+  }
+  try {
+    const d = new Date(dataRaw as string | number | Date);
+    return d.toISOString().split("T")[0];
+  } catch {
+    return new Date().toISOString().split("T")[0];
+  }
+}
+
+interface EventoMysqlRaw {
+  ID_evento?: number | string;
+  id_evento?: number | string;
+  id?: number | string;
+  nome_evento?: string;
+  nome?: string;
+  titulo?: string;
+  data_evento?: string;
+  data?: string;
+  localizacao?: string;
+  local?: string;
+  desc_evento?: string;
+  desc?: string;
+  comentarios?: string;
+  description?: string;
+  category?: CategoriaEvento;
+  vagas?: number;
+  photoUrl?: string;
+  photoAlt?: string;
+}
+
+export function mapearEventoDoBanco(
+  item: EventoMysqlRaw,
+  eventosLocaisCache: EventoGlobal[] = [],
+): EventoGlobal {
+  const idNum = Number(
+    item.ID_evento ?? item.id_evento ?? item.id ?? Date.now(),
+  );
+  const dataFormatada = formatarDataIso(item.data_evento ?? item.data);
+  const cacheExistente = eventosLocaisCache.find((e) => e.id === idNum);
+  const inscritosLimpos = (cacheExistente?.inscritosDetalhes || []).filter(
+    (i) => !ehInscritoFicticio(i),
+  );
+
+  return {
+    id: idNum,
+    titulo: item.nome_evento || item.nome || item.titulo || "Evento sem título",
+    data: dataFormatada,
+    local: item.localizacao || item.local || "Campinas e Região",
+    comentarios:
+      item.desc_evento ||
+      item.desc ||
+      item.comentarios ||
+      item.description ||
+      "",
+    description:
+      item.desc_evento ||
+      item.desc ||
+      item.description ||
+      item.comentarios ||
+      "",
+    category: cacheExistente?.category || item.category || "Mutirão",
+    vagas: cacheExistente?.vagas || item.vagas || 6,
+    voluntariosInscritos: inscritosLimpos.length,
+    inscritosDetalhes: inscritosLimpos,
+    photoUrl: cacheExistente?.photoUrl || item.photoUrl,
+    photoAlt: cacheExistente?.photoAlt || item.photoAlt,
+  };
+}
+
 export function obterEventos(): EventoGlobal[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_EVENTOS);
@@ -181,18 +232,55 @@ export function obterEventos(): EventoGlobal[] {
     }
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed.map((e) => ({
-        ...e,
-        inscritosDetalhes: Array.isArray(e.inscritosDetalhes) ? e.inscritosDetalhes : [],
-        voluntariosInscritos: Array.isArray(e.inscritosDetalhes)
-          ? e.inscritosDetalhes.length
-          : e.voluntariosInscritos || 0,
-      }));
+      const eventosLimpos = parsed.map((e) => {
+        const detalhesReais = (
+          Array.isArray(e.inscritosDetalhes) ? e.inscritosDetalhes : []
+        ).filter((i: VoluntarioInscrito) => !ehInscritoFicticio(i));
+        return {
+          ...e,
+          inscritosDetalhes: detalhesReais,
+          voluntariosInscritos: detalhesReais.length,
+        };
+      });
+
+      // Salva imediatamente para purgar dados fictícios que estavam no navegador do usuário
+      localStorage.setItem(STORAGE_KEY_EVENTOS, JSON.stringify(eventosLimpos));
+      return eventosLimpos;
     }
     salvarEventos(EVENTOS_INICIAIS);
     return EVENTOS_INICIAIS;
   } catch {
     return EVENTOS_INICIAIS;
+  }
+}
+
+export async function buscarEventosApi(): Promise<EventoGlobal[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/eventos`, {
+      method: "GET",
+    });
+
+    if (!res.ok) {
+      return obterEventos();
+    }
+
+    const dados = await res.json();
+    if (Array.isArray(dados) && dados.length > 0) {
+      const cacheLocal = obterEventos();
+      const eventosMapeados = dados.map((item: EventoMysqlRaw) =>
+        mapearEventoDoBanco(item, cacheLocal),
+      );
+      salvarEventos(eventosMapeados);
+      return eventosMapeados;
+    }
+
+    return obterEventos();
+  } catch (error) {
+    console.warn(
+      "API de eventos offline/indisponível, usando cache local:",
+      error,
+    );
+    return obterEventos();
   }
 }
 
@@ -205,6 +293,60 @@ export function salvarEventos(lista: EventoGlobal[]): void {
   }
 }
 
+export async function criarEventoApi(novo: {
+  titulo: string;
+  data: string;
+  comentarios?: string;
+  local?: string;
+  category?: string;
+  vagas?: number;
+}): Promise<EventoGlobal[]> {
+  let novoId = Date.now();
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/eventos`, {
+      method: "POST",
+      headers: obterHeaderAuth(),
+      body: JSON.stringify({
+        nome: novo.titulo.trim(),
+        data: novo.data,
+        localizacao: novo.local?.trim() || "Campinas e Região",
+        desc: novo.comentarios?.trim() || "",
+      }),
+    });
+
+    const respostaJson = await res.json().catch(() => ({}));
+    if (respostaJson.idEvento) {
+      novoId = Number(respostaJson.idEvento);
+    }
+  } catch (error) {
+    console.warn(
+      "Não foi possível salvar evento no backend, salvando localmente:",
+      error,
+    );
+  }
+
+  const lista = obterEventos();
+  const novoEvento: EventoGlobal = {
+    id: novoId,
+    titulo: novo.titulo.trim(),
+    data: novo.data,
+    comentarios: novo.comentarios?.trim() || "",
+    description:
+      novo.comentarios?.trim() ||
+      "Ação social organizada pelo Projeto Saúde Campinas.",
+    local: novo.local?.trim() || "Campinas e Região",
+    category: (novo.category as CategoriaEvento) || "Mutirão",
+    vagas: Number(novo.vagas) || 6,
+    voluntariosInscritos: 0,
+    inscritosDetalhes: [],
+  };
+
+  lista.unshift(novoEvento);
+  salvarEventos(lista);
+  return lista;
+}
+
 export function adicionarEvento(novo: {
   titulo: string;
   data: string;
@@ -213,6 +355,9 @@ export function adicionarEvento(novo: {
   category?: string;
   vagas?: number;
 }): EventoGlobal[] {
+  // Sincroniza em background com o backend caso chamado diretamente
+  criarEventoApi(novo).catch(() => {});
+
   const lista = obterEventos();
   const novoEvento: EventoGlobal = {
     id: Date.now(),
@@ -223,7 +368,7 @@ export function adicionarEvento(novo: {
       novo.comentarios?.trim() ||
       "Ação social organizada pelo Projeto Saúde Campinas.",
     local: novo.local?.trim() || "Campinas e Região",
-    category: novo.category || "Mutirão",
+    category: (novo.category as CategoriaEvento) || "Mutirão",
     vagas: Number(novo.vagas) || 6,
     voluntariosInscritos: 0,
     inscritosDetalhes: [],
@@ -232,6 +377,32 @@ export function adicionarEvento(novo: {
   lista.unshift(novoEvento);
   salvarEventos(lista);
   return lista;
+}
+
+export async function atualizarEventoApi(
+  id: number,
+  dados: Partial<EventoGlobal>,
+): Promise<EventoGlobal[]> {
+  try {
+    await fetch(`${API_BASE_URL}/eventos/${id}`, {
+      method: "PUT",
+      headers: obterHeaderAuth(),
+      body: JSON.stringify({
+        nome: dados.titulo?.trim(),
+        data: dados.data,
+        localizacao: dados.local?.trim(),
+        desc: dados.comentarios?.trim() || dados.description?.trim(),
+        status: true,
+      }),
+    });
+  } catch (error) {
+    console.warn(
+      "Não foi possível atualizar no backend, atualizando localmente:",
+      error,
+    );
+  }
+
+  return atualizarEvento(id, dados);
 }
 
 export function atualizarEvento(
@@ -262,6 +433,22 @@ export function atualizarEvento(
   return lista;
 }
 
+export async function removerEventoApi(id: number): Promise<EventoGlobal[]> {
+  try {
+    await fetch(`${API_BASE_URL}/eventos/${id}`, {
+      method: "DELETE",
+      headers: obterHeaderAuth(),
+    });
+  } catch (error) {
+    console.warn(
+      "Não foi possível desativar no backend, removendo localmente:",
+      error,
+    );
+  }
+
+  return removerEvento(id);
+}
+
 export function removerEvento(id: number): EventoGlobal[] {
   const lista = obterEventos().filter((evento) => evento.id !== id);
   salvarEventos(lista);
@@ -275,7 +462,9 @@ export function obterInscricoesVoluntario(
     const raw = localStorage.getItem(STORAGE_KEY_INSCRICOES);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    const idStr = String(usuarioIdentificador || "default_voluntario").toLowerCase().trim();
+    const idStr = String(usuarioIdentificador || "default_voluntario")
+      .toLowerCase()
+      .trim();
     return Array.isArray(parsed[idStr]) ? parsed[idStr] : [];
   } catch {
     return [];
@@ -294,12 +483,19 @@ export function alternarInscricaoVoluntario(
 ): { inscritos: number[]; estaInscrito: boolean } {
   try {
     const idIdentificador = String(
-      dadosVoluntario?.email || dadosVoluntario?.id || dadosVoluntario?.nome || "default_voluntario",
-    ).toLowerCase().trim();
+      dadosVoluntario?.email ||
+        dadosVoluntario?.id ||
+        dadosVoluntario?.nome ||
+        "default_voluntario",
+    )
+      .toLowerCase()
+      .trim();
 
     const raw = localStorage.getItem(STORAGE_KEY_INSCRICOES);
     const todasInscricoes = raw ? JSON.parse(raw) : {};
-    let usuarioInscricoes: number[] = Array.isArray(todasInscricoes[idIdentificador])
+    let usuarioInscricoes: number[] = Array.isArray(
+      todasInscricoes[idIdentificador],
+    )
       ? todasInscricoes[idIdentificador]
       : [];
 
@@ -324,7 +520,9 @@ export function alternarInscricaoVoluntario(
     // Atualiza a lista de inscritos detalhada dentro do próprio evento
     const eventos = obterEventos().map((ev) => {
       if (ev.id === eventoId) {
-        let detalhes = Array.isArray(ev.inscritosDetalhes) ? [...ev.inscritosDetalhes] : [];
+        let detalhes = Array.isArray(ev.inscritosDetalhes)
+          ? [...ev.inscritosDetalhes]
+          : [];
         if (estaInscrito) {
           const jaExiste = detalhes.some(
             (d) =>
@@ -337,14 +535,17 @@ export function alternarInscricaoVoluntario(
               nome: nomeVol,
               email: dadosVoluntario?.email || "voluntario@saudecampinas.org",
               telefone: dadosVoluntario?.telefone || "(19) 99124-3012",
-              sobre: dadosVoluntario?.sobre || "Inscrição realizada pelo painel do voluntário.",
+              sobre:
+                dadosVoluntario?.sobre ||
+                "Inscrição realizada pelo painel do voluntário.",
               dataInscricao: new Date().toISOString().split("T")[0],
             });
           }
         } else {
           detalhes = detalhes.filter(
             (d) =>
-              (emailNorm && d.email.toLowerCase().trim() !== emailNorm) &&
+              emailNorm &&
+              d.email.toLowerCase().trim() !== emailNorm &&
               d.nome.toLowerCase().trim() !== nomeVol.toLowerCase().trim(),
           );
         }

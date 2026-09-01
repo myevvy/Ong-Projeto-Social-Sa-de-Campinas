@@ -5,9 +5,8 @@ import type {
   ApiErrorPayload,
 } from "../types/auth";
 
-// Configure VITE_API_URL no .env do front. Nunca deixe a URL da API hardcoded
-// nem aponte para http:// em produção — sempre https://.
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3333";
+// Configure VITE_API_URL no .env do front.
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
 export class AuthApiError extends Error {
   status: number;
@@ -28,12 +27,8 @@ export class AuthApiError extends Error {
 export async function login(
   credentials: LoginCredentials,
 ): Promise<LoginResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+  const response = await fetch(`${API_BASE_URL}/login`, {
     method: "POST",
-    // "include" garante que o cookie httpOnly com o token (definido pelo back)
-    // seja enviado/recebido automaticamente. É por isso que o back NÃO deve
-    // devolver o token no corpo do JSON — só via Set-Cookie.
-    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
@@ -59,25 +54,30 @@ export async function login(
 }
 
 export async function logout(): Promise<void> {
-  await fetch(`${API_BASE_URL}/api/auth/logout`, {
-    method: "POST",
-    credentials: "include",
-  });
+  limparSessaoUsuario();
 }
 
-// Usado ao carregar a aplicação para checar se o cookie ainda é válido,
-// sem precisar guardar nada sensível no localStorage.
 export async function verificarSessao(): Promise<
   LoginResponse["usuario"] | null
 > {
-  const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
-    method: "GET",
-    credentials: "include",
-  });
+  const token = localStorage.getItem("token");
+  if (!token) return null;
 
-  if (!response.ok) return null;
-  const data = await response.json();
-  return data.usuario ?? null;
+  try {
+    const response = await fetch(`${API_BASE_URL}/pagAdm`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.usuario ?? null;
+    }
+  } catch {}
+
+  return null;
 }
 
 export type StatusAcesso = "pendente" | "aceito" | "recusado";
@@ -97,8 +97,9 @@ export interface SolicitacaoAcesso {
 }
 
 const STORAGE_KEY_SOLICITACOES = "ong_solicitacoes_usuarios";
+const STORAGE_KEY_ALERTA_SEGURANCA = "ong_alerta_seguranca";
 
-// 2 usuários reais já existentes no banco de dados MySQL que iniciam como pendentes
+// Usuários iniciais cadastrados para testes e controle
 export const USUARIOS_INICIAIS: SolicitacaoAcesso[] = [
   {
     id: 2,
@@ -133,18 +134,7 @@ export function obterSolicitacoes(): SolicitacaoAcesso[] {
       }
     }
 
-    // Remove quaisquer resquícios de usuários fictícios (Beatriz e Paulo)
-    lista = lista.filter(
-      (u) =>
-        !u.nome.toLowerCase().includes("beatriz") &&
-        !u.nome.toLowerCase().includes("paulo") &&
-        !u.email.toLowerCase().includes("beatriz") &&
-        !u.email.toLowerCase().includes("paulo") &&
-        u.email !== "voluntario@teste.com" &&
-        u.email !== "colaborador@teste.com",
-    );
-
-    // Garante que os usuários reais do banco (func@gmail.com e use18r@gmail.com) estejam presentes
+    // Garante que os usuários de teste estejam na lista se ela estiver vazia
     USUARIOS_INICIAIS.forEach((userReal) => {
       const existe = lista.some(
         (u) =>
@@ -166,6 +156,7 @@ export function obterSolicitacoes(): SolicitacaoAcesso[] {
 export function salvarSolicitacoes(lista: SolicitacaoAcesso[]): void {
   try {
     localStorage.setItem(STORAGE_KEY_SOLICITACOES, JSON.stringify(lista));
+    window.dispatchEvent(new CustomEvent("ong_solicitacoes_atualizadas"));
   } catch (error) {
     console.error("Erro ao salvar solicitações:", error);
   }
@@ -221,6 +212,7 @@ export function atualizarStatusSolicitacao(
     item.id === id ? { ...item, status } : item,
   );
   salvarSolicitacoes(lista);
+  window.dispatchEvent(new CustomEvent("ong_auth_change"));
   return lista;
 }
 
@@ -232,6 +224,7 @@ export function atualizarTipoSolicitacao(
     item.id === id ? { ...item, tipo } : item,
   );
   salvarSolicitacoes(lista);
+  window.dispatchEvent(new CustomEvent("ong_auth_change"));
   return lista;
 }
 
@@ -244,6 +237,7 @@ export function verificarStatusUsuario(email: string): {
 } {
   const emailNorm = email.toLowerCase().trim();
 
+  // Contas com privilégio de administração
   if (
     emailNorm.includes("adm") ||
     emailNorm === "admin@saudecampinas.org" ||
@@ -262,10 +256,14 @@ export function verificarStatusUsuario(email: string): {
   const usuario = lista.find((u) => u.email.toLowerCase().trim() === emailNorm);
 
   if (!usuario) {
+    // Se o usuário não está na lista local de solicitações, mas fez login no backend com token válido:
     return {
       encontrado: false,
       status: "aceito",
-      tipo: "voluntario",
+      tipo:
+        emailNorm.includes("func") || emailNorm.includes("colab")
+          ? "colaborador"
+          : "voluntario",
     };
   }
 
@@ -276,4 +274,102 @@ export function verificarStatusUsuario(email: string): {
     nome: usuario.nome,
     id: usuario.id,
   };
+}
+
+export interface SessaoUsuario {
+  id: number | string;
+  nome: string;
+  email: string;
+  tipo: "admin" | "colaborador" | "voluntario";
+  token: string;
+}
+
+export function normalizarTipoUsuario(
+  tipoRaw?: string,
+): "admin" | "colaborador" | "voluntario" {
+  if (!tipoRaw) return "voluntario";
+  const t = tipoRaw.toLowerCase().trim();
+  if (t === "adm" || t === "admin" || t === "administrador") return "admin";
+  if (t === "func" || t === "colaborador" || t === "funcionario")
+    return "colaborador";
+  return "voluntario";
+}
+
+export function obterSessaoUsuario(): SessaoUsuario | null {
+  try {
+    const token = localStorage.getItem("token");
+    const rawUser = localStorage.getItem("usuario");
+    if (!token || !rawUser) {
+      return null;
+    }
+    const parsed = JSON.parse(rawUser);
+    if (!parsed || typeof parsed !== "object" || !parsed.email) {
+      return null;
+    }
+
+    // Se o status na lista do administrador foi explicitamente marcado como 'recusado', encerra
+    const statusCheck = verificarStatusUsuario(parsed.email);
+    if (statusCheck.encontrado && statusCheck.status === "recusado") {
+      limparSessaoUsuario();
+      definirAlertaSeguranca(
+        "Seu acesso foi revogado pela administração da ONG.",
+      );
+      return null;
+    }
+
+    // Sincroniza o cargo caso o administrador tenha alterado no painel
+    let tipoFinal = normalizarTipoUsuario(parsed.tipo);
+    if (statusCheck.encontrado && statusCheck.tipo !== "adm") {
+      tipoFinal = normalizarTipoUsuario(statusCheck.tipo);
+    }
+
+    const sessaoAtualizada: SessaoUsuario = {
+      id: parsed.id ?? statusCheck.id ?? 1,
+      nome:
+        parsed.nome ||
+        statusCheck.nome ||
+        (tipoFinal === "admin"
+          ? "Administrador"
+          : tipoFinal === "colaborador"
+            ? "Colaborador"
+            : "Voluntário"),
+      email: parsed.email,
+      tipo: tipoFinal,
+      token,
+    };
+
+    return sessaoAtualizada;
+  } catch {
+    return null;
+  }
+}
+
+export function limparSessaoUsuario(): void {
+  try {
+    localStorage.removeItem("token");
+    localStorage.removeItem("usuario");
+    sessionStorage.clear();
+    window.dispatchEvent(new CustomEvent("ong_auth_change"));
+  } catch (error) {
+    console.error("Erro ao limpar sessão:", error);
+  }
+}
+
+export function definirAlertaSeguranca(mensagem: string): void {
+  try {
+    sessionStorage.setItem(STORAGE_KEY_ALERTA_SEGURANCA, mensagem);
+  } catch {}
+}
+
+export function obterEConsumirAlertaSeguranca(): string | null {
+  try {
+    const alerta = sessionStorage.getItem(STORAGE_KEY_ALERTA_SEGURANCA);
+    if (alerta) {
+      sessionStorage.removeItem(STORAGE_KEY_ALERTA_SEGURANCA);
+      return alerta;
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
