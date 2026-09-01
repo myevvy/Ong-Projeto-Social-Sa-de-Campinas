@@ -69,10 +69,10 @@ export default function Home() {
             className="w-full max-w-[420px] h-72 object-cover rounded-md mx-auto md:mx-0" />
 
           <div>
-            <h1 className="font-serif text-[#211d1a] text-2xl md:text-3xl leading-snug mb-4">
+            <h1 className="font-serif text-[#211d1a] text-3xl md:text-[38px] font-bold leading-tight mb-6">
               Um olhar humanizado para cada pessoa que atendemos.
             </h1>
-            <p className="text-[#5c5852] text-[15px] leading-relaxed">
+            <p className="text-[#3a3632] text-base md:text-[17px] leading-relaxed">
               "Levar atendimento de saúde para pessoas em vulnerabilidade
               socioeconômica, prestando um serviço social humanizado, com olhar
               holístico e empático sobre cada indivíduo."
@@ -99,26 +99,26 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="como-ajudar">
-        <img className="fotos" alt="foto random da ong" />
-        <div className="dicas doacao">
-          <h1>Duas formas diretas de fazer parte.</h1>
-          <img className="fotos" alt="icone de remedio" />
-          <h5>Doe medicamentos e insumos</h5>
-          <p>
+      <section className="como-ajudar flex flex-col md:flex-row gap-6 p-6 items-stretch max-w-5xl mx-auto">
+        <div className="dicas doacao bg-white rounded-[2rem] p-8 md:p-12 flex flex-col justify-between items-center text-center shadow-sm">
+          <h1 className="font-serif text-[#211d1a] text-2xl md:text-3xl font-bold leading-tight max-w-sm mb-10">Duas formas diretas de fazer parte.</h1>
+          <img src="src/assets/pills.png" className="fotos" alt="icone de remedio" />
+          <h5 className="text-xl font-bold mb-2 text-gray-800">Doe medicamentos e insumos</h5>
+          <p className="text-gray-600 text-sm">
             Remédios e amostras grátis parados no armário podem completar o
             estoque que levamos para as ações.
           </p>
         </div>
         <div className="bg-white rounded-[10px]">
-          <img className="fotos" alt="mao com coracao" />
-          <h5>Seja voluntário nas ações</h5>
-          <p>
+          <img src="src/assets/hand.png" className="fotos" alt="mao com coracao" />
+          <h5 className="text-xl font-bold mb-2 text-gray-800">Seja voluntário nas ações</h5>
+          <p className="text-gray-600 text-sm mb-4">
             Estudantes de medicina e de outras áreas da saúde encontram aqui um
             espaço para aprender cuidando.
           </p>
-          <button className="text-white bg-[rgb(201,126,57)]" type="button">Quero ajudar</button>
+          <button className="text-white bg-[rgb(201,126,57)] px-6 py-2 rounded-md font-medium hover:bg-[rgb(180,110,45)] transition-colors w-full mt-auto" type="button">Quero ajudar</button>
         </div>
+        <img src="src/assets/img2.jpg" className="fotos w-16 h-16 object-contain mb-4" alt="foto random da ong" />
       </section>
 
       <section className="bg-[#F2EDE5] py-20 px-6">
