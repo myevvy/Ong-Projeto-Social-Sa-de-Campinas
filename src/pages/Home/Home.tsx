@@ -64,30 +64,38 @@ export default function Home() {
       </section>
 
       <section className="text-black bg-white">
-        <img className="fotos" alt="foto voluntario + paciente da ong" />
-        <h1>Um olhar humanizado para cada pessoa que atendemos</h1>
-        <p>
-          “Levar atendimento de saúde para pessoas em vulnerabilidade
-          socioeconômica, prestando um serviço social humanizado, com olhar
-          holístico e empático sobre cada indivíduo.”
-        </p>
+        <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-16">
+          <img src="src/assets/img1.jpg" alt="voluntário atendendo pessoa em situação de rua"
+            className="w-full max-w-[420px] h-72 object-cover rounded-md mx-auto md:mx-0" />
+
+          <div>
+            <h1 className="font-serif text-[#211d1a] text-2xl md:text-3xl leading-snug mb-4">
+              Um olhar humanizado para cada pessoa que atendemos.
+            </h1>
+            <p className="text-[#5c5852] text-[15px] leading-relaxed">
+              "Levar atendimento de saúde para pessoas em vulnerabilidade
+              socioeconômica, prestando um serviço social humanizado, com olhar
+              holístico e empático sobre cada indivíduo."
+            </p>
+          </div>
+        </div>
       </section>
 
-      <section className="block px-5 pb-12 max-w-[560px] mx-auto mb-4">
-        <div className="cartao1">
-          <img className="fotos" alt="icone de pessoinha" />
-          <h2>Humanização</h2>
-          <p>Cada atendimento parte da conversa, antes de qualquer procedimento.</p>
+      <section className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-xl shadow-sm p-8 text-center flex flex-col items-center">
+          <img src="src/assets/person.png" className="fotos" alt="icone de pessoinha" />
+          <h2 className="font-serif text-lg text-[#211d1a] mb-2">Humanização</h2>
+          <p className="text-sm text-[#6b665f] leading-relaxed">Cada atendimento parte da conversa, antes de qualquer procedimento.</p>
         </div>
-        <div className="cartao2">
-          <img className="fotos" alt="icone circulo" />
-          <h2>Respeito</h2>
-          <p>Reconhecemos a história e a autonomia de cada pessoa atendida.</p>
+        <div className="bg-white rounded-xl shadow-sm p-8 text-center flex flex-col items-center">
+          <img src="src/assets/circle.png" className="fotos" alt="icone circulo" />
+          <h2 className="font-serif text-lg text-[#211d1a] mb-2">Respeito</h2>
+          <p className="text-sm text-[#6b665f] leading-relaxed">Reconhecemos a história e a autonomia de cada pessoa atendida.</p>
         </div>
-        <div className="cartao3">
-          <img className="fotos" alt="icone de 3 pessoas" />
-          <h2>Altruísmo</h2>
-          <p>Voluntários que doam tempo e conhecimento sem esperar retorno.</p>
+        <div className="bg-white rounded-xl shadow-sm p-8 text-center flex flex-col items-center">
+          <img src="src/assets/people.png" className="fotos" alt="icone de 3 pessoas" />
+          <h2 className="font-serif text-lg text-[#211d1a] mb-2">Altruísmo</h2>
+          <p className="text-sm text-[#6b665f] leading-relaxed">Voluntários que doam tempo e conhecimento sem esperar retorno.</p>
         </div>
       </section>
 
