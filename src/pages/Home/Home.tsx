@@ -17,35 +17,39 @@ export default function Home() {
       />
 
       <section className="um">
-        <h4 className="flex flex-col items-center text-center pt-12 px-6 pb-10 max-w-[560px] mx-auto">PROJETO SOCIAL SAÚDE CAMPINAS</h4>
-        <h1>Cuidado que pousa onde é preciso.</h1>
-        <p>
+        <p className="bg-[#F2EDE5] py-20 px-6 text-center">PROJETO SOCIAL SAÚDE CAMPINAS</p>
+        
+        <h1 className="font-serif text-[#211d1a] text-4xl md:text-5xl leading-tight max-w-[680px] mx-auto mb-6">Cuidado que pousa onde é preciso.</h1>
+        
+        <p className="text-[#5c5852] text-base md:text-[17px] leading-relaxed max-w-[620px] mx-auto mb-9">
           Levamos atendimento de saúde, escuta e acolhimento para pessoas em
           situação de rua e vulnerabilidade em Campinas - conduzido por estudantes
           de medicina e da área da saúde, há 6 anos.
         </p>
-        <button id="flex justify-center text-white bg-black mb-5 leading-tight max-w-[15ch]" type="button">Quero ser voluntário</button>
-        <button id="botao-doar" type="button">Doar medicamentos</button>
-<a href="/dashboard/admin">
-  <button>Ir para Admin</button>
-</a>
+
+
+        <button className="flex justify-center text-white bg-black mb-5 leading-tight max-w-[15ch]" type="button">Quero ser voluntário</button>
+        <button className="block w-full max-w-[320px] px-6 py-[15px] rounded-full transition-[opacity,background,color] duration-150 ease-in-ou" type="button">Doar medicamentos</button>
+        <a href="/dashboard/admin">
+        <button>Ir para Admin</button>
+        </a>
         <section>
-          <div id="infos-ong1">
-            <h5 className="h5-info">6 anos</h5>
-            <p className="textinho-info">de atuação contínua em Campinas</p>
+          <div className="bg-white rounded-[10px] mb-6">
+            <h5 className="text-[#D9A441] mb-1">6 anos</h5>
+            <p className="text-black m-0 text-[13px]">de atuação contínua em Campinas</p>
           </div>
-          <div id="infos-ong2">
-            <h5 className="h5-info">100%</h5>
-            <p className="textinho-info">Conduzido por estudantes da área da saúde</p>
+          <div className="bg-white rounded-[10px] mb-6">
+            <h5 className="text-[#D9A441] mb-1">100%</h5>
+            <p className="text-black m-0 text-[13px]">Conduzido por estudantes da área da saúde</p>
           </div>
-          <div id="infos-ong3">
-            <h5 className="h5-info">Rua a rua</h5>
-            <p className="textinho-info">Atuação itinerante, sem sede fixa</p>
+          <div className="bg-white rounded-[10px] mb-6">
+            <h5 className="text-[#D9A441] mb-1">Rua a rua</h5>
+            <p className="text-black m-0 text-[13px]">Atuação itinerante, sem sede fixa</p>
           </div>
         </section>
       </section>
 
-      <section id="principios">
+      <section className="text-black bg-white">
         <img className="fotos" alt="foto voluntario + paciente da ong" />
         <h1>Um olhar humanizado para cada pessoa que atendemos</h1>
         <p>
@@ -55,25 +59,25 @@ export default function Home() {
         </p>
       </section>
 
-      <section className="cartoezinhos">
-        <div id="cartao1">
+      <section className="block px-5 pb-12 max-w-[560px] w-10 h-10 mx-auto mb-4">
+        <div className="cartao1">
           <img className="fotos" alt="icone de pessoinha" />
           <h2>Humanização</h2>
           <p>Cada atendimento parte da conversa, antes de qualquer procedimento.</p>
         </div>
-        <div id="cartao2">
+        <div className="cartao2">
           <img className="fotos" alt="icone circulo" />
           <h2>Respeito</h2>
           <p>Reconhecemos a história e a autonomia de cada pessoa atendida.</p>
         </div>
-        <div id="cartao3">
+        <div className="cartao3">
           <img className="fotos" alt="icone de 3 pessoas" />
           <h2>Altruísmo</h2>
           <p>Voluntários que doam tempo e conhecimento sem esperar retorno.</p>
         </div>
       </section>
 
-      <section id="como-ajudar">
+      <section className="como-ajudar">
         <img className="fotos" alt="foto random da ong" />
         <div className="dicas doacao">
           <h1>Duas formas diretas de fazer parte.</h1>
@@ -84,70 +88,104 @@ export default function Home() {
             estoque que levamos para as ações.
           </p>
         </div>
-        <div className="dicas doacao">
+        <div className="bg-white rounded-[10px]">
           <img className="fotos" alt="mao com coracao" />
           <h5>Seja voluntário nas ações</h5>
           <p>
             Estudantes de medicina e de outras áreas da saúde encontram aqui um
             espaço para aprender cuidando.
           </p>
-          <button id="botao-quero-ajudar" type="button">Quero ajudar</button>
+          <button className="text-white bg-[rgb(201,126,57)]" type="button">Quero ajudar</button>
         </div>
       </section>
 
-      <section id="calendario">
-        <h3 id="titulo-eventos">Próximos eventos</h3>
-        <h1>Onde estaremos nas próximas semanas.</h1>
+      <section className="bg-[#F2EDE5] py-20 px-6">
+        <h3 className="text-[#D9A441]">Próximos eventos</h3>
+        <h1 className="text-[#5c5852] text-[15px] leading-relaxed">Onde estaremos nas próximas semanas.</h1>
         <p>
           Nossas ações acontecem direto na rua, sem endereço fixo. Confira as
           próximas datas e junte-se a nós.
         </p>
-        <button id="agenda" type="button">Ver agenda completa</button>
+        <button className="shrink-0 bg-transparent text-[#211d1a] text-sm font-medium px-6 py-3 rounded-full border border-[#2b241f] hover:bg-[#e9e2d6] transition-colors">Ver agenda completa</button>
 
-        <div id="calendario-1">
-          <p className="datas">14 DE SETEMBRO - MUTIRÃO</p>
-          <h5>Atendimento de rua</h5>
+        <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
+          <p className="text-xs tracking-widest text-[#C98A3A] font-semibold uppercase mb-3">14 DE SETEMBRO - MUTIRÃO</p>
+          <h5 className="font-serif text-[#211d1a] text-lg mb-4">Atendimento de rua</h5>
           <img alt="foto de exemplo" />
           <button className="quero-participar" type="button">Quero participar</button>
         </div>
-        <div id="calendario-2">
-          <p className="datas">21 DE SETEMBRO - CAPACITAÇÃO</p>
-          <h5>Coleta de medicamentos</h5>
-          <img alt="foto de exemplo" />
-          <button className="quero-participar" type="button">Quero participar</button>
+
+        <div className="calendario-2">
+          <p className="text-xs tracking-widest text-[#C98A3A] font-semibold uppercase mb-3">21 DE SETEMBRO - CAPACITAÇÃO</p>
+          <h5 className="font-serif text-[#211d1a] text-lg mb-4">Coleta de medicamentos</h5>
+          <img className="w-full h-56 object-cover rounded-sm" alt="foto de exemplo" />
+          <button  className="quero-participar absolute -bottom-4 left-4 bg-[#2b241f] text-white text-xs font-medium px-4 py-2.5 rounded-md hover:opacity-90 transition-opacity" type="button">Quero participar</button>
         </div>
-        <div id="calendario-3">
-          <p className="datas">5 DE OUTUBRO - CAPACITAÇÃO</p>
-          <h5>Doação de alimentos</h5>
+
+        <div className="pb-8">
+          <p className="text-xs tracking-widest text-[#C98A3A] font-semibold uppercase mb-3">5 DE OUTUBRO - CAPACITAÇÃO</p>
+          <h5 className="font-serif text-[#211d1a] text-lg mb-4">Doação de alimentos</h5>
           <img alt="foto de exemplo" />
-          <button className="quero-participar" type="button">Quero participar</button>
+          <button className="text-white bg-black rounded-[7px]" type="button">Quero participar</button>
         </div>
       </section>
 
-      <section>
-        <h1>Um espaço para quem já faz parte do cuidado</h1>
-        <div id="area-colaboradores">
-          <div id="voluntario">
-            <h5 id="botao-voluntario">ÁREA DO VOLUNTÁRIO</h5>
-            <h6>Acompanhe sua inscrição</h6>
-            <p>Confirme presença nos mutirões</p>
-            <p>Veja a agenda atualizada</p>
-            <p>Fale direto com a equipe</p>
-            <button className="botao-entrar" type="button">Entrar</button>
+      <section className="bg-[#F2EDE5] px-6 pt-16 pb-20">
+        <h1 className="font-serif text-[#211d1a] text-3xl md:text-[34px] text-center mb-10">
+          Um espaço pra quem já faz parte do cuidado.
+        </h1>
+
+        <div className="max-w-[1050px] mx-auto grid grid-cols-1 md:grid-cols-2 rounded-md overflow-hidden">
+          <div className="bg-[#E4EAD9] p-10 md:p-12">
+            <span className="inline-block bg-[#6B7A52] text-white text-[11px] tracking-widest font-semibold uppercase px-3 py-1 rounded-full mb-5">
+              Área do voluntário
+            </span>
+            <h2 className="font-serif text-[#211d1a] text-2xl mb-4">Acompanhe sua inscrição</h2>
+            <ul className="mb-10 space-y-2">
+              <li className="text-[#4a4a42] text-sm flex gap-2">
+                <span>—</span> Confirme presença nos mutirões
+              </li>
+              <li className="text-[#4a4a42] text-sm flex gap-2">
+                <span>—</span> Veja a agenda atualizada
+              </li>
+              <li className="text-[#4a4a42] text-sm flex gap-2">
+                <span>—</span> Fale direto com a equipe
+              </li>
+            </ul>
+            <button
+              type="button"
+              className="bg-[#2b241f] text-white text-sm font-medium px-6 py-3 rounded-full hover:opacity-90 transition-opacity"
+            >
+              Entrar
+            </button>
           </div>
-          <div id="adm">
-            <h5 id="botao-equipe">PAINEL DA EQUIPE</h5>
-            <h6>Gestão de estoque e eventos</h6>
-            <p>Estoque em tempo real</p>
-            <p>Alertas de validade</p>
-            <p>Histórico de alterações</p>
-            <button type="button">Entrar</button>
+
+          <div className="bg-[#DDE4EC] p-10 md:p-12">
+            <span className="inline-block bg-[#3F5877] text-white text-[11px] tracking-widest font-semibold uppercase px-3 py-1 rounded-full mb-5">
+              Painel da equipe
+            </span>
+            <h2 className="font-serif text-[#211d1a] text-2xl mb-4">Gestão de estoque e eventos</h2>
+            <ul className="mb-10 space-y-2">
+              <li className="text-[#4a4a42] text-sm flex gap-2">
+                <p> Estoque em tempo real</p>
+              </li>
+              <li className="text-[#4a4a42] text-sm flex gap-2">
+                <p> Alertas de validade</p>
+              </li>
+              <li className="text-[#4a4a42] text-sm flex gap-2">
+                <p>Histórico de alterações</p>
+              </li>
+            </ul>
+            <button type="button"
+             className="bg-[#2b241f] text-white text-sm font-medium px-6 py-3 rounded-full hover:opacity-90 transition-opacity">
+              Entrar
+             </button>
           </div>
         </div>
       </section>
 
-      <section>
-        <h1>Perguntas frequentes</h1>
+      <section className="max-w-[730px] mx-auto space-y-4">
+        <h1 className="font-serif text-[#211d1a] text-3xl md:text-[34px] text-center mb-10">Perguntas frequentes</h1>
         <div className="perguntinhas">
           <h2>A ONG tem sede fixa?</h2>
         </div>
@@ -162,12 +200,12 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="carrossel-fotos">
+      <section className="carrossel-fotos">
         <p>NO DIA A DIA</p>
         <h2>Um retrato de cada ação</h2>
       </section>
 
-      <section id="contato">
+      <section className="contato">
         <p>SIGA DE PERTO</p>
         <h2>Acompanhe cada ação nas nossas redes</h2>
         <p>Fotos, bastidores e próximas datas em primeira mão.</p>
