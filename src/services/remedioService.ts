@@ -1,4 +1,3 @@
-// src/services/remedioService.ts
 export interface MedicamentoItem {
   id?: number;
   nome: string;
@@ -96,4 +95,21 @@ export function salvarMedicamentosCache(lista: MedicamentoItem[]): void {
   } catch (error) {
     console.error("Erro ao salvar cache de medicamentos:", error);
   }
+}
+
+/**
+ * Deriva a lista de "faltando agora" a partir do estoque geral — não existe
+ * (ainda) um campo de prioridade no back, então usamos como critério os
+ * itens com MENOR quantidade em estoque (mais perto de acabar).
+ * Ignora vencidos (esses são problema de descarte, não de falta) e limita
+ * a `maximo` itens pra caber no card da página de Doação.
+ */
+export function itensFaltandoAgora(
+  medicamentos: MedicamentoItem[],
+  { limite = 15, maximo = 6 }: { limite?: number; maximo?: number } = {},
+): MedicamentoItem[] {
+  return medicamentos
+    .filter((item) => !item.vencido && item.quantidade <= limite)
+    .sort((a, b) => a.quantidade - b.quantidade)
+    .slice(0, maximo);
 }

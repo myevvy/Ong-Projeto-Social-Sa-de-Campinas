@@ -4,7 +4,7 @@ import { LogoutButton } from "../../components/LogoutButton/LogoutButton";
 import {
   buscarMedicamentosApi,
   obterMedicamentosCache,
-  salvarMedicamentosCache,
+ 
 } from "../../services/remedioService";
 
 export interface MedicamentosProps {

@@ -9,6 +9,8 @@ import Home from "../pages/Home/Home";
 import LoginPage from "../pages/Login/LoginPage";
 import Eventos from "../pages/Eventos/eventos";
 import Sobre from "../pages/Sobre/sobre";
+import Doacao from "../pages/Doacao/doacao";
+import Contato from "../pages/Contato/contato";
 import {
   obterSessaoUsuario,
   definirAlertaSeguranca,
@@ -22,6 +24,8 @@ type Route =
   | "/login"
   | "/eventos"
   | "/sobre"
+  | "/doacao"
+  | "/contato"
   | "/dashboard/colaborador"
   | "/dashboard/medicamentos"
   | "/dashboard/doacoes"
@@ -33,6 +37,8 @@ function getCurrentRoute(): Route {
   if (path === "/" || path === "") return "/";
   if (path === "/eventos") return "/eventos";
   if (path === "/sobre") return "/sobre";
+  if (path === "/doacao") return "/doacao";
+  if (path === "/contato") return "/contato";
   if (path === "/login") return "/login";
   if (path === "/dashboard/colaborador") return "/dashboard/colaborador";
   if (path === "/dashboard/medicamentos") return "/dashboard/medicamentos";
@@ -125,9 +131,19 @@ export default function AppRoutes() {
     return <Sobre />;
   }
 
+  if (route === "/doacao") {
+    return <Doacao />;
+  }
+
+  if (route === "/contato") {
+    return <Contato />;
+  }
+
+
   if (route === "/login") {
     return <LoginPage />;
   }
+
 
   // 2. Proteção de Dashboard: Usuário NÃO logado tentando acessar /dashboard/*
   if (!sessao) {

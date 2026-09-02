@@ -9,7 +9,7 @@ import {
   obterEventos,
   buscarEventosApi,
   type EventoGlobal,
-  type CategoriaEvento,
+ 
 } from "../../services/eventService";
 import heroPlaceholder from "../../assets/hero.png";
 
